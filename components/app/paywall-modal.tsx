@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { Check, Lock } from 'lucide-react'
 import { PpGrilloAvatar } from './brand-mark'
-import { PLAN, MERCADOPAGO_CHECKOUT_URL, SUPPORT_WHATSAPP_URL } from './types'
+import { PLAN, PLAN_TAGLINE, MERCADOPAGO_CHECKOUT_URL, SUPPORT_WHATSAPP_URL } from './types'
 
 export function PaywallModal({ onSubscribe }: { onSubscribe: () => void }) {
   // Bloquea el scroll del fondo mientras el modal está abierto.
@@ -51,6 +51,9 @@ export function PaywallModal({ onSubscribe }: { onSubscribe: () => void }) {
                 <span className="text-sm font-semibold text-slate-400">{PLAN.period}</span>
               </span>
             </div>
+            <p className="mt-1 text-[13px] font-medium leading-snug text-primary">
+              {PLAN_TAGLINE}
+            </p>
             <ul className="mt-3 space-y-2">
               {PLAN.features.map((f) => (
                 <li key={f} className="flex items-start gap-2 text-[13px] leading-snug text-slate-600">

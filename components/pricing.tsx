@@ -48,7 +48,10 @@ export function Pricing() {
                 <span className="pb-1.5 text-lg font-semibold text-slate-500">MXN / mes</span>
               </div>
               <p className="mt-1.5 text-sm text-slate-500">
-                o $1.00 USD · por estudiante
+                ≈ $1.00 USD · por estudiante
+              </p>
+              <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">
+                Educación accesible para todos (menos de lo que cuesta un refresco o café).
               </p>
             </div>
 

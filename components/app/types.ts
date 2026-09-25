@@ -13,8 +13,11 @@ export type TutorSession = {
 }
 
 export const TRIAL_DAYS = 14
-export const PLAN_PRICE = '$199 MXN'
+export const PLAN_PRICE = '$20 MXN'
 export const PLAN_PERIOD = '/ mes'
+/** Leyenda de accesibilidad mostrada junto al precio. */
+export const PLAN_TAGLINE =
+  'Educación accesible para todos (menos de lo que cuesta un refresco o café).'
 
 /** Precio y detalles del plan mensual mostrados en el paywall. */
 export const PLAN = {
