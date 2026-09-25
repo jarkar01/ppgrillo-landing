@@ -6,6 +6,7 @@ import { ReportSection } from '@/components/report-section'
 import { SummerCamp } from '@/components/summer-camp'
 import { Pricing } from '@/components/pricing'
 import { SiteFooter } from '@/components/site-footer'
+import { ChatWidget } from '@/components/chat-widget'
 
 export default function Page() {
   return (
@@ -20,6 +21,7 @@ export default function Page() {
         <Pricing />
       </main>
       <SiteFooter />
+      <ChatWidget />
     </div>
   )
 }
