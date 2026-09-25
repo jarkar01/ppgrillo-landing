@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button'
 import { Check, MessageCircle } from 'lucide-react'
+import { MERCADOPAGO_CHECKOUT_URL } from '@/components/app/types'
 
 const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
@@ -78,6 +79,18 @@ export function Pricing() {
                 Comenzar 14 días gratis
               </a>
             </Button>
+
+            <p className="relative mt-4 text-center text-[13px] text-slate-500">
+              ¿Ya decidido?{' '}
+              <a
+                href={MERCADOPAGO_CHECKOUT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                Suscríbete directo con Mercado Pago
+              </a>
+            </p>
           </div>
         </div>
       </div>

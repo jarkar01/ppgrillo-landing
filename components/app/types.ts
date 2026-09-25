@@ -39,7 +39,7 @@ export const SUPPORT_WHATSAPP_URL =
 
 /** Enlace de checkout de Mercado Pago (configurable vía variable de entorno). */
 export const MERCADOPAGO_CHECKOUT_URL =
-  process.env.NEXT_PUBLIC_MERCADOPAGO_CHECKOUT_URL || 'https://www.mercadopago.com.mx/'
+  process.env.NEXT_PUBLIC_MERCADOPAGO_CHECKOUT_URL || 'https://mpago.la/22zK26j'
 
 const DAY_MS = 86_400_000
 
