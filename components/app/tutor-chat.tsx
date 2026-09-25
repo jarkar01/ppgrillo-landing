@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { UIMessage } from 'ai'
-import { Send, ImagePlus, X, Menu, Sparkles, Clock } from 'lucide-react'
+import { Send, ImagePlus, X, Menu, Sparkles, Clock, Crown, Lock } from 'lucide-react'
 import { PpGrilloAvatar } from './brand-mark'
 import type { StudentProfile } from './types'
 
@@ -39,12 +39,18 @@ export function TutorChat({
   profile,
   messages,
   status,
+  isSubscribed,
+  daysLeft,
+  locked,
   onSend,
   onOpenSidebar,
 }: {
   profile: StudentProfile
   messages: UIMessage[]
   status: Status
+  isSubscribed: boolean
+  daysLeft: number
+  locked: boolean
   onSend: (text: string, files?: FileList) => void
   onOpenSidebar: () => void
 }) {
@@ -77,7 +83,7 @@ export function TutorChat({
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (busy) return
+    if (busy || locked) return
     if (!input.trim() && (!files || files.length === 0)) return
     onSend(input, files)
     setInput('')
@@ -104,10 +110,22 @@ export function TutorChat({
             Tutor Socrático en línea
           </span>
         </div>
-        <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground sm:inline-flex">
-          <Clock className="h-3.5 w-3.5" />
-          Prueba gratuita: 14 días restantes
-        </span>
+        {isSubscribed ? (
+          <span className="hidden items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1.5 text-xs font-bold text-primary sm:inline-flex">
+            <Crown className="h-3.5 w-3.5" />
+            Plan Activo
+          </span>
+        ) : locked ? (
+          <span className="hidden items-center gap-1.5 rounded-full bg-red-50 px-3 py-1.5 text-xs font-bold text-red-600 sm:inline-flex">
+            <Lock className="h-3.5 w-3.5" />
+            Prueba vencida
+          </span>
+        ) : (
+          <span className="hidden items-center gap-1.5 rounded-full bg-accent px-3 py-1.5 text-xs font-bold text-accent-foreground sm:inline-flex">
+            <Clock className="h-3.5 w-3.5" />
+            Prueba: {daysLeft} {daysLeft === 1 ? 'día restante' : 'días restantes'}
+          </span>
+        )}
       </header>
 
       {/* messages */}

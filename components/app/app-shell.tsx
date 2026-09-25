@@ -5,7 +5,10 @@ import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
 import { AppSidebar } from './app-sidebar'
 import { TutorChat } from './tutor-chat'
-import type { StudentProfile, TutorSession } from './types'
+import { PaywallModal } from './paywall-modal'
+import { daysRemaining, TRIAL_DAYS, type StudentProfile, type TutorSession } from './types'
+
+const DAY_MS = 86_400_000
 
 function deriveTitle(messages: UIMessage[]): string {
   const firstUser = messages.find((m) => m.role === 'user')
@@ -24,6 +27,20 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [sessions, setSessions] = useState<TutorSession[]>([])
   const [activeId, setActiveId] = useState<string>(() => crypto.randomUUID())
+
+  // --- Estado de prueba / suscripción ---
+  // trialStartDate: momento en que inició la prueba de 14 días.
+  const [trialStartDate, setTrialStartDate] = useState<number>(() => Date.now())
+  const [isSubscribed, setIsSubscribed] = useState(false)
+
+  const remaining = daysRemaining(trialStartDate)
+  const trialExpired = !isSubscribed && remaining <= 0
+  const locked = trialExpired
+
+  function toggleTrialSimulation() {
+    // Alterna entre "Prueba activa" (14 días) y "Prueba vencida" (0 días).
+    setTrialStartDate((prev) => (daysRemaining(prev) <= 0 ? Date.now() : Date.now() - (TRIAL_DAYS + 1) * DAY_MS))
+  }
 
   const { messages, sendMessage, setMessages, status } = useChat({
     transport: new DefaultChatTransport({
@@ -67,6 +84,7 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
   }
 
   function handleSend(text: string, files?: FileList) {
+    if (locked) return // bloqueo por prueba vencida
     const trimmed = text.trim()
     if (files && files.length > 0) {
       sendMessage({ text: trimmed, files })
@@ -82,18 +100,25 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
         sessions={sessions}
         activeId={activeId}
         open={sidebarOpen}
+        isSubscribed={isSubscribed}
+        daysLeft={remaining}
         onClose={() => setSidebarOpen(false)}
         onNewConsulta={handleNewConsulta}
         onSelectSession={handleSelectSession}
+        onToggleTrial={toggleTrialSimulation}
         onLogout={onLogout}
       />
       <TutorChat
         profile={profile}
         messages={messages}
         status={status}
+        isSubscribed={isSubscribed}
+        daysLeft={remaining}
+        locked={locked}
         onSend={handleSend}
         onOpenSidebar={() => setSidebarOpen(true)}
       />
+      {locked && <PaywallModal onSubscribe={() => setIsSubscribed(true)} />}
     </div>
   )
 }
