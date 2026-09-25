@@ -45,7 +45,8 @@ export function Hero() {
               size="lg"
               className="h-auto w-full whitespace-normal rounded-full px-6 py-3 text-center text-base font-semibold shadow-md shadow-emerald-600/20 sm:w-auto"
             >
-              <a href="#precios">
+                <a href="/app">
+
                 <MessageCircle className="h-5 w-5 shrink-0" />
                 Activar 14 días gratis en WhatsApp
               </a>

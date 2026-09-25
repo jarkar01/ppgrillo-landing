@@ -41,7 +41,7 @@ export function SiteHeader() {
           asChild
           className="min-w-[160px] rounded-full bg-[#25D366] px-6 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a]"
         >
-          <a href="#precios" className="flex items-center gap-2 whitespace-nowrap">
+              <a href="/app" className="flex items-center gap-2 whitespace-nowrap">
             <MessageCircle className="h-4 w-4 shrink-0" />
             Probar 14 días
           </a>
