@@ -1,35 +1,40 @@
-"use client"
+'use client'
 
-import React, { useState } from "react"
-import { MessageCircle, X, Send } from "lucide-react"
+import React, { useState } from 'react'
+import { MessageCircle, X, Send } from 'lucide-react'
 
 export function FloatingChat() {
   const [isOpen, setIsOpen] = useState(false)
-  const [input, setInput] = useState("")
-  const [messages, setMessages] = useState([
+  const [messages, setMessages] = useState>([
     {
-      role: "assistant",
-      text: "¡Hola! Soy PpGrillo, tu compañero de estudio 🦗. ¿Cómo te llamas y qué grado escolar cursas?",
-    },
+      sender: 'bot',
+      text: '¡Hola! Soy PpGrillo 🦗, tu tutor socrático. ¿En qué problema o concepto te gustaría que pensemos juntos hoy?'
+    }
   ])
+  const [inputValue, setInputValue] = useState('')
 
-  const handleSend = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!input.trim()) return
+  const handleSend = () => {
+    if (!inputValue.trim()) return
 
-    const userText = input.trim()
-    setMessages((prev) => [...prev, { role: "user", text: userText }])
-    setInput("")
+    const userMessage = inputValue
+    setMessages((prev) => [...prev, { sender: 'user', text: userMessage }])
+    setInputValue('')
 
     setTimeout(() => {
       setMessages((prev) => [
         ...prev,
         {
-          role: "assistant",
-          text: "¡Mucho gusto! Recuerda que conmigo aprendes razonando paso a paso. ¿En qué ejercicio o materia te gustaría que trabajemos hoy?",
-        },
+          sender: 'bot',
+          text: 'Interesante planteamiento. Antes de resolverlo directamente, cuéntame: ¿qué datos o pistas clave identificas primero?'
+        }
       ])
     }, 700)
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSend()
+    }
   }
 
   return (
