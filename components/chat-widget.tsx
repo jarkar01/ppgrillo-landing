@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MessageCircle, X, ChevronLeft, ArrowLeft, HelpCircle } from 'lucide-react'
 
 const WHATSAPP_URL =
-  'https://wa.me/5215500000000?text=' +
+  'https://wa.me/526141202790?text=' +
   encodeURIComponent('Hola, quiero hablar con un asesor de PpGrillo.')
 
 type Faq = {
