@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { MessageCircle } from 'lucide-react'
 
@@ -37,15 +38,24 @@ export function SiteHeader() {
           </a>
         </nav>
 
-        <Button
-          asChild
-          className="min-w-[160px] rounded-full bg-[#25D366] px-6 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a]"
-        >
-              <a href="/app" className="flex items-center gap-2 whitespace-nowrap">
-            <MessageCircle className="h-4 w-4 shrink-0" />
-            Probar 14 días
-          </a>
-        </Button>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button
+            asChild
+            variant="ghost"
+            className="rounded-full px-4 py-2.5 font-semibold text-slate-700 hover:bg-accent hover:text-accent-foreground"
+          >
+            <Link href="/app">Iniciar sesión</Link>
+          </Button>
+          <Button
+            asChild
+            className="rounded-full bg-[#25D366] px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a] sm:min-w-[160px] sm:px-6"
+          >
+            <Link href="/app" className="flex items-center gap-2 whitespace-nowrap">
+              <MessageCircle className="h-4 w-4 shrink-0" />
+              Probar 14 días
+            </Link>
+          </Button>
+        </div>
       </div>
     </header>
   )

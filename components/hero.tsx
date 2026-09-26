@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { CreditCard, ShieldCheck, MousePointerClick, MessageCircle, Play } from 'lucide-react'
 import {
@@ -45,11 +46,10 @@ export function Hero() {
               size="lg"
               className="h-auto w-full whitespace-normal rounded-full px-6 py-3 text-center text-base font-semibold shadow-md shadow-emerald-600/20 sm:w-auto"
             >
-                <a href="/app">
-
+              <Link href="/app">
                 <MessageCircle className="h-5 w-5 shrink-0" />
-                Activar 14 días gratis en WhatsApp
-              </a>
+                Comenzar 14 días gratis
+              </Link>
             </Button>
             <Button
               asChild
@@ -57,7 +57,7 @@ export function Hero() {
               variant="outline"
               className="h-auto w-full whitespace-normal rounded-full border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 sm:w-auto"
             >
-              <a href="#pedagogia">
+              <a href="#pedagogia" className="flex items-center gap-2">
                 <Play className="h-4 w-4 shrink-0" />
                 Ver cómo responde
               </a>

@@ -1,6 +1,9 @@
+import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Check, MessageCircle } from 'lucide-react'
-import { MERCADOPAGO_CHECKOUT_URL } from '@/components/app/types'
+
+const MERCADOPAGO_CHECKOUT_URL =
+  process.env.NEXT_PUBLIC_MERCADOPAGO_CHECKOUT_URL || 'https://mpago.la/22zK26j'
 
 const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
@@ -74,10 +77,10 @@ export function Pricing() {
               asChild
               className="relative mt-8 h-auto w-full rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]"
             >
-                <a href="/app" className="flex items-center justify-center gap-2 whitespace-nowrap">
+              <Link href="/app" className="flex items-center justify-center gap-2 whitespace-nowrap">
                 <MessageCircle className="h-5 w-5 shrink-0" />
                 Comenzar 14 días gratis
-              </a>
+              </Link>
             </Button>
 
             <p className="relative mt-4 text-center text-[13px] text-slate-500">
