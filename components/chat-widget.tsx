@@ -61,7 +61,7 @@ export function ChatWidget() {
   }, [open])
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div className="pointer-events-none fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
       {/* Popup */}
       <div
         ref={panelRef}
@@ -170,7 +170,7 @@ export function ChatWidget() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-label={open ? 'Cerrar chat de ayuda' : 'Abrir chat de ayuda'}
-        className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-emerald-900/30 transition-transform duration-300 hover:scale-105 active:scale-95"
+        className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-xl shadow-emerald-900/30 transition-transform duration-300 hover:scale-105 active:scale-95"
       >
         <span className="relative flex items-center justify-center">
           <MessageCircle
