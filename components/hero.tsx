@@ -13,7 +13,7 @@ import {
 
 const badges = [
   { icon: CreditCard, label: 'Sin tarjeta bancaria' },
-  { icon: ShieldCheck, label: 'WhatsApp oficial' },
+  { icon: ShieldCheck, label: 'Acceso inmediato' },
   { icon: MousePointerClick, label: 'Cancelación en 1 clic' },
 ]
 
@@ -27,20 +27,30 @@ export function Hero() {
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-24">
         {/* copy */}
         <div className="max-w-xl">
-          <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1.5 text-xs font-semibold text-accent-foreground">
-            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-            Tutor socrático K-12 en WhatsApp
+          <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-full bg-accent px-3.5 py-1.5 text-xs font-semibold text-accent-foreground">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Google Vertex AI
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              Arka Universidad
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+              K-12
+            </span>
           </span>
 
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
             Tu hijo no necesita que le hagan la tarea.{' '}
-            <span style={{ color: '#4285F4' }}>Recupera la armonía del hogar.</span>
+            <span style={{ color: '#4285F4' }}>Necesita aprender a pensar.</span>
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            El tutor socrático en WhatsApp con paciencia infinita que acompaña a tus hijos paso a
-            paso para que ellos aprendan a pensar, tú disfrutes de tu hogar y las tardes recuperen
-            la paz.
+            El tutor socrático con paciencia infinita que acompaña a tus hijos paso a paso para que
+            descubran las respuestas por sí mismos, desarrollen pensamiento crítico y tú recuperes
+            la paz en las tardes de estudio.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
