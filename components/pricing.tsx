@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
 const MERCADOPAGO_CHECKOUT_URL =
@@ -73,15 +74,16 @@ export function Pricing() {
               ))}
             </ul>
 
-            <Button
-              asChild
-              className="relative mt-8 h-auto w-full rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]"
+            <Link
+              href="/app"
+              className={cn(
+                buttonVariants(),
+                'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',
+              )}
             >
-              <Link href="/app" className="flex items-center justify-center gap-2 whitespace-nowrap">
-                <MessageCircle className="h-5 w-5 shrink-0" />
-                Comenzar 14 días gratis
-              </Link>
-            </Button>
+              <MessageCircle className="h-5 w-5 shrink-0" />
+              Comenzar 14 días gratis
+            </Link>
 
             <p className="relative mt-4 text-center text-[13px] text-slate-500">
               ¿Ya decidido?{' '}

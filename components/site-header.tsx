@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { MessageCircle } from 'lucide-react'
 
 export function SiteHeader() {
@@ -39,22 +40,25 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Button
-            asChild
-            variant="ghost"
-            className="rounded-full px-4 py-2.5 font-semibold text-slate-700 hover:bg-accent hover:text-accent-foreground"
+          <Link
+            href="/app"
+            className={cn(
+              buttonVariants({ variant: 'ghost' }),
+              'rounded-full px-4 py-2.5 font-semibold text-slate-700 hover:bg-accent hover:text-accent-foreground',
+            )}
           >
-            <Link href="/app">Iniciar sesión</Link>
-          </Button>
-          <Button
-            asChild
-            className="rounded-full bg-[#25D366] px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a] sm:min-w-[160px] sm:px-6"
+            Iniciar sesión
+          </Link>
+          <Link
+            href="/app"
+            className={cn(
+              buttonVariants(),
+              'gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a] sm:min-w-[160px] sm:px-6',
+            )}
           >
-            <Link href="/app" className="flex items-center gap-2 whitespace-nowrap">
-              <MessageCircle className="h-4 w-4 shrink-0" />
-              Probar 14 días
-            </Link>
-          </Button>
+            <MessageCircle className="h-4 w-4 shrink-0" />
+            Probar 14 días
+          </Link>
         </div>
       </div>
     </header>

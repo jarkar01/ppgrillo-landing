@@ -1,5 +1,6 @@
 import Link from 'next/link'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { CreditCard, ShieldCheck, MousePointerClick, MessageCircle, Play } from 'lucide-react'
 import {
   WhatsappPhone,
@@ -41,27 +42,26 @@ export function Hero() {
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button
-              asChild
-              size="lg"
-              className="h-auto w-full whitespace-normal rounded-full px-6 py-3 text-center text-base font-semibold shadow-md shadow-emerald-600/20 sm:w-auto"
+            <Link
+              href="/app"
+              className={cn(
+                buttonVariants({ size: 'lg' }),
+                'h-auto w-full gap-2 whitespace-normal rounded-full px-6 py-3 text-center text-base font-semibold shadow-md shadow-emerald-600/20 sm:w-auto',
+              )}
             >
-              <Link href="/app">
-                <MessageCircle className="h-5 w-5 shrink-0" />
-                Comenzar 14 días gratis
-              </Link>
-            </Button>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="h-auto w-full whitespace-normal rounded-full border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 sm:w-auto"
+              <MessageCircle className="h-5 w-5 shrink-0" />
+              Comenzar 14 días gratis
+            </Link>
+            <a
+              href="#pedagogia"
+              className={cn(
+                buttonVariants({ size: 'lg', variant: 'outline' }),
+                'h-auto w-full gap-2 whitespace-normal rounded-full border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 sm:w-auto',
+              )}
             >
-              <a href="#pedagogia" className="flex items-center gap-2">
-                <Play className="h-4 w-4 shrink-0" />
-                Ver cómo responde
-              </a>
-            </Button>
+              <Play className="h-4 w-4 shrink-0" />
+              Ver cómo responde
+            </a>
           </div>
 
           <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
