@@ -20,7 +20,7 @@ const benefits = [
 
 export function Pricing() {
   return (
-    <section id="precios" className="scroll-mt-20">
+    <section id="precios" className="relative z-20 scroll-mt-20">
       <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 lg:py-24">
         <div className="mx-auto max-w-2xl text-center">
           <p className="font-display text-sm font-bold uppercase tracking-widest text-primary">

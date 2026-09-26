@@ -35,7 +35,7 @@ function PartnerCard({
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-slate-200/70 bg-secondary/40">
+    <footer className="relative z-20 border-t border-slate-200/70 bg-secondary/40">
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
         <div className="text-center">
           <p className="font-display text-sm font-bold uppercase tracking-widest text-slate-500">
@@ -125,10 +125,10 @@ export function SiteFooter() {
               powered by Google
             </span>
           </div>
-          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+          <nav className="relative z-20 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
             <Link
               href="/privacidad"
-              className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
             >
               Aviso de Privacidad
             </Link>
@@ -137,7 +137,7 @@ export function SiteFooter() {
             </span>
             <Link
               href="/terminos"
-              className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
             >
               Términos del Servicio
             </Link>
@@ -146,7 +146,7 @@ export function SiteFooter() {
             </span>
             <a
               href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
-              className="cursor-pointer text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
             >
               Contacto
             </a>
