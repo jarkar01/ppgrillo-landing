@@ -3,9 +3,9 @@ import Link from 'next/link'
 import { ArrowLeft, Mail, Clock, ShieldCheck, HelpCircle } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Contacto · PpGrillo',
+  title: 'Contacto y Atención a Familias · PpGrillo',
   description:
-    'Contacta a PpGrillo (Arka Universidad Digital S.A. de C.V.) para dudas, soporte y el ejercicio de tus derechos ARCO. Escríbenos a legal@arka.edu.mx.',
+    'Contacta a PpGrillo (Arka Universidad Digital S.A. de C.V.) para dudas pedagógicas, suscripciones y el ejercicio de tus derechos ARCO. Escríbenos a jfalomir@arkaedu.com.',
 }
 
 function Brand() {
@@ -58,33 +58,33 @@ export default function ContactoPage() {
         <header className="mt-8">
           <Brand />
           <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-balance text-slate-900 sm:text-4xl">
-            Contacto y atención
+            Contacto y Atención a Familias
           </h1>
           <p className="mt-4 text-pretty text-base leading-relaxed text-slate-600">
-            Estamos para ayudarte. Escríbenos para resolver dudas sobre el servicio, soporte de la
-            tutoría o para ejercer tus derechos de privacidad.
+            Estamos para ayudarte. Escríbenos para resolver dudas pedagógicas, gestionar tu
+            suscripción o ejercer tus derechos de privacidad y protección de datos de menores.
           </p>
         </header>
 
         <div className="mt-10 space-y-6">
           <Card icon={Mail} title="Correo de atención">
             <p>
-              Puedes escribirnos directamente a nuestro correo oficial de atención:
+              Puedes escribirnos directamente a nuestro correo oficial de atención a familias:
             </p>
             <a
-              href="mailto:legal@arka.edu.mx"
+              href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
               className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 font-semibold text-primary transition-colors hover:bg-primary/10"
             >
               <Mail className="h-4 w-4" />
-              legal@arka.edu.mx
+              jfalomir@arkaedu.com
             </a>
           </Card>
 
           <Card icon={HelpCircle} title="Dudas y soporte">
             <p>
-              Si tienes preguntas sobre el funcionamiento del tutor socrático, tu suscripción, el
-              periodo de prueba de 14 días o los métodos de pago (Mercado Pago), inclúyelas en tu
-              mensaje con el mayor detalle posible para poder ayudarte mejor.
+              Atendemos dudas pedagógicas sobre el tutor socrático, gestión de suscripciones y el
+              periodo de prueba de 14 días, métodos de pago (Mercado Pago) y solicitudes de derechos
+              ARCO y privacidad de menores. Incluye el mayor detalle posible para ayudarte mejor.
             </p>
           </Card>
 
@@ -97,10 +97,10 @@ export default function ContactoPage() {
             <p>
               Para ejercerlos, envía tu solicitud a{' '}
               <a
-                href="mailto:legal@arka.edu.mx"
+                href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
                 className="font-semibold text-primary hover:underline"
               >
-                legal@arka.edu.mx
+                jfalomir@arkaedu.com
               </a>{' '}
               indicando tu nombre, la cuenta asociada y el derecho que deseas ejercer. Consulta más
               detalles en nuestro{' '}
