@@ -144,12 +144,12 @@ export function SiteFooter() {
             <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
               |
             </span>
-            <Link
-              href="/contacto"
-              className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            <a
+              href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
+              className="cursor-pointer text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
             >
               Contacto
-            </Link>
+            </a>
           </nav>
         </div>
 
