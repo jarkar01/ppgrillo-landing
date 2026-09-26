@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -76,6 +78,9 @@ export function Pricing() {
 
             <Link
               href="/app"
+              onClick={() => {
+                window.location.href = '/app'
+              }}
               className={cn(
                 buttonVariants(),
                 'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',

@@ -1,3 +1,5 @@
+'use client'
+
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -52,8 +54,11 @@ export function Hero() {
               <MessageCircle className="h-5 w-5 shrink-0" />
               Comenzar 14 días gratis
             </Link>
-            <a
-              href="#pedagogia"
+            <button
+              type="button"
+              onClick={() =>
+                document.getElementById('pedagogia')?.scrollIntoView({ behavior: 'smooth' })
+              }
               className={cn(
                 buttonVariants({ size: 'lg', variant: 'outline' }),
                 'h-auto w-full gap-2 whitespace-normal rounded-full border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 sm:w-auto',
@@ -61,7 +66,7 @@ export function Hero() {
             >
               <Play className="h-4 w-4 shrink-0" />
               Ver cómo responde
-            </a>
+            </button>
           </div>
 
           <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
