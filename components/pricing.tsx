@@ -1,5 +1,12 @@
-import { Button } from '@/components/ui/button'
+'use client'
+
+import Link from 'next/link'
+import { buttonVariants } from '@/components/ui/button'
+import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
+
+const MERCADOPAGO_CHECKOUT_URL =
+  process.env.NEXT_PUBLIC_MERCADOPAGO_CHECKOUT_URL || 'https://mpago.la/22zK26j'
 
 const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
@@ -48,7 +55,10 @@ export function Pricing() {
                 <span className="pb-1.5 text-lg font-semibold text-slate-500">MXN / mes</span>
               </div>
               <p className="mt-1.5 text-sm text-slate-500">
-                o $1.00 USD · por estudiante
+                ≈ $1.00 USD · por estudiante
+              </p>
+              <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">
+                Educación accesible para todos (menos de lo que cuesta un refresco o café).
               </p>
             </div>
 
@@ -66,15 +76,31 @@ export function Pricing() {
               ))}
             </ul>
 
-            <Button
-              asChild
-              className="relative mt-8 h-auto w-full rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]"
+            <Link
+              href="/app"
+              onClick={() => {
+                window.location.href = '/app'
+              }}
+              className={cn(
+                buttonVariants(),
+                'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',
+              )}
             >
-              <a href="#" className="flex items-center justify-center gap-2 whitespace-nowrap">
-                <MessageCircle className="h-5 w-5 shrink-0" />
-                Comenzar 14 días gratis
+              <MessageCircle className="h-5 w-5 shrink-0" />
+              Comenzar 14 días gratis
+            </Link>
+
+            <p className="relative mt-4 text-center text-[13px] text-slate-500">
+              ¿Ya decidido?{' '}
+              <a
+                href={MERCADOPAGO_CHECKOUT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                Suscríbete directo con Mercado Pago
               </a>
-            </Button>
+            </p>
           </div>
         </div>
       </div>
