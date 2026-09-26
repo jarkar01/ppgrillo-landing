@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { ShieldCheck, ChevronRight, Sparkles, Handshake } from 'lucide-react'
 
 function GoogleCloudMark() {
@@ -124,9 +125,17 @@ export function SiteFooter() {
               powered by Google
             </span>
           </div>
-          <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} PpGrillo. Aprender a pensar, en familia.
-          </p>
+          <div className="flex flex-col items-center gap-2 sm:items-end">
+            <Link
+              href="/privacidad"
+              className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            >
+              Aviso de Privacidad
+            </Link>
+            <p className="text-sm text-slate-500">
+              © {new Date().getFullYear()} PpGrillo. Aprender a pensar, en familia.
+            </p>
+          </div>
         </div>
       </div>
     </footer>
