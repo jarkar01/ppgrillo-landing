@@ -113,7 +113,7 @@ export function SiteFooter() {
           </span>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-slate-200 pt-8 sm:flex-row">
           <div className="flex flex-col items-center gap-1 sm:items-start">
             <span className="font-display text-xl font-extrabold leading-none tracking-tight sm:text-2xl">
               <span style={{ color: '#EA4335' }}>P</span>
@@ -125,18 +125,38 @@ export function SiteFooter() {
               powered by Google
             </span>
           </div>
-          <div className="flex flex-col items-center gap-2 sm:items-end">
+          <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             <Link
               href="/privacidad"
               className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
             >
               Aviso de Privacidad
             </Link>
-            <p className="text-sm text-slate-500">
-              © {new Date().getFullYear()} PpGrillo. Aprender a pensar, en familia.
-            </p>
-          </div>
+            <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
+              |
+            </span>
+            <Link
+              href="/terminos"
+              className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            >
+              Términos del Servicio
+            </Link>
+            <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
+              |
+            </span>
+            <a
+              href="mailto:legal@arka.edu.mx"
+              className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            >
+              Contacto
+            </a>
+          </nav>
         </div>
+
+        <p className="mt-6 text-center text-xs text-slate-400">
+          © {new Date().getFullYear()} Arka Universidad Digital S.A. de C.V. Todos los derechos
+          reservados.
+        </p>
       </div>
     </footer>
   )
