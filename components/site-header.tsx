@@ -7,7 +7,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-slate-200/70 bg-background/80 backdrop-blur-md">
       <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-5 py-3 sm:px-8">
-        <a href="#" className="flex flex-col items-start leading-none" aria-label="PpGrillo, powered by Google">
+        <Link href="/" className="flex flex-col items-start leading-none" aria-label="PpGrillo, powered by Google">
           <span className="font-display text-2xl font-extrabold tracking-tight sm:text-3xl">
             <span style={{ color: '#EA4335' }}>P</span>
             <span style={{ color: '#34A853' }}>p</span>
