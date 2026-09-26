@@ -25,7 +25,7 @@ export function SiteHeader() {
               <span style={{ color: '#EA4335' }}>e</span>
             </span>
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-slate-600 md:flex">
           <a href="#pedagogia" className="transition-colors hover:text-primary">
