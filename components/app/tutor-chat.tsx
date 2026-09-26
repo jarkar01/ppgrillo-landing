@@ -238,6 +238,27 @@ export function TutorChat({
             <Sparkles className="h-3 w-3" />
             PpGrillo te guía con preguntas. No te dará la respuesta directa.
           </p>
+          <p className="mx-auto mt-1.5 max-w-xl text-center text-[11px] leading-relaxed text-slate-400">
+            PpGrillo fomenta el pensamiento crítico. Consulta nuestro{' '}
+            <a
+              href="/privacidad"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-slate-300 underline-offset-2 transition-colors hover:text-primary"
+            >
+              Aviso de Privacidad
+            </a>{' '}
+            y{' '}
+            <a
+              href="/terminos"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-slate-300 underline-offset-2 transition-colors hover:text-primary"
+            >
+              Términos
+            </a>
+            . El uso del tutor debe estar supervisado por un padre o tutor legal.
+          </p>
         </form>
       </div>
     </div>
