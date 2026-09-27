@@ -4,6 +4,8 @@ export type StudentProfile = {
   studentName: string
   grade: 'Primaria' | 'Secundaria' | 'Preparatoria'
   whatsapp: string
+  /** Inicio de la prueba (ms), persistido en Firestore. */
+  trialStartDate?: number
 }
 
 export type TutorSession = {

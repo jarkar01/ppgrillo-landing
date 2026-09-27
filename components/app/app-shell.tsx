@@ -31,7 +31,7 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
 
   // --- Estado de prueba / suscripción ---
   // trialStartDate: momento en que inició la prueba de 14 días.
-  const [trialStartDate, setTrialStartDate] = useState<number>(() => Date.now())
+  const [trialStartDate, setTrialStartDate] = useState<number>(() => profile.trialStartDate ?? Date.now())
   const [isSubscribed, setIsSubscribed] = useState(false)
 
   const remaining = daysRemaining(trialStartDate)

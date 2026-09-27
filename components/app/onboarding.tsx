@@ -8,12 +8,31 @@ import type { StudentProfile } from './types'
 
 const grades = ['Primaria', 'Secundaria', 'Preparatoria'] as const
 
-export function Onboarding({ onComplete }: { onComplete: (profile: StudentProfile) => void }) {
+export function Onboarding({ onComplete }: { onComplete: (profile: StudentProfile) => Promise<void> }) {
   const [studentName, setStudentName] = useState('')
   const [grade, setGrade] = useState<StudentProfile['grade'] | ''>('')
   const [whatsapp, setWhatsapp] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const valid = studentName.trim() && grade && whatsapp.trim().length >= 8
+
+  async function submit() {
+    if (!valid || saving) return
+    setError(null)
+    setSaving(true)
+    try {
+      await onComplete({
+        studentName: studentName.trim(),
+        grade: grade as StudentProfile['grade'],
+        whatsapp: whatsapp.trim(),
+      })
+    } catch (err) {
+      console.error('[PpGrillo] No se pudo guardar el onboarding:', err)
+      setError('No pudimos guardar tus datos. Revisa tu conexión e intenta de nuevo.')
+      setSaving(false)
+    }
+  }
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-5 py-12">
@@ -38,7 +57,7 @@ export function Onboarding({ onComplete }: { onComplete: (profile: StudentProfil
           <form
             onSubmit={(e) => {
               e.preventDefault()
-              if (valid) onComplete({ studentName: studentName.trim(), grade: grade as StudentProfile['grade'], whatsapp: whatsapp.trim() })
+              submit()
             }}
             className="mt-8 space-y-6"
           >
@@ -96,13 +115,19 @@ export function Onboarding({ onComplete }: { onComplete: (profile: StudentProfil
               <p className="text-xs text-slate-400">Para enviarte los reportes semanales de progreso.</p>
             </div>
 
+            {error && (
+              <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                {error}
+              </p>
+            )}
+
             <Button
               type="submit"
               size="lg"
-              disabled={!valid}
+              disabled={!valid || saving}
               className="h-auto w-full rounded-full py-4 text-base font-bold disabled:opacity-50"
             >
-              Comenzar tutoría con PpGrillo
+              {saving ? 'Guardando…' : 'Comenzar tutoría con PpGrillo'}
             </Button>
           </form>
         </div>
