@@ -1,13 +1,76 @@
 'use client'
 
 import { useState } from 'react'
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signInWithPopup,
+} from 'firebase/auth'
+import { FirebaseError } from 'firebase/app'
 import { Button } from '@/components/ui/button'
-import { Mail, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { Mail, ShieldCheck, ArrowLeft, Lock, Loader2 } from 'lucide-react'
+import { firebaseAuth, googleProvider, isFirebaseConfigured } from '@/lib/firebase'
 import { GoogleG, PpGrilloWordmark } from './brand-mark'
 
-export function AuthScreen({ onAuthed }: { onAuthed: () => void }) {
+function authErrorMessage(err: unknown): string {
+  const code = err instanceof FirebaseError ? err.code : ''
+  switch (code) {
+    case 'auth/popup-closed-by-user':
+    case 'auth/cancelled-popup-request':
+      return 'Cerraste la ventana de Google antes de terminar.'
+    case 'auth/popup-blocked':
+      return 'Tu navegador bloqueó la ventana de Google. Permite ventanas emergentes e intenta de nuevo.'
+    case 'auth/unauthorized-domain':
+      return 'Este dominio no está autorizado en Firebase Authentication.'
+    case 'auth/email-already-in-use':
+    case 'auth/invalid-credential':
+    case 'auth/wrong-password':
+      return 'Correo o contraseña incorrectos.'
+    case 'auth/weak-password':
+      return 'La contraseña debe tener al menos 6 caracteres.'
+    case 'auth/invalid-email':
+      return 'El correo no es válido.'
+    default:
+      return 'No pudimos iniciar sesión. Intenta de nuevo.'
+  }
+}
+
+export function AuthScreen({ initialError }: { initialError?: string | null }) {
   const [emailMode, setEmailMode] = useState(false)
   const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState<string | null>(
+    isFirebaseConfigured ? (initialError ?? null) : 'El inicio de sesión aún no está configurado.',
+  )
+
+  async function run(action: () => Promise<unknown>) {
+    setError(null)
+    setPending(true)
+    try {
+      await action()
+    } catch (err) {
+      setError(authErrorMessage(err))
+    } finally {
+      setPending(false)
+    }
+  }
+
+  const signInWithGoogle = () => run(() => signInWithPopup(firebaseAuth(), googleProvider))
+
+  const signInWithEmail = () =>
+    run(async () => {
+      const auth = firebaseAuth()
+      try {
+        await signInWithEmailAndPassword(auth, email.trim(), password)
+      } catch (err) {
+        if (err instanceof FirebaseError && err.code === 'auth/invalid-credential') {
+          await createUserWithEmailAndPassword(auth, email.trim(), password)
+          return
+        }
+        throw err
+      }
+    })
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center overflow-hidden px-5 py-12">
@@ -40,13 +103,24 @@ export function AuthScreen({ onAuthed }: { onAuthed: () => void }) {
 
           <div className="mt-8 space-y-4">
             <Button
-              onClick={onAuthed}
+              onClick={signInWithGoogle}
+              disabled={pending || !isFirebaseConfigured}
               size="lg"
-              className="h-auto w-full rounded-full border border-slate-200 bg-white py-4 text-base font-bold text-slate-700 shadow-sm hover:bg-slate-50"
+              className="h-auto w-full rounded-full border border-slate-200 bg-white py-4 text-base font-bold text-slate-700 shadow-sm hover:bg-slate-50 disabled:opacity-60"
             >
-              <GoogleG className="h-5 w-5 shrink-0" />
+              {pending ? (
+                <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden="true" />
+              ) : (
+                <GoogleG className="h-5 w-5 shrink-0" />
+              )}
               Continuar con Google
             </Button>
+
+            {error && (
+              <p role="alert" className="rounded-2xl bg-red-50 px-4 py-3 text-center text-sm font-medium text-red-700">
+                {error}
+              </p>
+            )}
 
             {!emailMode ? (
               <div className="flex items-center gap-3">
@@ -64,7 +138,7 @@ export function AuthScreen({ onAuthed }: { onAuthed: () => void }) {
               <form
                 onSubmit={(e) => {
                   e.preventDefault()
-                  if (email.trim()) onAuthed()
+                  if (email.trim() && password) signInWithEmail()
                 }}
                 className="space-y-3"
               >
@@ -85,9 +159,24 @@ export function AuthScreen({ onAuthed }: { onAuthed: () => void }) {
                     className="w-full rounded-full border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
+                <div className="relative">
+                  <Lock className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    minLength={6}
+                    autoComplete="current-password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Contraseña (mín. 6 caracteres)"
+                    aria-label="Contraseña"
+                    className="w-full rounded-full border border-slate-200 bg-white py-3.5 pl-11 pr-4 text-sm text-slate-800 outline-none transition-colors placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
                 <Button
                   type="submit"
                   size="lg"
+                  disabled={pending || !isFirebaseConfigured}
                   className="h-auto w-full rounded-full py-3.5 text-base font-semibold"
                 >
                   Continuar
