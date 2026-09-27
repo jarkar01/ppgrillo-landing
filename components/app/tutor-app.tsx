@@ -1,44 +1,65 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { onAuthStateChanged, signOut, type User } from 'firebase/auth'
+import { useEffect, useRef, useState } from 'react'
+import { onAuthStateChanged, signInAnonymously, signOut } from 'firebase/auth'
 import { Loader2 } from 'lucide-react'
 import { firebaseAuth, isFirebaseConfigured } from '@/lib/firebase'
-import { AuthScreen } from './auth-screen'
-import { Onboarding } from './onboarding'
+import { QuickSignup } from './quick-signup'
 import { AppShell } from './app-shell'
-import { loadCompletedProfile, saveOnboarding } from './user-profile'
+import { clearStoredPhone, getStoredPhone, loadProfile, registerTrial } from './user-profile'
 import type { StudentProfile } from './types'
 
-type Step = 'loading' | 'auth' | 'onboarding' | 'app'
+type Step = 'loading' | 'signup' | 'app'
 
 export function TutorApp() {
-  const [step, setStep] = useState<Step>(isFirebaseConfigured ? 'loading' : 'auth')
-  const [user, setUser] = useState<User | null>(null)
+  const [step, setStep] = useState<Step>(isFirebaseConfigured ? 'loading' : 'signup')
   const [profile, setProfile] = useState<StudentProfile | null>(null)
-  const [loadError, setLoadError] = useState<string | null>(null)
+  const [loadError, setLoadError] = useState<string | null>(
+    isFirebaseConfigured ? null : 'El servicio no está disponible en este momento.',
+  )
+  const registering = useRef(false)
 
   useEffect(() => {
     if (!isFirebaseConfigured) return
     return onAuthStateChanged(firebaseAuth(), async (authUser) => {
-      setUser(authUser)
-      if (!authUser) {
+      if (registering.current) return
+      const phone = getStoredPhone()
+      if (!authUser || !phone) {
         setProfile(null)
-        setStep('auth')
+        setStep('signup')
         return
       }
-      setStep('loading')
       try {
-        const saved = await loadCompletedProfile(authUser.uid)
+        const saved = await loadProfile(authUser.uid, phone)
         setProfile(saved)
-        setStep(saved ? 'app' : 'onboarding')
+        setStep(saved ? 'app' : 'signup')
       } catch (err) {
         console.error('[PpGrillo] No se pudo leer el perfil:', err)
-        setLoadError('No pudimos cargar tu perfil. Intenta de nuevo.')
-        setStep('auth')
+        setLoadError('No pudimos cargar tu cuenta. Vuelve a ingresar tus datos.')
+        setStep('signup')
       }
     })
   }, [])
+
+  async function activateTrial(studentName: string, phone: string) {
+    registering.current = true
+    try {
+      const auth = firebaseAuth()
+      const user = auth.currentUser ?? (await signInAnonymously(auth)).user
+      const saved = await registerTrial(user.uid, studentName, phone)
+      setProfile(saved)
+      setStep('app')
+    } finally {
+      registering.current = false
+    }
+  }
+
+  async function logout() {
+    clearStoredPhone()
+    setProfile(null)
+    setStep('signup')
+    await signOut(firebaseAuth())
+  }
 
   if (step === 'loading') {
     return (
@@ -49,21 +70,9 @@ export function TutorApp() {
     )
   }
 
-  if (step === 'auth' || !user) {
-    return <AuthScreen initialError={loadError} />
+  if (step === 'signup' || !profile) {
+    return <QuickSignup initialError={loadError} onSubmit={activateTrial} />
   }
 
-  if (step === 'onboarding' || !profile) {
-    return (
-      <Onboarding
-        onComplete={async (p) => {
-          const saved = await saveOnboarding(user, p)
-          setProfile(saved)
-          setStep('app')
-        }}
-      />
-    )
-  }
-
-  return <AppShell profile={profile} onLogout={() => signOut(firebaseAuth())} />
+  return <AppShell profile={profile} onLogout={logout} />
 }

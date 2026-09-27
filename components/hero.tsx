@@ -62,7 +62,7 @@ export function Hero() {
               )}
             >
               <MessageCircle className="h-5 w-5 shrink-0" />
-              Comenzar 14 días gratis
+              Comenzar prueba gratis de 14 días
             </Link>
             <button
               type="button"

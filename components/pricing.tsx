@@ -87,7 +87,7 @@ export function Pricing() {
               )}
             >
               <MessageCircle className="h-5 w-5 shrink-0" />
-              Comenzar 14 días gratis
+              Comenzar prueba gratis de 14 días
             </Link>
 
             <p className="relative mt-4 text-center text-[13px] text-slate-500">

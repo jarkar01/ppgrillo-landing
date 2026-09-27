@@ -1,9 +1,16 @@
-import { doc, getDoc, serverTimestamp, setDoc, Timestamp } from 'firebase/firestore'
-import type { User } from 'firebase/auth'
+import {
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+  type FirestoreError,
+  type Timestamp,
+} from 'firebase/firestore'
 import { firestore } from '@/lib/firebase'
 import type { StudentProfile } from './types'
 
 type UserDoc = {
+  uid?: string
   student_name?: string
   grade?: StudentProfile['grade']
   phone?: string
@@ -11,42 +18,102 @@ type UserDoc = {
   trial_start_date?: Timestamp
 }
 
-/** Returns the saved profile if the user already finished onboarding, otherwise null. */
-export async function loadCompletedProfile(uid: string): Promise<StudentProfile | null> {
-  const snap = await getDoc(doc(firestore(), 'users', uid))
-  if (!snap.exists()) return null
+const PHONE_STORAGE_KEY = 'ppgrillo_phone'
 
-  const data = snap.data() as UserDoc
-  const hasAllFields = Boolean(data.student_name && data.grade && data.phone)
-  if (!data.onboarding_completed && !hasAllFields) return null
+/** Keeps only digits; a valid Mexican WhatsApp number has exactly 10. */
+export function normalizePhone(value: string): string {
+  return value.replace(/\D/g, '').slice(0, 10)
+}
 
+export function isValidPhone(phone: string): boolean {
+  return /^\d{10}$/.test(phone)
+}
+
+/** The phone is only a pointer to the Firestore document; the profile itself lives in Firestore. */
+export function getStoredPhone(): string | null {
+  try {
+    return localStorage.getItem(PHONE_STORAGE_KEY)
+  } catch {
+    return null
+  }
+}
+
+function setStoredPhone(phone: string | null) {
+  try {
+    if (phone) localStorage.setItem(PHONE_STORAGE_KEY, phone)
+    else localStorage.removeItem(PHONE_STORAGE_KEY)
+  } catch {
+    // Some in-app browsers block storage in private modes; the session still works for this visit.
+  }
+}
+
+export function clearStoredPhone() {
+  setStoredPhone(null)
+}
+
+function toProfile(data: UserDoc, phone: string): StudentProfile {
   return {
     studentName: data.student_name ?? '',
-    grade: data.grade ?? 'Primaria',
-    whatsapp: data.phone ?? '',
+    grade: data.grade,
+    whatsapp: data.phone ?? phone,
     trialStartDate: data.trial_start_date?.toMillis(),
   }
 }
 
-export async function saveOnboarding(user: User, profile: StudentProfile): Promise<StudentProfile> {
-  const ref = doc(firestore(), 'users', user.uid)
-  const existing = await getDoc(ref)
-  const trialStart = (existing.data() as UserDoc | undefined)?.trial_start_date
+/** Returns the saved profile when this anonymous session owns the phone's document. */
+export async function loadProfile(uid: string, phone: string): Promise<StudentProfile | null> {
+  const snap = await getDoc(doc(firestore(), 'users', phone))
+  if (!snap.exists()) return null
+  const data = snap.data() as UserDoc
+  if (data.uid !== uid) return null
+  return toProfile(data, phone)
+}
+
+/**
+ * Creates or reclaims the phone's user document for this session. A returning user on a new
+ * device gets a new anonymous uid, so Firestore denies the read; we then reclaim the document,
+ * and the security rules keep the original trial_start_date so the trial can't be restarted.
+ */
+export async function registerTrial(
+  uid: string,
+  studentName: string,
+  phone: string,
+): Promise<StudentProfile> {
+  const ref = doc(firestore(), 'users', phone)
+
+  let exists = false
+  let trialStart: Timestamp | undefined
+  try {
+    const snap = await getDoc(ref)
+    exists = snap.exists()
+    trialStart = (snap.data() as UserDoc | undefined)?.trial_start_date
+  } catch (err) {
+    if ((err as FirestoreError).code !== 'permission-denied') throw err
+    exists = true
+  }
 
   await setDoc(
     ref,
     {
-      email: user.email,
-      display_name: user.displayName,
-      student_name: profile.studentName,
-      grade: profile.grade,
-      phone: profile.whatsapp,
+      uid,
+      student_name: studentName,
+      phone,
       onboarding_completed: true,
-      trial_start_date: trialStart ?? serverTimestamp(),
       updated_at: serverTimestamp(),
+      ...(exists ? {} : { trial_start_date: serverTimestamp(), created_at: serverTimestamp() }),
     },
     { merge: true },
   )
 
-  return { ...profile, trialStartDate: trialStart?.toMillis() ?? Date.now() }
+  if (exists && !trialStart) {
+    const snap = await getDoc(ref)
+    trialStart = (snap.data() as UserDoc | undefined)?.trial_start_date
+  }
+
+  setStoredPhone(phone)
+  return {
+    studentName,
+    whatsapp: phone,
+    trialStartDate: trialStart?.toMillis() ?? Date.now(),
+  }
 }
