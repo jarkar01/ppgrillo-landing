@@ -42,6 +42,7 @@ export function TutorChat({
   isSubscribed,
   daysLeft,
   locked,
+  uploadError,
   onSend,
   onOpenSidebar,
 }: {
@@ -51,6 +52,7 @@ export function TutorChat({
   isSubscribed: boolean
   daysLeft: number
   locked: boolean
+  uploadError?: string | null
   onSend: (text: string, files?: FileList) => void
   onOpenSidebar: () => void
 }) {
@@ -173,6 +175,12 @@ export function TutorChat({
           {status === 'error' && (
             <p className="mx-auto rounded-full bg-red-50 px-4 py-2 text-center text-xs font-medium text-red-500">
               Ocurrió un error. Intenta enviar tu mensaje de nuevo.
+            </p>
+          )}
+
+          {uploadError && status !== 'error' && (
+            <p className="mx-auto rounded-full bg-red-50 px-4 py-2 text-center text-xs font-medium text-red-500">
+              {uploadError}
             </p>
           )}
         </div>
