@@ -136,6 +136,7 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
         uploadError={uploadError}
         onSend={handleSend}
         onOpenSidebar={() => setSidebarOpen(true)}
+        onLogout={onLogout}
       />
       {locked && <PaywallModal onSubscribe={() => setIsSubscribed(true)} />}
     </div>
