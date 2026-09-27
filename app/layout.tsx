@@ -8,12 +8,6 @@ export const metadata: Metadata = {
     'El tutor socrático en WhatsApp con paciencia infinita que acompaña a tus hijos paso a paso para que aprendan a pensar. Impulsado por Google Cloud y Ed1to1.',
   generator: 'v0.app',
   applicationName: 'PpGrillo',
-  manifest: '/manifest.json',
-  appleWebApp: {
-    capable: true,
-    title: 'PpGrillo',
-    statusBarStyle: 'default',
-  },
   formatDetection: { telephone: false },
   icons: {
     icon: [
@@ -22,7 +16,6 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: '/icons/apple-touch-icon.png', sizes: '180x180' }],
   },
-  other: { 'apple-mobile-web-app-capable': 'yes' },
 }
 
 export const viewport: Viewport = {
