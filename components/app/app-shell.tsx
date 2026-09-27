@@ -6,7 +6,6 @@ import { DefaultChatTransport, type UIMessage } from 'ai'
 import { AppSidebar } from './app-sidebar'
 import { TutorChat } from './tutor-chat'
 import { PaywallModal } from './paywall-modal'
-import { InstallPrompt } from './install-prompt'
 import { compressImage, lightenHistory } from './compress-image'
 import { daysRemaining, TRIAL_DAYS, type StudentProfile, type TutorSession } from './types'
 
@@ -139,7 +138,6 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
         onOpenSidebar={() => setSidebarOpen(true)}
         onLogout={onLogout}
       />
-      {!locked && <InstallPrompt />}
       {locked && <PaywallModal onSubscribe={() => setIsSubscribed(true)} />}
     </div>
   )
