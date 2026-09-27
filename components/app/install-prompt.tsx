@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Download, Share, SquarePlus, X } from 'lucide-react'
+import { Check, Compass, Copy, Download, X } from 'lucide-react'
+import { IosInstallGuide } from './ios-install-guide'
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>
@@ -22,10 +23,18 @@ function isIOS() {
   return /iphone|ipad|ipod/i.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1)
 }
 
+function isIOSSafari() {
+  const ua = navigator.userAgent
+  const otherBrowserOrWebView =
+    /CriOS|FxiOS|EdgiOS|OPiOS|GSA\/|WhatsApp|Instagram|FBAN|FBAV|Line\/|Twitter|TikTok|Snapchat/i
+  return /Safari/i.test(ua) && !otherBrowserOrWebView.test(ua)
+}
+
 export function InstallPrompt() {
-  const [platform, setPlatform] = useState<'android' | 'ios' | null>(null)
+  const [platform, setPlatform] = useState<'android' | 'ios' | 'ios-other' | null>(null)
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null)
   const [showIosHelp, setShowIosHelp] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -34,7 +43,7 @@ export function InstallPrompt() {
     if (isStandalone() || localStorage.getItem(DISMISS_KEY)) return
 
     if (isIOS()) {
-      setPlatform('ios')
+      setPlatform(isIOSSafari() ? 'ios' : 'ios-other')
       return
     }
 
@@ -73,7 +82,59 @@ export function InstallPrompt() {
     if (outcome === 'accepted') setPlatform(null)
   }
 
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(window.location.origin + '/app')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2500)
+    } catch {}
+  }
+
   if (!platform) return null
+
+  if (platform === 'ios-other') {
+    return (
+      <div
+        role="region"
+        aria-label="Abrir en Safari"
+        className="fixed inset-x-3 top-[calc(env(safe-area-inset-top)+4.5rem)] z-40 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-card p-4 shadow-lg shadow-slate-900/10 animate-in fade-in slide-in-from-top-2 md:hidden"
+      >
+        <div className="flex items-start gap-3">
+          <span className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Compass className="h-7 w-7" aria-hidden="true" />
+          </span>
+          <p className="flex-1 text-sm font-medium leading-relaxed text-slate-800 text-pretty">
+            Para agregar la app a tu celular, abre esta página en <strong>Safari</strong> (icono de la brújula).
+          </p>
+          <button
+            type="button"
+            onClick={dismiss}
+            aria-label="Cerrar aviso"
+            className="-mr-1 -mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100"
+          >
+            <X className="h-4 w-4" aria-hidden="true" />
+          </button>
+        </div>
+        <button
+          type="button"
+          onClick={copyLink}
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground active:scale-95"
+        >
+          {copied ? (
+            <>
+              <Check className="h-4 w-4" aria-hidden="true" />
+              Enlace copiado. Pégalo en Safari
+            </>
+          ) : (
+            <>
+              <Copy className="h-4 w-4" aria-hidden="true" />
+              Copiar enlace
+            </>
+          )}
+        </button>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -110,68 +171,7 @@ export function InstallPrompt() {
         </button>
       </div>
 
-      {showIosHelp && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden"
-          onClick={() => setShowIosHelp(false)}
-        >
-          <div
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="ios-install-title"
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-3xl bg-card p-5 shadow-xl animate-in fade-in slide-in-from-bottom-4"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <h2 id="ios-install-title" className="font-display text-lg font-bold text-slate-900">
-                Agrega PpGrillo a tu inicio
-              </h2>
-              <button
-                type="button"
-                onClick={() => setShowIosHelp(false)}
-                aria-label="Cerrar instrucciones"
-                className="-mr-1 -mt-1 inline-flex h-8 w-8 items-center justify-center rounded-full text-slate-400 hover:bg-slate-100"
-              >
-                <X className="h-4 w-4" aria-hidden="true" />
-              </button>
-            </div>
-            <ol className="mt-4 flex flex-col gap-3 text-sm leading-relaxed text-slate-700">
-              <li className="flex items-center gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <Share className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>1.</strong> Toca el botón <strong>Compartir</strong> (cuadrado con flecha) en la barra de Safari.
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                  <SquarePlus className="h-5 w-5" aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>2.</strong> Selecciona <strong>{"'Agregar a pantalla de inicio'"}</strong>.
-                </span>
-              </li>
-            </ol>
-            <div className="mt-5 flex gap-2">
-              <button
-                type="button"
-                onClick={dismiss}
-                className="flex-1 rounded-full border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600"
-              >
-                Ahora no
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowIosHelp(false)}
-                className="flex-1 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground"
-              >
-                Entendido
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {showIosHelp && <IosInstallGuide onClose={() => setShowIosHelp(false)} onDismiss={dismiss} />}
     </>
   )
 }
