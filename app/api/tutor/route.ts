@@ -7,6 +7,7 @@ import {
   type UIMessage,
 } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { lightenHistory } from '@/components/app/compress-image'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -105,7 +106,7 @@ export async function POST(req: Request) {
   const result = streamText({
     model: google('gemini-2.5-flash'),
     system,
-    messages: await convertToModelMessages(messages),
+    messages: await convertToModelMessages(lightenHistory(messages)),
   })
 
   return result.toUIMessageStreamResponse()

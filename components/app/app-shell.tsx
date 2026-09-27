@@ -6,6 +6,7 @@ import { DefaultChatTransport, type UIMessage } from 'ai'
 import { AppSidebar } from './app-sidebar'
 import { TutorChat } from './tutor-chat'
 import { PaywallModal } from './paywall-modal'
+import { compressImage, lightenHistory } from './compress-image'
 import { daysRemaining, TRIAL_DAYS, type StudentProfile, type TutorSession } from './types'
 
 const DAY_MS = 86_400_000
@@ -42,10 +43,20 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
     setTrialStartDate((prev) => (daysRemaining(prev) <= 0 ? Date.now() : Date.now() - (TRIAL_DAYS + 1) * DAY_MS))
   }
 
-  const { messages, sendMessage, setMessages, status } = useChat({
+  const [uploadError, setUploadError] = useState<string | null>(null)
+
+  const { messages, sendMessage, setMessages, status, clearError } = useChat({
     transport: new DefaultChatTransport({
       api: '/api/tutor',
-      body: { studentName: profile.studentName, grade: profile.grade },
+      prepareSendMessagesRequest: ({ id, messages, body }) => ({
+        body: {
+          ...body,
+          id,
+          messages: lightenHistory(messages),
+          studentName: profile.studentName,
+          grade: profile.grade,
+        },
+      }),
     }),
   })
 
@@ -83,11 +94,18 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
     setSidebarOpen(false)
   }
 
-  function handleSend(text: string, files?: FileList) {
+  async function handleSend(text: string, files?: FileList) {
     if (locked) return // bloqueo por prueba vencida
+    clearError()
+    setUploadError(null)
     const trimmed = text.trim()
     if (files && files.length > 0) {
-      sendMessage({ text: trimmed, files })
+      try {
+        const compressed = await compressImage(files[0])
+        sendMessage({ text: trimmed, files: [compressed] })
+      } catch {
+        setUploadError('No pudimos procesar la foto. Intenta con otra imagen.')
+      }
     } else {
       sendMessage({ text: trimmed })
     }
@@ -115,6 +133,7 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
         isSubscribed={isSubscribed}
         daysLeft={remaining}
         locked={locked}
+        uploadError={uploadError}
         onSend={handleSend}
         onOpenSidebar={() => setSidebarOpen(true)}
       />
