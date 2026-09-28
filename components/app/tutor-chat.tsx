@@ -48,6 +48,9 @@ export function TutorChat({
   isSubscribed,
   daysLeft,
   locked,
+  dailyLimit,
+  usedToday,
+  dailyLimitReached,
   uploadError,
   onSend,
   onOpenSidebar,
@@ -59,6 +62,9 @@ export function TutorChat({
   isSubscribed: boolean
   daysLeft: number
   locked: boolean
+  dailyLimit: number | null
+  usedToday: number
+  dailyLimitReached: boolean
   uploadError?: string | null
   onSend: (text: string, files?: FileList) => void
   onOpenSidebar: () => void
@@ -72,6 +78,8 @@ export function TutorChat({
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const busy = status === 'submitted' || status === 'streaming'
+  const inputBlocked = locked || dailyLimitReached
+  const remainingToday = dailyLimit === null ? null : Math.max(0, dailyLimit - usedToday)
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' })
@@ -94,7 +102,7 @@ export function TutorChat({
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
-    if (busy || locked) return
+    if (busy || inputBlocked) return
     if (!input.trim() && (!files || files.length === 0)) return
     onSend(input, files)
     setInput('')
@@ -180,7 +188,7 @@ export function TutorChat({
             </div>
           </div>
 
-          {messages.length === 0 && !locked && (
+          {messages.length === 0 && !inputBlocked && (
             <div className="flex flex-col items-start gap-2 pl-10.5" aria-label="Sugerencias para empezar">
               {SUGGESTIONS.map((suggestion) => (
                 <button
@@ -231,6 +239,16 @@ export function TutorChat({
             </p>
           )}
 
+          {dailyLimitReached && !busy && (
+            <div className="flex items-end gap-2.5" role="status">
+              <PpGrilloAvatar className="h-8 w-8 shrink-0" />
+              <div className="max-w-[85%] rounded-2xl rounded-bl-md bg-accent px-4 py-3 text-[15px] leading-relaxed text-accent-foreground shadow-sm ring-1 ring-primary/20">
+                ¡Gran sesión de estudio hoy! Has alcanzado tu límite diario de {dailyLimit} preguntas de la prueba
+                gratuita. Tu tutor descansará y estará listo mañana, o podrás actualizar pronto a un plan ilimitado.
+              </div>
+            </div>
+          )}
+
           {uploadError && status !== 'error' && (
             <p className="mx-auto rounded-full bg-red-50 px-4 py-2 text-center text-xs font-medium text-red-500">
               {uploadError}
@@ -269,7 +287,8 @@ export function TutorChat({
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-accent hover:text-primary"
+              disabled={inputBlocked}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-slate-500 transition-colors hover:bg-accent hover:text-primary disabled:opacity-40 disabled:hover:bg-transparent"
               aria-label="Subir foto de tu libreta o libro"
             >
               <Camera className="h-5 w-5" />
@@ -289,19 +308,25 @@ export function TutorChat({
               }}
               rows={1}
               enterKeyHint="send"
+              disabled={inputBlocked}
               aria-label="Escribe tu duda"
-              placeholder="Escribe tu duda..."
-              className="max-h-32 min-w-0 flex-1 resize-none bg-transparent py-2.5 text-base text-slate-800 outline-none placeholder:text-slate-400 sm:text-[15px]"
+              placeholder={dailyLimitReached ? 'Vuelve mañana para seguir estudiando' : 'Escribe tu duda...'}
+              className="max-h-32 min-w-0 flex-1 resize-none bg-transparent py-2.5 text-base text-slate-800 outline-none placeholder:text-slate-400 disabled:cursor-not-allowed sm:text-[15px]"
             />
             <button
               type="submit"
-              disabled={busy || locked || (!input.trim() && (!files || files.length === 0))}
+              disabled={busy || inputBlocked || (!input.trim() && (!files || files.length === 0))}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-40"
               aria-label="Enviar mensaje"
             >
               <Send className="h-5 w-5" />
             </button>
           </div>
+          {remainingToday !== null && remainingToday > 0 && remainingToday <= 5 && (
+            <p className="mt-2 text-center text-xs font-medium text-primary" role="status">
+              Te {remainingToday === 1 ? 'queda 1 pregunta' : `quedan ${remainingToday} preguntas`} hoy
+            </p>
+          )}
           <p className="mt-2 hidden items-center justify-center gap-1.5 text-center text-[11px] text-slate-400 sm:flex">
             <Sparkles className="h-3 w-3" />
             PpGrillo te guía con preguntas. No te dará la respuesta directa.

@@ -1,13 +1,22 @@
 'use client'
 
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type UIMessage } from 'ai'
 import { AppSidebar } from './app-sidebar'
 import { TutorChat } from './tutor-chat'
 import { PaywallModal } from './paywall-modal'
 import { compressImage, lightenHistory } from './compress-image'
-import { daysRemaining, TRIAL_DAYS, type StudentProfile, type TutorSession } from './types'
+import { recordMessage } from './user-profile'
+import {
+  daysRemaining,
+  PLAN_TIERS,
+  todayKey,
+  TRIAL_DAYS,
+  type PlanTier,
+  type StudentProfile,
+  type TutorSession,
+} from './types'
 
 const DAY_MS = 86_400_000
 
@@ -37,6 +46,32 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
   const remaining = daysRemaining(trialStartDate)
   const trialExpired = !isSubscribed && remaining <= 0
   const locked = trialExpired
+
+  // --- Límite diario de mensajes según el plan ---
+  const plan: PlanTier = isSubscribed ? 'ilimitado' : (profile.plan ?? 'prueba')
+  const dailyLimit = PLAN_TIERS[plan].dailyMessageLimit
+  const [usage, setUsage] = useState(() => ({
+    date: profile.lastMessageDate ?? '',
+    count: profile.messagesToday ?? 0,
+  }))
+  const [, forceDayRollover] = useState(0)
+  const usedToday = usage.date === todayKey() ? usage.count : 0
+  const dailyLimitReached = dailyLimit !== null && usedToday >= dailyLimit
+
+  useEffect(() => {
+    if (!dailyLimitReached) return
+    const now = new Date()
+    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    const timer = setTimeout(() => forceDayRollover((n) => n + 1), nextMidnight.getTime() - now.getTime() + 1000)
+    return () => clearTimeout(timer)
+  }, [dailyLimitReached])
+
+  function countMessage() {
+    setUsage({ date: todayKey(), count: usedToday + 1 })
+    recordMessage(profile.whatsapp)
+      .then(setUsage)
+      .catch((err) => console.error('[PpGrillo] No se pudo guardar el conteo diario:', err))
+  }
 
   function toggleTrialSimulation() {
     // Alterna entre "Prueba activa" (14 días) y "Prueba vencida" (0 días).
@@ -95,18 +130,20 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
   }
 
   async function handleSend(text: string, files?: FileList) {
-    if (locked) return // bloqueo por prueba vencida
+    if (locked || dailyLimitReached) return
     clearError()
     setUploadError(null)
     const trimmed = text.trim()
     if (files && files.length > 0) {
       try {
         const compressed = await compressImage(files[0])
+        countMessage()
         sendMessage({ text: trimmed, files: [compressed] })
       } catch {
         setUploadError('No pudimos procesar la foto. Intenta con otra imagen.')
       }
     } else {
+      countMessage()
       sendMessage({ text: trimmed })
     }
   }
@@ -133,6 +170,9 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
         isSubscribed={isSubscribed}
         daysLeft={remaining}
         locked={locked}
+        dailyLimit={dailyLimit}
+        usedToday={usedToday}
+        dailyLimitReached={dailyLimitReached}
         uploadError={uploadError}
         onSend={handleSend}
         onOpenSidebar={() => setSidebarOpen(true)}
