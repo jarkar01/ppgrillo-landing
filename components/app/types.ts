@@ -6,6 +6,30 @@ export type StudentProfile = {
   whatsapp: string
   /** Inicio de la prueba (ms), persistido en Firestore. */
   trialStartDate?: number
+  plan?: PlanTier
+  /** Mensajes enviados en `lastMessageDate` (día local, YYYY-MM-DD). */
+  messagesToday?: number
+  lastMessageDate?: string
+}
+
+export type PlanTier = 'prueba' | 'basico' | 'ilimitado'
+
+/**
+ * Límites de uso por plan. `dailyMessageLimit: null` significa sin límite.
+ * Ajusta aquí los valores cuando se activen los planes de cobro.
+ */
+export const PLAN_TIERS: Record<PlanTier, { label: string; dailyMessageLimit: number | null }> = {
+  prueba: { label: 'Prueba gratuita', dailyMessageLimit: 25 },
+  basico: { label: 'Plan Básico', dailyMessageLimit: 50 },
+  ilimitado: { label: 'Plan Ilimitado / Intenso', dailyMessageLimit: null },
+}
+
+/** Fecha local del dispositivo en formato YYYY-MM-DD; el conteo se reinicia al cambiar de día. */
+export function todayKey(date = new Date()): string {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, '0')
+  const d = String(date.getDate()).padStart(2, '0')
+  return `${y}-${m}-${d}`
 }
 
 export type TutorSession = {
