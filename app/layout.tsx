@@ -1,5 +1,6 @@
 import { Analytics } from '@vercel/analytics/next'
 import type { Metadata, Viewport } from 'next'
+import { MetaPixel } from '@/components/meta-pixel'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -34,6 +35,7 @@ export default function RootLayout({
     <html lang="es" className="light scroll-smooth">
       <body className="font-body antialiased">
         {children}
+        <MetaPixel />
         {process.env.NODE_ENV === 'production' && <Analytics />}
       </body>
     </html>

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { onAuthStateChanged, signInAnonymously, signOut } from 'firebase/auth'
 import { Loader2 } from 'lucide-react'
 import { firebaseAuth, isFirebaseConfigured } from '@/lib/firebase'
+import { trackMetaEvent } from '@/lib/meta-pixel'
 import { QuickSignup } from './quick-signup'
 import { AppShell } from './app-shell'
 import { clearStoredPhone, getStoredPhone, loadProfile, registerTrial } from './user-profile'
@@ -47,6 +48,10 @@ export function TutorApp() {
       const auth = firebaseAuth()
       const user = auth.currentUser ?? (await signInAnonymously(auth)).user
       const saved = await registerTrial(user.uid, studentName, phone)
+      trackMetaEvent('CompleteRegistration', {
+        content_name: 'Prueba gratis 14 días',
+        status: 'trial_started',
+      })
       setProfile(saved)
       setStep('app')
     } finally {
