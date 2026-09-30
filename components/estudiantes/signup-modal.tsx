@@ -18,7 +18,21 @@ export function useOpenSignup() {
   return open
 }
 
-export function SignupModalProvider({ children }: { children: ReactNode }) {
+type SignupModalProviderProps = {
+  children: ReactNode
+  category?: string
+  title?: string
+  subtitle?: string
+  submitLabel?: string
+}
+
+export function SignupModalProvider({
+  children,
+  category = 'estudiantes',
+  title = 'Activa tus 14 días gratis',
+  subtitle = 'Solo tu nombre y tu WhatsApp. En segundos estás resolviendo tu tarea.',
+  submitLabel = 'Empezar con mi tutor',
+}: SignupModalProviderProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [formKey, setFormKey] = useState(0)
   const router = useRouter()
@@ -35,7 +49,7 @@ export function SignupModalProvider({ children }: { children: ReactNode }) {
     await registerTrial(user.uid, studentName, phone)
     trackMetaEvent('Lead', {
       content_name: 'Prueba gratis 14 días',
-      content_category: 'estudiantes',
+      content_category: category,
     })
     router.push('/app')
   }
@@ -70,18 +84,16 @@ export function SignupModalProvider({ children }: { children: ReactNode }) {
               id="student-signup-title"
               className="text-balance font-display text-2xl font-extrabold tracking-tight text-slate-900"
             >
-              Activa tus 14 días gratis
+              {title}
             </h2>
-            <p className="text-pretty text-sm leading-relaxed text-slate-500">
-              Solo tu nombre y tu WhatsApp. En segundos estás resolviendo tu tarea.
-            </p>
+            <p className="text-pretty text-sm leading-relaxed text-slate-500">{subtitle}</p>
           </div>
 
           <div className="mt-7">
             <SignupForm
               key={formKey}
               nameLabel="Nombre del estudiante"
-              submitLabel="Empezar con mi tutor"
+              submitLabel={submitLabel}
               onSubmit={register}
             />
           </div>

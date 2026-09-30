@@ -57,6 +57,7 @@ export default function EstudiantesPage() {
         <main>
           <StudentHero />
           <BenefitGrid
+            id="beneficios"
             eyebrow="Cero estrés"
             title="Estudia a tu ritmo y sin pasar penas"
             benefits={emotionalBenefits}

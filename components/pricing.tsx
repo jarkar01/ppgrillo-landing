@@ -10,7 +10,7 @@ const MERCADOPAGO_CHECKOUT_URL =
 
 const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
-const benefits = [
+const defaultBenefits = [
   'Tutor socrático 24/7 con paciencia infinita',
   'Lectura de fotos y audios de la libreta',
   'Reportes semanales para padres bajo demanda',
@@ -18,12 +18,22 @@ const benefits = [
   'Pagos vía Mercado Pago o Stripe',
 ]
 
+type PricingProps = {
+  onStartTrial?: () => void
+  title?: string
+  benefits?: string[]
+}
+
 const ctaClass = cn(
   buttonVariants(),
   'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',
 )
 
-export function Pricing({ onStartTrial }: { onStartTrial?: () => void } = {}) {
+export function Pricing({
+  onStartTrial,
+  title = 'Un precio simple para recuperar tus tardes.',
+  benefits = defaultBenefits,
+}: PricingProps = {}) {
   return (
     <section id="precios" className="relative z-20 scroll-mt-20">
       <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 lg:py-24">
@@ -32,7 +42,7 @@ export function Pricing({ onStartTrial }: { onStartTrial?: () => void } = {}) {
             Precios y planes
           </p>
           <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            Un precio simple para recuperar tus tardes.
+            {title}
           </h2>
         </div>
 

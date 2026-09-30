@@ -32,7 +32,12 @@ export function BenefitGrid({ id, eyebrow, title, benefits, tinted }: BenefitGri
           </h2>
         </div>
 
-        <ul className="mt-12 grid gap-6 md:grid-cols-3">
+        <ul
+          className={cn(
+            'mt-12 grid gap-6',
+            benefits.length === 4 ? 'md:grid-cols-2 lg:grid-cols-4' : 'md:grid-cols-3',
+          )}
+        >
           {benefits.map(({ icon: Icon, title, body, color }) => (
             <li
               key={title}
