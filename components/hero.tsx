@@ -17,7 +17,7 @@ const badgeItems = [
 
 const reassurances = [
   { icon: CreditCard, label: 'Sin tarjeta bancaria' },
-  { icon: Timer, label: 'En su WhatsApp en 1 minuto' },
+  { icon: Timer, label: 'Registro por WhatsApp en 1 minuto' },
   { icon: MousePointerClick, label: 'Cancela en 1 clic' },
 ]
 

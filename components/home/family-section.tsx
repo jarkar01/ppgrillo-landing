@@ -1,24 +1,65 @@
-import Image from 'next/image'
 import { CalendarHeart, MessagesSquare, UtensilsCrossed } from 'lucide-react'
 
 const moments = [
-  { icon: UtensilsCrossed, label: 'Cenas en calma', color: '#4285F4' },
-  { icon: MessagesSquare, label: 'Conversaciones sobre el día', color: '#34A853' },
-  { icon: CalendarHeart, label: 'Fines de semana sin pendientes', color: '#EA4335' },
+  {
+    icon: UtensilsCrossed,
+    label: 'Cenas en calma',
+    detail: 'La mesa vuelve a ser para compartir, no para revisar tareas.',
+    color: '#4285F4',
+    offset: 'sm:mr-10',
+  },
+  {
+    icon: MessagesSquare,
+    label: 'Conversaciones sobre el día',
+    detail: 'Hablan de lo que aprendió, no de lo que falta por hacer.',
+    color: '#34A853',
+    offset: 'sm:ml-10',
+  },
+  {
+    icon: CalendarHeart,
+    label: 'Fines de semana sin pendientes',
+    detail: 'Sábados y domingos libres de estrés académico.',
+    color: '#EA4335',
+    offset: 'sm:mr-6',
+  },
 ]
 
 export function FamilySection() {
   return (
     <section className="border-y border-slate-200/70 bg-secondary/50">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-5 py-16 sm:px-8 lg:grid-cols-2 lg:gap-16 lg:py-24">
-        <div className="relative overflow-hidden rounded-[2rem] shadow-xl shadow-slate-900/10">
-          <Image
-            src="/images/familia-cena.png"
-            alt="Familia conversando y riendo en la mesa durante la cena"
-            width={1024}
-            height={1024}
-            className="aspect-[4/3] h-auto w-full object-cover"
-          />
+        <div
+          className="relative overflow-hidden rounded-[2rem] border border-slate-200 bg-card p-6 shadow-xl shadow-slate-900/5 sm:p-10"
+          style={{
+            backgroundImage:
+              'radial-gradient(circle, rgb(148 163 184 / 0.28) 1px, transparent 1px)',
+            backgroundSize: '22px 22px',
+          }}
+        >
+          <ul className="relative flex flex-col gap-4">
+            {moments.map(({ icon: Icon, label, detail, color, offset }) => (
+              <li
+                key={label}
+                className={`flex items-center gap-4 rounded-2xl border border-slate-200 bg-card p-4 shadow-md shadow-slate-900/5 sm:p-5 ${offset}`}
+              >
+                <span
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl"
+                  style={{ backgroundColor: `${color}1A`, color }}
+                >
+                  <Icon className="h-6 w-6" aria-hidden="true" />
+                </span>
+                <div className="min-w-0">
+                  <p className="font-display text-base font-bold text-slate-900">{label}</p>
+                  <p className="mt-0.5 text-sm leading-relaxed text-slate-600">{detail}</p>
+                </div>
+                <span
+                  className="ml-auto hidden h-2.5 w-2.5 shrink-0 rounded-full sm:block"
+                  style={{ backgroundColor: color }}
+                  aria-hidden="true"
+                />
+              </li>
+            ))}
+          </ul>
         </div>
 
         <div>
@@ -32,18 +73,6 @@ export function FamilySection() {
             Cenas en calma, conversaciones sobre el día y fines de semana libres de pendientes
             escolares. El hogar deja de girar en torno al estrés académico.
           </p>
-
-          <ul className="mt-8 flex flex-wrap gap-3">
-            {moments.map(({ icon: Icon, label, color }) => (
-              <li
-                key={label}
-                className="flex items-center gap-2 rounded-full border border-slate-200 bg-card px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm"
-              >
-                <Icon className="h-5 w-5" style={{ color }} aria-hidden="true" />
-                {label}
-              </li>
-            ))}
-          </ul>
         </div>
       </div>
     </section>
