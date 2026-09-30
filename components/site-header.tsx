@@ -31,7 +31,7 @@ export function SiteHeader() {
           <a href="#pedagogia" className="transition-colors hover:text-primary">
             Cómo funciona
           </a>
-          <a href="#verano" className="transition-colors hover:text-primary">
+          <a href="/#verano" className="transition-colors hover:text-primary">
             Campamento
           </a>
           <a href="#precios" className="transition-colors hover:text-primary">
