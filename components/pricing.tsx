@@ -18,7 +18,12 @@ const benefits = [
   'Pagos vía Mercado Pago o Stripe',
 ]
 
-export function Pricing() {
+const ctaClass = cn(
+  buttonVariants(),
+  'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',
+)
+
+export function Pricing({ onStartTrial }: { onStartTrial?: () => void } = {}) {
   return (
     <section id="precios" className="relative z-20 scroll-mt-20">
       <div className="mx-auto max-w-6xl px-5 py-16 sm:px-8 lg:py-24">
@@ -76,19 +81,27 @@ export function Pricing() {
               ))}
             </ul>
 
-            <Link
-              href="/app"
-              onClick={() => {
-                window.location.href = '/app'
-              }}
-              className={cn(
-                buttonVariants(),
-                'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',
-              )}
-            >
-              <MessageCircle className="h-5 w-5 shrink-0" />
-              Comenzar prueba gratis de 14 días
-            </Link>
+            {onStartTrial ? (
+              <button
+                type="button"
+                onClick={onStartTrial}
+                className={cn(ctaClass, 'cursor-pointer')}
+              >
+                <MessageCircle className="h-5 w-5 shrink-0" />
+                Comenzar prueba gratis de 14 días
+              </button>
+            ) : (
+              <Link
+                href="/app"
+                onClick={() => {
+                  window.location.href = '/app'
+                }}
+                className={ctaClass}
+              >
+                <MessageCircle className="h-5 w-5 shrink-0" />
+                Comenzar prueba gratis de 14 días
+              </Link>
+            )}
 
             <p className="relative mt-4 text-center text-[13px] text-slate-500">
               ¿Ya decidido?{' '}
