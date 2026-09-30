@@ -1,11 +1,18 @@
-import { BarChart3, Camera, Gauge, MessageCircle, Sparkles } from 'lucide-react'
+import {
+  BarChart3,
+  Camera,
+  Gauge,
+  MessageCircle,
+  MonitorSmartphone,
+  Sparkles,
+} from 'lucide-react'
 
 const features = [
   {
-    icon: MessageCircle,
-    color: '#25D366',
-    title: 'Tutor socrático en WhatsApp',
-    body: 'Sin instalar apps nuevas ni recordar contraseñas.',
+    icon: MonitorSmartphone,
+    color: '#4285F4',
+    title: 'Tutor socrático web en vivo',
+    body: 'Interactúa en tiempo real con una interfaz limpia diseñada para concentrarse en aprender.',
   },
   {
     icon: Camera,
@@ -29,7 +36,7 @@ const features = [
     icon: BarChart3,
     color: '#34A853',
     title: 'Reportes para padres bajo demanda',
-    body: 'Evolución periódica y materias consultadas, cuando tú los pidas.',
+    body: 'Evolución periódica y materias consultadas, directo a tu WhatsApp cuando tú los pidas.',
   },
 ]
 
@@ -42,10 +49,18 @@ export function FeaturesSection() {
             Cómo funciona
           </p>
           <h2 className="mt-3 text-balance font-display text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            Todo sucede en el WhatsApp que tu hijo ya usa
+            Acceso instantáneo desde cualquier dispositivo
           </h2>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            Sin plataformas complicadas. Tecnología seria, diseñada para que aprenda a pensar.
+            Tu hijo entra directo a la aplicación web desde su celular, tablet o computadora. Sin
+            descargas pesadas ni configuraciones complicadas.
+          </p>
+          <p className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-200 bg-card p-4 text-sm leading-relaxed text-slate-600">
+            <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#25D366]" aria-hidden="true" />
+            <span>
+              WhatsApp se usa solo para el registro rápido con tu número, las notificaciones de
+              acceso y los reportes para padres bajo demanda.
+            </span>
           </p>
         </div>
 

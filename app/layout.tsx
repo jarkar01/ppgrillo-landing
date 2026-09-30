@@ -6,7 +6,7 @@ import './globals.css'
 export const metadata: Metadata = {
   title: 'PpGrillo · Deja de pelear por la tarea. Recupera la paz de tus tardes',
   description:
-    'Tutor socrático K-8 a K-12 en WhatsApp con paciencia infinita. Tu hijo aprende a razonar por su cuenta y tú recuperas la paz en casa. 14 días gratis, sin tarjeta.',
+    'Tutor socrático web K-8 a K-12, desde cualquier dispositivo y con paciencia infinita. Tu hijo aprende a razonar por su cuenta y tú recuperas la paz en casa. 14 días gratis, sin tarjeta.',
   generator: 'v0.app',
   applicationName: 'PpGrillo',
   formatDetection: { telephone: false },
