@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { ArrowRight, Loader2, MessageCircle, ShieldCheck, User } from 'lucide-react'
+import { ArrowRight, Loader2, Lock, MessageCircle, ShieldCheck, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { isValidPhone, normalizePhone } from './user-profile'
 
@@ -10,6 +10,7 @@ type SignupFormProps = {
   initialError?: string | null
   nameLabel?: string
   submitLabel?: string
+  trustNote?: string
   onSubmit: (studentName: string, phone: string) => Promise<void>
 }
 
@@ -20,6 +21,7 @@ export function SignupForm({
   initialError,
   nameLabel = 'Nombre completo',
   submitLabel = 'Entrar a mi tutor',
+  trustNote,
   onSubmit,
 }: SignupFormProps) {
   const [name, setName] = useState('')
@@ -106,6 +108,12 @@ export function SignupForm({
             ? `Faltan ${10 - phone.length} dígitos.`
             : 'Lo usamos para identificar tu cuenta y enviarte avances.'}
         </p>
+        {trustNote && (
+          <p className="flex items-start gap-2 rounded-2xl bg-accent px-3.5 py-2.5 text-xs font-medium leading-relaxed text-slate-700">
+            <Lock className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+            <span>{trustNote}</span>
+          </p>
+        )}
       </div>
 
       {error && (
@@ -118,7 +126,7 @@ export function SignupForm({
         type="submit"
         size="lg"
         disabled={!nameOk || !phoneOk || saving}
-        className="h-auto w-full gap-2 rounded-full py-4 text-base font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50"
+        className="h-auto min-h-14 w-full gap-2 whitespace-normal rounded-full px-5 py-4 text-base font-bold shadow-md shadow-emerald-600/20 disabled:opacity-50"
       >
         {saving ? (
           <>

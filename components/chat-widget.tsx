@@ -40,7 +40,7 @@ const FAQS: Faq[] = [
   },
 ]
 
-export function ChatWidget() {
+export function ChatWidget({ liftOnMobile = false }: { liftOnMobile?: boolean }) {
   const [open, setOpen] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -61,7 +61,11 @@ export function ChatWidget() {
   }, [open])
 
   return (
-    <div className="pointer-events-none fixed bottom-5 right-5 z-50 flex flex-col items-end gap-3 sm:bottom-6 sm:right-6">
+    <div
+      className={`pointer-events-none fixed right-5 z-50 flex flex-col items-end gap-3 sm:right-6 md:bottom-6 ${
+        liftOnMobile ? 'bottom-32' : 'bottom-5 sm:bottom-6'
+      }`}
+    >
       {/* Popup */}
       <div
         ref={panelRef}

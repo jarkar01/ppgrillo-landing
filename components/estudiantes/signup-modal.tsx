@@ -24,6 +24,7 @@ type SignupModalProviderProps = {
   title?: string
   subtitle?: string
   submitLabel?: string
+  trustNote?: string
 }
 
 export function SignupModalProvider({
@@ -32,6 +33,7 @@ export function SignupModalProvider({
   title = 'Activa tus 14 días gratis',
   subtitle = 'Solo tu nombre y tu WhatsApp. En segundos estás resolviendo tu tarea.',
   submitLabel = 'Empezar con mi tutor',
+  trustNote,
 }: SignupModalProviderProps) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [formKey, setFormKey] = useState(0)
@@ -63,7 +65,7 @@ export function SignupModalProvider({
         onClick={(e) => {
           if (e.target === e.currentTarget) e.currentTarget.close()
         }}
-        className="m-auto w-[calc(100%-2rem)] max-w-md rounded-[2rem] border border-slate-200 bg-card p-0 shadow-2xl shadow-slate-900/20 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm"
+        className="m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] max-w-md overflow-y-auto rounded-[2rem] border border-slate-200 bg-card p-0 shadow-2xl shadow-slate-900/20 backdrop:bg-slate-900/50 backdrop:backdrop-blur-sm"
       >
         <div className="relative p-7 sm:p-9">
           <button
@@ -94,6 +96,7 @@ export function SignupModalProvider({
               key={formKey}
               nameLabel="Nombre del estudiante"
               submitLabel={submitLabel}
+              trustNote={trustNote}
               onSubmit={register}
             />
           </div>
