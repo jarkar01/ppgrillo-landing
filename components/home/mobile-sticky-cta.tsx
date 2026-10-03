@@ -3,7 +3,11 @@
 import { ArrowRight } from 'lucide-react'
 import { useOpenSignup } from '@/components/estudiantes/signup-modal'
 
-export function MobileStickyCta() {
+export function MobileStickyCta({
+  legend = 'Sin tarjeta bancaria · WhatsApp oficial',
+}: {
+  legend?: string
+}) {
   const openSignup = useOpenSignup()
 
   return (
@@ -17,7 +21,7 @@ export function MobileStickyCta() {
         <ArrowRight className="h-5 w-5" aria-hidden="true" />
       </button>
       <p className="mt-1.5 text-center text-xs font-medium text-slate-500">
-        Sin tarjeta bancaria · WhatsApp oficial
+        {legend}
       </p>
     </div>
   )
