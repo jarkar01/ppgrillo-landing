@@ -20,6 +20,8 @@ import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid
 import { FamilySection } from '@/components/home/family-section'
 import { FeaturesSection } from '@/components/home/features-section'
 import { HomePricing } from '@/components/home/home-pricing'
+import { InlineTrialCta } from '@/components/home/inline-trial-cta'
+import { MobileStickyCta } from '@/components/home/mobile-sticky-cta'
 
 const parentBenefits: Benefit[] = [
   {
@@ -98,8 +100,9 @@ export default function Page() {
         title="Activa sus 14 días gratis"
         subtitle="Solo el nombre de tu hijo y su WhatsApp. En 1 minuto tiene a su tutor."
         submitLabel="Activar su tutor"
+        trustNote="Cero spam y cero llamadas comerciales. Tu WhatsApp es solo para tu acceso y reportes."
       >
-        <div className="min-h-screen overflow-x-hidden bg-background">
+        <div className="min-h-screen overflow-x-hidden bg-background pb-28 md:pb-0">
           <SiteHeader />
           <main>
             <Hero />
@@ -109,11 +112,13 @@ export default function Page() {
               title="Tu rol es quererlo y guiarlo, no desgastarte haciendo ecuaciones"
               benefits={parentBenefits}
               tinted
+              compactMobile
             />
             <BenefitGrid
               eyebrow="Para tu hijo"
               title="Un tutor que nunca se desespera ni lo hace sentir mal"
               benefits={childBenefits}
+              compactMobile
             />
             <FamilySection />
             <BenefitGrid
@@ -121,12 +126,16 @@ export default function Page() {
               eyebrow="En la escuela"
               title="Resultados visibles en la libreta y en el aula"
               benefits={schoolBenefits}
-            />
+              compactMobile
+            >
+              <InlineTrialCta />
+            </BenefitGrid>
             <FeaturesSection />
             <HomePricing />
           </main>
           <SiteFooter />
-          <ChatWidget />
+          <ChatWidget liftOnMobile />
+          <MobileStickyCta />
         </div>
       </SignupModalProvider>
     </BrandFonts>
