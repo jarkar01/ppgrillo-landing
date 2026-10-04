@@ -65,12 +65,12 @@ export function Pricing({
             <div className="relative mt-6 text-center">
               <div className="flex items-end justify-center gap-1.5">
                 <span className="font-display text-5xl font-extrabold tracking-tight text-slate-900">
-                  $20
+                  $25
                 </span>
                 <span className="pb-1.5 text-lg font-semibold text-slate-500">MXN / mes</span>
               </div>
               <p className="mt-1.5 text-sm text-slate-500">
-                ≈ $1.00 USD · por estudiante
+                Menos de $1 peso al día · por estudiante
               </p>
               <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">
                 Educación accesible para todos (menos de lo que cuesta un refresco o café).
@@ -122,7 +122,8 @@ export function Pricing({
                 className="font-semibold text-primary underline-offset-2 hover:underline"
               >
                 Suscríbete directo con Mercado Pago
-              </a>
+              </a>{' '}
+              por $25 MXN al mes
             </p>
           </div>
         </div>

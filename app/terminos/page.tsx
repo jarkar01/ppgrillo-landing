@@ -103,7 +103,7 @@ export default function TerminosPage() {
               <li>El servicio ofrece un periodo de prueba gratuito de 14 días.</li>
               <li>
                 Tras la prueba, la suscripción mensual recurrente es de{' '}
-                <strong className="text-slate-800">$20.00 MXN</strong>, gestionada a través de la
+                <strong className="text-slate-800">$25.00 MXN</strong>, gestionada a través de la
                 pasarela de pagos de Mercado Pago.
               </li>
               <li>
