@@ -3,7 +3,10 @@ import type { UIMessage } from 'ai'
 export type StudentProfile = {
   studentName: string
   grade?: 'Primaria' | 'Secundaria' | 'Preparatoria'
+  /** Vacío en cuentas creadas sin teléfono (experimento /go). */
   whatsapp: string
+  /** ID del documento en la colección 'users': el teléfono, o el uid anónimo en /go. */
+  userDocId: string
   /** Inicio de la prueba (ms), persistido en Firestore. */
   trialStartDate?: number
   plan?: PlanTier
