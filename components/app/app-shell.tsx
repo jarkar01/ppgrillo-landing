@@ -68,7 +68,7 @@ export function AppShell({ profile, onLogout }: { profile: StudentProfile; onLog
 
   function countMessage() {
     setUsage({ date: todayKey(), count: usedToday + 1 })
-    recordMessage(profile.whatsapp)
+    recordMessage(profile.userDocId)
       .then(setUsage)
       .catch((err) => console.error('[PpGrillo] No se pudo guardar el conteo diario:', err))
   }

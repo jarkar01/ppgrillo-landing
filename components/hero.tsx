@@ -1,4 +1,4 @@
-import { CreditCard, MessageCircle, MousePointerClick, Timer } from 'lucide-react'
+import { CreditCard, MessageCircle, MousePointerClick, Timer, type LucideIcon } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { SignupTrigger } from '@/components/estudiantes/signup-modal'
@@ -15,13 +15,18 @@ const badgeItems = [
   { label: 'Método Socrático', color: '#FBBC05' },
 ]
 
-const reassurances = [
+const defaultReassurances = [
   { icon: CreditCard, label: 'Sin tarjeta bancaria' },
   { icon: Timer, label: 'Registro por WhatsApp en 1 minuto' },
   { icon: MousePointerClick, label: 'Cancela en 1 clic' },
 ]
 
-export function Hero() {
+type HeroProps = {
+  ctaIcon?: LucideIcon
+  reassurances?: { icon: LucideIcon; label: string }[]
+}
+
+export function Hero({ ctaIcon: CtaIcon = MessageCircle, reassurances = defaultReassurances }: HeroProps) {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:py-24">
@@ -52,7 +57,7 @@ export function Hero() {
               'mt-8 h-auto w-full cursor-pointer gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
             )}
           >
-            <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+            <CtaIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
             Comenzar prueba gratis de 14 días
           </SignupTrigger>
 

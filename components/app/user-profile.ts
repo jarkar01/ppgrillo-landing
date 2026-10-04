@@ -20,6 +20,9 @@ type UserDoc = {
   plan?: PlanTier
   messages_today?: number
   last_message_date?: string
+  pin?: string
+  source?: string
+  role?: string
 }
 
 const PHONE_STORAGE_KEY = 'ppgrillo_phone'
@@ -33,7 +36,10 @@ export function isValidPhone(phone: string): boolean {
   return /^\d{10}$/.test(phone)
 }
 
-/** The phone is only a pointer to the Firestore document; the profile itself lives in Firestore. */
+/**
+ * Pointer to the user's Firestore document id (the phone, or the anonymous uid for /go signups);
+ * the profile itself lives in Firestore. The storage key keeps its name so existing sessions survive.
+ */
 export function getStoredPhone(): string | null {
   try {
     return localStorage.getItem(PHONE_STORAGE_KEY)
@@ -55,11 +61,12 @@ export function clearStoredPhone() {
   setStoredPhone(null)
 }
 
-function toProfile(data: UserDoc, phone: string): StudentProfile {
+function toProfile(data: UserDoc, docId: string): StudentProfile {
   return {
     studentName: data.student_name ?? '',
     grade: data.grade,
-    whatsapp: data.phone ?? phone,
+    whatsapp: data.phone ?? (isValidPhone(docId) ? docId : ''),
+    userDocId: docId,
     trialStartDate: data.trial_start_date?.toMillis(),
     plan: data.plan,
     messagesToday: data.messages_today ?? 0,
@@ -133,6 +140,47 @@ export async function registerTrial(
     ...toProfile(existing ?? {}, phone),
     studentName,
     whatsapp: phone,
+    userDocId: phone,
+    trialStartDate: existing?.trial_start_date?.toMillis() ?? Date.now(),
+  }
+}
+
+export function isValidPin(pin: string): boolean {
+  return /^\d{4}$/.test(pin)
+}
+
+/**
+ * Phone-less signup for the /go experiment. The document is keyed by the anonymous uid, so a
+ * repeat signup on the same device keeps the original trial_start_date instead of restarting it.
+ */
+export async function registerZeroFrictionTrial(
+  uid: string,
+  details: { studentName: string; grade: NonNullable<StudentProfile['grade']>; pin: string },
+): Promise<StudentProfile> {
+  const ref = doc(firestore(), 'users', uid)
+  const existing = (await getDoc(ref)).data() as UserDoc | undefined
+
+  await setDoc(
+    ref,
+    {
+      uid,
+      student_name: details.studentName,
+      grade: details.grade,
+      pin: details.pin,
+      source: 'experiment_go',
+      role: 'student_trial',
+      onboarding_completed: true,
+      updated_at: serverTimestamp(),
+      ...(existing ? {} : { trial_start_date: serverTimestamp(), created_at: serverTimestamp() }),
+    },
+    { merge: true },
+  )
+
+  setStoredPhone(uid)
+  return {
+    ...toProfile(existing ?? {}, uid),
+    studentName: details.studentName,
+    grade: details.grade,
     trialStartDate: existing?.trial_start_date?.toMillis() ?? Date.now(),
   }
 }

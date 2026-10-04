@@ -1,40 +1,17 @@
 'use client'
 
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useRef, useState, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInAnonymously } from 'firebase/auth'
 import { X } from 'lucide-react'
 import { firebaseAuth, isFirebaseConfigured } from '@/lib/firebase'
 import { trackMetaEvent } from '@/lib/meta-pixel'
 import { PpGrilloWordmark } from '@/components/app/brand-mark'
-import { SignupForm } from '@/components/app/signup-form'
-import { registerTrial } from '@/components/app/user-profile'
+import { registerZeroFrictionTrial } from '@/components/app/user-profile'
+import { SignupModalContext } from '@/components/estudiantes/signup-modal'
+import { GoSignupForm, type GoSignupDetails } from './go-signup-form'
 
-export const SignupModalContext = createContext<(() => void) | null>(null)
-
-export function useOpenSignup() {
-  const open = useContext(SignupModalContext)
-  if (!open) throw new Error('useOpenSignup debe usarse dentro de <SignupModalProvider>.')
-  return open
-}
-
-type SignupModalProviderProps = {
-  children: ReactNode
-  category?: string
-  title?: string
-  subtitle?: string
-  submitLabel?: string
-  trustNote?: string
-}
-
-export function SignupModalProvider({
-  children,
-  category = 'estudiantes',
-  title = 'Activa tus 14 días gratis',
-  subtitle = 'Solo tu nombre y tu WhatsApp. En segundos estás resolviendo tu tarea.',
-  submitLabel = 'Empezar con mi tutor',
-  trustNote,
-}: SignupModalProviderProps) {
+export function GoSignupModalProvider({ children }: { children: ReactNode }) {
   const dialogRef = useRef<HTMLDialogElement>(null)
   const [formKey, setFormKey] = useState(0)
   const router = useRouter()
@@ -44,14 +21,15 @@ export function SignupModalProvider({
     dialogRef.current?.showModal()
   }, [])
 
-  async function register(studentName: string, phone: string) {
+  async function register(details: GoSignupDetails) {
     if (!isFirebaseConfigured) throw new Error('Firebase no está configurado.')
     const auth = firebaseAuth()
     const user = auth.currentUser ?? (await signInAnonymously(auth)).user
-    await registerTrial(user.uid, studentName, phone)
+    await registerZeroFrictionTrial(user.uid, details)
     trackMetaEvent('Lead', {
-      content_name: 'Prueba gratis 14 días',
-      content_category: category,
+      content_name: 'Registro Cero Friccion /go',
+      value: 0.0,
+      currency: 'MXN',
     })
     router.push('/app')
   }
@@ -61,7 +39,7 @@ export function SignupModalProvider({
       {children}
       <dialog
         ref={dialogRef}
-        aria-labelledby="student-signup-title"
+        aria-labelledby="go-signup-title"
         onClick={(e) => {
           if (e.target === e.currentTarget) e.currentTarget.close()
         }}
@@ -79,38 +57,22 @@ export function SignupModalProvider({
 
           <div className="flex flex-col items-center gap-3 text-center">
             <PpGrilloWordmark className="text-xl" />
-            <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-widest text-primary">
-              Sin tarjeta · Sin contraseñas
-            </span>
             <h2
-              id="student-signup-title"
+              id="go-signup-title"
               className="text-balance font-display text-2xl font-extrabold tracking-tight text-slate-900"
             >
-              {title}
+              Activa tus 14 días gratis al instante
             </h2>
-            <p className="text-pretty text-sm leading-relaxed text-slate-500">{subtitle}</p>
+            <p className="text-pretty text-sm font-medium leading-relaxed text-slate-500">
+              Sin teléfono • Sin tarjeta bancaria • Acceso inmediato
+            </p>
           </div>
 
           <div className="mt-7">
-            <SignupForm
-              key={formKey}
-              nameLabel="Nombre del estudiante"
-              submitLabel={submitLabel}
-              trustNote={trustNote}
-              onSubmit={register}
-            />
+            <GoSignupForm key={formKey} onSubmit={register} />
           </div>
         </div>
       </dialog>
     </SignupModalContext.Provider>
-  )
-}
-
-export function SignupTrigger({ className, children }: { className?: string; children: ReactNode }) {
-  const open = useOpenSignup()
-  return (
-    <button type="button" onClick={open} className={className}>
-      {children}
-    </button>
   )
 }
