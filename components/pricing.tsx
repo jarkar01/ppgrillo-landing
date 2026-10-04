@@ -5,8 +5,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
-const MERCADOPAGO_CHECKOUT_URL =
-  process.env.NEXT_PUBLIC_MERCADOPAGO_CHECKOUT_URL || 'https://mpago.la/22zK26j'
+const MERCADOPAGO_CHECKOUT_URL = 'https://mpago.la/22zK26j'
 
 const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
@@ -113,18 +112,23 @@ export function Pricing({
               </Link>
             )}
 
-            <p className="relative mt-4 text-center text-[13px] text-slate-500">
-              ¿Ya decidido?{' '}
+            <div className="relative mt-6 flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
+              <p className="text-center text-[13px] text-slate-500">
+                ¿Ya decidido? Suscríbete directo con Mercado Pago
+              </p>
               <a
                 href={MERCADOPAGO_CHECKOUT_URL}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-primary underline-offset-2 hover:underline"
+                className="inline-flex w-full items-center justify-center rounded-full border-2 border-primary px-6 py-3 text-[15px] font-bold text-primary transition-colors hover:bg-primary/10"
               >
-                Suscríbete directo con Mercado Pago
-              </a>{' '}
-              por $25 MXN al mes
-            </p>
+                Suscribirme por $25 MXN al mes
+                <span className="sr-only"> (abre Mercado Pago en una pestaña nueva)</span>
+              </a>
+              <p className="text-center text-xs text-slate-500">
+                Cobro recurrente mensual • Cancela cuando quieras sin contratos
+              </p>
+            </div>
           </div>
         </div>
       </div>
