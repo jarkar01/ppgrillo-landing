@@ -155,7 +155,8 @@ export function isValidPin(pin: string): boolean {
  */
 export async function registerZeroFrictionTrial(
   uid: string,
-  details: { studentName: string; grade: NonNullable<StudentProfile['grade']>; pin: string },
+  details: { studentName: string; grade: NonNullable<StudentProfile['grade']>; pin?: string },
+  source = 'experiment_go',
 ): Promise<StudentProfile> {
   const ref = doc(firestore(), 'users', uid)
   const existing = (await getDoc(ref)).data() as UserDoc | undefined
@@ -166,8 +167,8 @@ export async function registerZeroFrictionTrial(
       uid,
       student_name: details.studentName,
       grade: details.grade,
-      pin: details.pin,
-      source: 'experiment_go',
+      ...(details.pin ? { pin: details.pin } : {}),
+      source,
       role: 'student_trial',
       onboarding_completed: true,
       updated_at: serverTimestamp(),

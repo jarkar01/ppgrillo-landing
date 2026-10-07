@@ -3,43 +3,31 @@ import {
   Award,
   Brain,
   CalendarCheck,
-  CreditCard,
   Eye,
   HandHeart,
   HeartHandshake,
   Home,
-  KeyRound,
   Presentation,
-  Rocket,
   ShieldCheck,
   Smile,
-  Zap,
 } from 'lucide-react'
 import { BrandFonts } from '@/components/brand-fonts'
 import { SiteHeader } from '@/components/site-header'
-import { Hero } from '@/components/hero'
 import { SiteFooter } from '@/components/site-footer'
 import { ChatWidget } from '@/components/chat-widget'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
 import { FamilySection } from '@/components/home/family-section'
 import { FeaturesSection } from '@/components/home/features-section'
 import { HomePricing } from '@/components/home/home-pricing'
-import { InlineTrialCta } from '@/components/home/inline-trial-cta'
 import { MobileStickyCta } from '@/components/home/mobile-sticky-cta'
-import { GoSignupModalProvider } from '@/components/go/go-signup-modal'
+import { GoDemo, GoDemoCtaProvider } from '@/components/go/go-demo'
 
 export const metadata: Metadata = {
-  title: 'Pp Grillo | 14 días gratis al instante, sin teléfono',
+  title: 'Pp Grillo | Prueba el tutor socrático gratis, ahora mismo',
   description:
-    'Activa tu tutor socrático en segundos: solo nombre, grado y un PIN. Sin teléfono y sin tarjeta bancaria.',
+    'Mira cómo PpGrillo le explica la tarea a tu hijo sin darle la respuesta. Pruébalo sin registro y activa 14 días gratis sin tarjeta.',
   alternates: { canonical: '/go' },
 }
-
-const heroReassurances = [
-  { icon: CreditCard, label: 'Sin tarjeta bancaria' },
-  { icon: KeyRound, label: 'Sin teléfono: solo un PIN' },
-  { icon: Zap, label: 'Acceso inmediato' },
-]
 
 const parentBenefits: Benefit[] = [
   {
@@ -113,11 +101,11 @@ const schoolBenefits: Benefit[] = [
 export default function GoPage() {
   return (
     <BrandFonts>
-      <GoSignupModalProvider>
+      <GoDemoCtaProvider>
         <div className="min-h-screen overflow-x-hidden bg-background pb-28 md:pb-0">
           <SiteHeader />
           <main>
-            <Hero ctaIcon={Rocket} reassurances={heroReassurances} />
+            <GoDemo />
             <BenefitGrid
               id="beneficios"
               eyebrow="Para ti, mamá o papá"
@@ -139,9 +127,7 @@ export default function GoPage() {
               title="Resultados visibles en la libreta y en el aula"
               benefits={schoolBenefits}
               compactMobile
-            >
-              <InlineTrialCta />
-            </BenefitGrid>
+            />
             <FeaturesSection />
             <HomePricing />
           </main>
@@ -149,7 +135,7 @@ export default function GoPage() {
           <ChatWidget liftOnMobile />
           <MobileStickyCta />
         </div>
-      </GoSignupModalProvider>
+      </GoDemoCtaProvider>
     </BrandFonts>
   )
 }
