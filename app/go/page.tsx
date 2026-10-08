@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 const FOOTER_LINKS = [
   { href: '/terminos', label: 'Términos del Servicio', newTab: true },
   { href: '/privacidad', label: 'Aviso de Privacidad', newTab: true },
-  { href: '/contacto', label: 'Contacto', newTab: false },
+  { href: '/contacto', label: 'Contacto', newTab: true },
 ]
 
 export default function GoPage() {
