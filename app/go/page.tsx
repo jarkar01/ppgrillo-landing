@@ -15,9 +15,9 @@ export const metadata: Metadata = {
 }
 
 const FOOTER_LINKS = [
-  { href: '/terminos', label: 'Términos y Condiciones' },
-  { href: '/privacidad', label: 'Aviso de Privacidad' },
-  { href: '/contacto', label: 'Contacto' },
+  { href: '/terminos', label: 'Términos del Servicio', newTab: true },
+  { href: '/privacidad', label: 'Aviso de Privacidad', newTab: true },
+  { href: '/contacto', label: 'Contacto', newTab: false },
 ]
 
 export default function GoPage() {
@@ -63,15 +63,27 @@ export default function GoPage() {
 
         <footer className="border-t border-slate-200 px-4 py-6">
           <nav aria-label="Legal" className="mx-auto flex max-w-xl flex-wrap items-center justify-center gap-x-5 gap-y-2">
-            {FOOTER_LINKS.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="text-xs font-medium text-slate-500 hover:text-emerald-700 hover:underline"
-              >
-                {link.label}
-              </Link>
-            ))}
+            {FOOTER_LINKS.map((link) =>
+              link.newTab ? (
+                <a
+                  key={link.href}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-medium text-slate-500 hover:text-emerald-700 hover:underline"
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-xs font-medium text-slate-500 hover:text-emerald-700 hover:underline"
+                >
+                  {link.label}
+                </Link>
+              ),
+            )}
           </nav>
         </footer>
       </div>

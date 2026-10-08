@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
-import Link from 'next/link'
-import { ArrowLeft, FileText, GraduationCap, ShieldAlert, CreditCard, Scale } from 'lucide-react'
+import { LegalBackButton } from '@/components/legal-back-button'
+import { FileText, GraduationCap, ShieldAlert, CreditCard, Scale } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Términos y Condiciones · PpGrillo',
@@ -47,13 +47,7 @@ export default function TerminosPage() {
   return (
     <main className="min-h-screen bg-secondary/40">
       <div className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver al inicio
-        </Link>
+        <LegalBackButton />
 
         <header className="mt-8">
           <div className="flex items-center gap-3">
