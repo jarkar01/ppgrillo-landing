@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowLeft, Mail, Clock, ShieldCheck, HelpCircle } from 'lucide-react'
+import { Mail, Clock, ShieldCheck, HelpCircle } from 'lucide-react'
+import { LegalBackButton } from '@/components/legal-back-button'
 
 export const metadata: Metadata = {
   title: 'Contacto y Atención a Familias · PpGrillo',
@@ -47,13 +48,7 @@ export default function ContactoPage() {
   return (
     <main className="min-h-screen bg-background">
       <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver al inicio
-        </Link>
+        <LegalBackButton />
 
         <header className="mt-8">
           <Brand />
