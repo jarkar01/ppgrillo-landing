@@ -6,6 +6,7 @@ import { PpGrilloAvatar, PpGrilloWordmark } from '@/components/app/brand-mark'
 import { ChatReplay } from '@/components/go/chat-replay'
 import { ActivationCard } from '@/components/go/activation-card'
 import { GoFaq } from '@/components/go/go-faq'
+import { AcademicBadge } from '@/components/go/academic-badge'
 
 export const metadata: Metadata = {
   title: 'Pp Grillo | Deja de pelear con tu hijo por la tarea',
@@ -25,9 +26,22 @@ export default function GoPage() {
     <BrandFonts>
       <div className="min-h-screen overflow-x-hidden bg-gradient-to-b from-emerald-50/80 via-background to-background">
         <header className="mx-auto flex max-w-xl items-center justify-between gap-3 px-4 py-4">
-          <Link href="/go" className="flex items-center gap-2" aria-label="PpGrillo">
+          <Link href="/go" className="flex items-center gap-2" aria-label="PpGrillo, powered by Google">
             <PpGrilloAvatar className="h-8 w-8" />
-            <PpGrilloWordmark className="text-lg" />
+            <span className="flex flex-col items-start leading-none">
+              <PpGrilloWordmark className="text-lg" />
+              <span className="mt-0.5 flex items-center gap-1 whitespace-nowrap text-[10px] font-medium text-slate-500">
+                powered by
+                <span className="font-semibold">
+                  <span style={{ color: '#4285F4' }}>G</span>
+                  <span style={{ color: '#EA4335' }}>o</span>
+                  <span style={{ color: '#FBBC05' }}>o</span>
+                  <span style={{ color: '#4285F4' }}>g</span>
+                  <span style={{ color: '#34A853' }}>l</span>
+                  <span style={{ color: '#EA4335' }}>e</span>
+                </span>
+              </span>
+            </span>
           </Link>
           <a
             href="/"
@@ -54,6 +68,7 @@ export default function GoPage() {
                 Mira cómo PpGrillo le enseña a razonar en segundos sin regalarle la respuesta:
               </p>
             </div>
+            <AcademicBadge />
             <ChatReplay />
           </section>
 
