@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react'
 const FAQS = [
   {
     q: '¿Tiene algún costo o compromiso?',
-    a: 'Pruebas 14 días completamente gratis sin ingresar tarjeta. Si decides continuar, el costo mensual es accesible y puedes cancelar en cualquier momento con un clic.',
+    a: 'Pruebas 14 días completamente gratis sin ingresar tarjeta bancaria. Si al terminar tu prueba decides continuar, la suscripción cuesta solo $25 MXN al mes (menos de lo que cuesta una sola hora de un asesor particular) y puedes cancelar cuando quieras con un solo clic.',
   },
   {
     q: '¿Qué materias cubre?',
