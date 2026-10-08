@@ -14,20 +14,20 @@ const SCRIPT: Line[] = [
     from: 'student',
     text: 'PpGrillo, no le entiendo a las fracciones. Tengo que sumar 1/2 + 1/4 y no me sale 😭',
   },
-  { at: 2500, from: 'thinking', until: 4500 },
+  { at: 4500, from: 'thinking', until: 7000 },
   {
-    at: 4500,
+    at: 7000,
     from: 'tutor',
     text: '¡Tranqui, que esto se resuelve con comida! 🍕 Imagina una pizza entera. Si tienes media pizza, ¿cuántas rebanadas de un cuarto le caben a esa mitad?',
   },
-  { at: 8000, from: 'student', text: 'Mmm... ¡caben 2 rebanadas de un cuarto!' },
+  { at: 13000, from: 'student', text: 'Mmm... ¡caben 2 rebanadas de un cuarto!' },
   {
-    at: 11000,
+    at: 16500,
     from: 'tutor',
     text: '¡Esooo! 🎉 Entonces ya tienes 2 cuartos... más el otro cuarto que te pide la tarea, ¿cuántos cuartos son en total? ¡Ya casi la tienes!',
   },
-  { at: 14000, from: 'student', text: '¡Son 3 cuartos! 😱 ¡Ya entendí, gracias!' },
-  { at: 16000, from: 'tutor', text: '¡Brillante! Lo lograste tú solito 🌟' },
+  { at: 21000, from: 'student', text: '¡Son 3 cuartos! 😱 ¡Ya entendí, gracias!' },
+  { at: 24000, from: 'tutor', text: '¡Brillante! Lo lograste tú solito 🌟' },
 ]
 
 const END_AT = Math.max(...SCRIPT.map((l) => ('until' in l ? l.until : l.at)))
