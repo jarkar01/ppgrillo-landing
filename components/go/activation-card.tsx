@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInAnonymously } from 'firebase/auth'
 import { ArrowRight, GraduationCap, Loader2, User } from 'lucide-react'
@@ -14,7 +14,6 @@ type Grade = NonNullable<StudentProfile['grade']>
 const GRADE_OPTIONS: { value: Grade; label: string }[] = [
   { value: 'Primaria', label: '🎒 Primaria (1º a 6º)' },
   { value: 'Secundaria', label: '📐 Secundaria (1º a 3º)' },
-  { value: 'Preparatoria', label: '📚 Preparatoria / Bachillerato' },
 ]
 
 const inputClass =
@@ -30,10 +29,6 @@ export function ActivationCard() {
   const [error, setError] = useState<string | null>(null)
 
   const canSubmit = name.trim().length >= 2 && grade !== '' && !saving
-
-  const revealOnMount = useCallback((el: HTMLElement | null) => {
-    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-  }, [])
 
   async function activate() {
     if (!canSubmit || !grade) return
@@ -63,21 +58,16 @@ export function ActivationCard() {
 
   return (
     <section
-      ref={revealOnMount}
+      id="activar"
       aria-labelledby="activation-title"
-      className="animate-in fade-in slide-in-from-bottom-4 scroll-mt-24 rounded-[2rem] border border-emerald-100 bg-white p-6 shadow-xl shadow-emerald-900/10 duration-500 sm:p-8"
+      className="scroll-mt-6 rounded-[2rem] border-2 border-emerald-200 bg-gradient-to-b from-emerald-50 to-white p-6 shadow-xl shadow-emerald-900/10 sm:p-8"
     >
-      <div className="flex flex-col gap-2 text-center">
-        <h2
-          id="activation-title"
-          className="text-balance font-display text-2xl font-extrabold tracking-tight text-slate-900"
-        >
-          🎉 ¡Así de fácil es hacer la tarea sin pelear!
-        </h2>
-        <p className="text-pretty leading-relaxed text-slate-600">
-          Activa tus 14 días gratis para usar PpGrillo en todas sus materias escolares.
-        </p>
-      </div>
+      <h2
+        id="activation-title"
+        className="text-balance text-center font-display text-2xl font-extrabold leading-tight tracking-tight text-slate-900"
+      >
+        Tu hijo puede aprender con esta misma paciencia hoy.
+      </h2>
 
       <form
         onSubmit={(e) => {
@@ -90,7 +80,7 @@ export function ActivationCard() {
         <div className="flex flex-col gap-2">
           <label htmlFor="activation-name" className={labelClass}>
             <User className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-            Nombre del estudiante
+            Nombre de tu hijo
           </label>
           <input
             id="activation-name"
@@ -143,7 +133,7 @@ export function ActivationCard() {
         <button
           type="submit"
           disabled={!canSubmit}
-          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-4 text-base font-bold text-white shadow-md shadow-emerald-600/25 transition-colors hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-emerald-500 px-5 py-4 text-lg font-extrabold text-white shadow-lg shadow-emerald-600/30 transition-colors hover:bg-emerald-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500/40 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {saving ? (
             <>
@@ -152,14 +142,14 @@ export function ActivationCard() {
             </>
           ) : (
             <>
-              Comenzar mis 14 días gratis
+              Comenzar 14 días gratis
               <ArrowRight className="h-5 w-5" aria-hidden="true" />
             </>
           )}
         </button>
 
         <p className="text-pretty text-center text-xs leading-relaxed text-slate-500">
-          Sin tarjeta bancaria · Cancela cuando quieras · $25 MXN/mes al terminar la prueba
+          Sin tarjeta de crédito • Se activa en 30 segundos • Cancela cuando quieras
         </p>
       </form>
     </section>
