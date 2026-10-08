@@ -149,7 +149,7 @@ export function ActivationCard() {
         </button>
 
         <p className="text-pretty text-center text-xs leading-relaxed text-slate-500">
-          Sin tarjeta de crédito • Se activa en 30 segundos • Cancela cuando quieras
+          14 días gratis sin tarjeta • Después solo $25 MXN/mes si decides continuar • Cancela en cualquier momento
         </p>
       </form>
     </section>
