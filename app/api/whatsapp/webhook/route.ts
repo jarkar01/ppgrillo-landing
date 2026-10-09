@@ -1,14 +1,17 @@
 import { after } from 'next/server'
-import { generateText } from 'ai'
-import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { GoogleAuth } from 'google-auth-library'
 
+export const runtime = 'nodejs'
 export const maxDuration = 30
 
 // waba-v2 proxies Cloud API at /messages; the legacy /v1/messages path returns a generic 400.
 const D360_MESSAGES_URL = 'https://waba-v2.360dialog.io/messages'
 
-const GREETING_PATTERN =
-  /^\s*(hola|holi|hey|buen[oa]s(\s+(d[ií]as|tardes|noches))?|qu[eé]\s+tal|saludos|hi|hello|inicio|empezar|comenzar)\b[\s!¡.,¿?]*$/i
+const DIALOGFLOW_AGENT_URL =
+  'https://us-central1-dialogflow.googleapis.com/v3/projects/ppgrillo-06/locations/us-central1/agents/600bbe0a-3f7b-405c-9ea3-b89eee47d816'
+
+const FALLBACK_REPLY =
+  'Uy, tuve un pequeño problema para pensar mi respuesta. ¿Me puedes volver a escribir tu duda, por favor?'
 
 type IncomingTextMessage = {
   from: string
@@ -32,31 +35,32 @@ type WebhookPayload = {
   }>
 }
 
-const SOCRATIC_SYSTEM_PROMPT = `Eres PpGrillo, un tutor socrático de habla hispana para estudiantes de Primaria, Secundaria y Preparatoria. Estás conversando con un alumno por WhatsApp.
+type DetectIntentResponse = {
+  queryResult?: {
+    responseMessages?: Array<{ text?: { text?: string[] } }>
+  }
+}
 
-TU MÉTODO (obligatorio):
-- NUNCA das la respuesta o el resultado final directamente. Jamás resuelves el ejercicio por el alumno.
-- Guías con preguntas cortas y claras que llevan al alumno a descubrir la solución por sí mismo, un paso a la vez.
-- Haces UNA sola pregunta o das UNA sola pista por mensaje. No abrumas.
-- Usas analogías cotidianas y ejemplos concretos apropiados para su edad y grado.
-- Celebras el esfuerzo y los aciertos con calidez ("¡Exacto!", "¡Vas muy bien!"), y cuando se equivoca lo animas sin juzgar y le ayudas a ver dónde repensar.
-- Adaptas el lenguaje al grado: más simple y con más apoyo para Primaria, más autónomo para Preparatoria. Si no conoces su grado, pregúntalo con amabilidad.
+let googleAuth: GoogleAuth | null = null
 
-ESTILO (WhatsApp):
-- Cálido, paciente, cercano y motivador. Hablas de "tú".
-- Mensajes breves (1 a 3 frases). Terminas casi siempre con una pregunta que invita a pensar.
-- Español neutro de México. Sin tecnicismos innecesarios.
-- No uses Markdown con encabezados ni tablas; para resaltar usa *negritas* al estilo WhatsApp.
-
-Si el alumno insiste en que le des la respuesta, con amabilidad le explicas que tu trabajo es ayudarlo a llegar solo, y le ofreces la siguiente pista.`
-
-const WELCOME_INSTRUCTION = `El alumno acaba de saludarte o es su primer mensaje. Preséntate como PpGrillo, su tutor, con una bienvenida breve y entusiasta, explica en una frase que le ayudarás a aprender haciéndole preguntas (sin darle las respuestas), y pregúntale su *nombre* y su *grado escolar*.`
-
-const FALLBACK_WELCOME =
-  '¡Hola! Soy *PpGrillo*, tu tutor. Te voy a ayudar a aprender haciéndote preguntas paso a paso para que descubras las respuestas tú mismo. Para empezar, ¿cómo te llamas y en qué grado escolar vas?'
-
-const FALLBACK_REPLY =
-  'Uy, tuve un pequeño problema para pensar mi respuesta. ¿Me puedes volver a escribir tu duda, por favor?'
+function getGoogleAuth(): GoogleAuth | null {
+  if (googleAuth) return googleAuth
+  const rawKey = process.env.GCP_SERVICE_ACCOUNT_KEY
+  if (!rawKey) {
+    console.error('[whatsapp] GCP_SERVICE_ACCOUNT_KEY is not configured')
+    return null
+  }
+  try {
+    googleAuth = new GoogleAuth({
+      credentials: JSON.parse(rawKey),
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    })
+    return googleAuth
+  } catch (error) {
+    console.error('[whatsapp] GCP_SERVICE_ACCOUNT_KEY is not valid JSON:', error)
+    return null
+  }
+}
 
 function extractTextMessages(payload: WebhookPayload): IncomingTextMessage[] {
   const raw: WhatsAppMessage[] = [
@@ -71,33 +75,48 @@ function extractTextMessages(payload: WebhookPayload): IncomingTextMessage[] {
     .map((m) => ({ from: m.from!, text: m.text!.body!.trim(), id: m.id }))
 }
 
-function isGreeting(text: string) {
-  return GREETING_PATTERN.test(text)
-}
+async function detectIntent(fromNumber: string, textBody: string): Promise<string> {
+  const auth = getGoogleAuth()
+  if (!auth) return FALLBACK_REPLY
 
-async function generateSocraticReply(text: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY
-  const greeting = isGreeting(text)
-
-  if (!apiKey) {
-    console.error('[whatsapp] GEMINI_API_KEY is not configured')
-    return greeting ? FALLBACK_WELCOME : FALLBACK_REPLY
-  }
-
-  const google = createGoogleGenerativeAI({ apiKey })
+  // One session per phone number lets Dialogflow CX keep each student's conversation memory.
+  const sessionId = fromNumber.replace(/[^a-zA-Z0-9]/g, '')
 
   try {
-    const { text: reply } = await generateText({
-      model: google('gemini-2.5-flash'),
-      system: greeting
-        ? `${SOCRATIC_SYSTEM_PROMPT}\n\n${WELCOME_INSTRUCTION}`
-        : SOCRATIC_SYSTEM_PROMPT,
-      prompt: text,
+    const token = await auth.getAccessToken()
+    const res = await fetch(`${DIALOGFLOW_AGENT_URL}/sessions/${sessionId}:detectIntent`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        queryInput: {
+          text: { text: textBody },
+          languageCode: 'es',
+        },
+      }),
     })
-    return reply.trim() || (greeting ? FALLBACK_WELCOME : FALLBACK_REPLY)
+
+    if (!res.ok) {
+      const responseBody = await res.text()
+      console.error(
+        `[whatsapp] Dialogflow detectIntent failed - status: ${res.status} - body: ${responseBody}`,
+      )
+      return FALLBACK_REPLY
+    }
+
+    const data = (await res.json()) as DetectIntentResponse
+    const reply = (data.queryResult?.responseMessages ?? [])
+      .filter((message) => message.text?.text?.length)
+      .flatMap((message) => message.text!.text!)
+      .join('\n\n')
+      .trim()
+
+    return reply || FALLBACK_REPLY
   } catch (error) {
-    console.error('[whatsapp] Gemini generation failed:', error)
-    return greeting ? FALLBACK_WELCOME : FALLBACK_REPLY
+    console.error('[whatsapp] Dialogflow request error:', error)
+    return FALLBACK_REPLY
   }
 }
 
@@ -136,7 +155,7 @@ async function sendWhatsAppText(fromNumber: string, replyText: string) {
 }
 
 async function handleMessage(message: IncomingTextMessage) {
-  const reply = await generateSocraticReply(message.text)
+  const reply = await detectIntent(message.from, message.text)
   await sendWhatsAppText(message.from, reply)
 }
 
