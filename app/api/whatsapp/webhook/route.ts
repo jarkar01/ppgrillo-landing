@@ -4,8 +4,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 export const maxDuration = 30
 
-const D360_MESSAGES_URL =
-  process.env.D360_API_URL || 'https://waba-v2.360dialog.io/v1/messages'
+const D360_MESSAGES_URL = 'https://waba-v2.360dialog.io/v1/messages'
 
 const GREETING_PATTERN =
   /^\s*(hola|holi|hey|buen[oa]s(\s+(d[ií]as|tardes|noches))?|qu[eé]\s+tal|saludos|hi|hello|inicio|empezar|comenzar)\b[\s!¡.,¿?]*$/i
@@ -101,34 +100,37 @@ async function generateSocraticReply(text: string): Promise<string> {
   }
 }
 
-async function sendWhatsAppText(to: string, body: string) {
+async function sendWhatsAppText(fromNumber: string, replyText: string) {
   const apiKey = process.env.D360_API_KEY
   if (!apiKey) {
     console.error('[whatsapp] D360_API_KEY is not configured')
     return
   }
 
-  const response = await fetch(D360_MESSAGES_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'D360-API-KEY': apiKey,
-    },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to,
-      type: 'text',
-      text: { preview_url: false, body: body.slice(0, 4096) },
-    }),
-  })
+  try {
+    const res = await fetch(D360_MESSAGES_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'D360-API-KEY': apiKey,
+      },
+      body: JSON.stringify({
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: fromNumber,
+        type: 'text',
+        text: { body: replyText.slice(0, 4096) },
+      }),
+    })
 
-  if (!response.ok) {
-    console.error(
-      '[whatsapp] 360dialog send failed:',
-      response.status,
-      await response.text(),
-    )
+    if (!res.ok) {
+      const responseBody = await res.text()
+      console.error(
+        `[whatsapp] 360dialog send failed - status: ${res.status} ${res.statusText} - body: ${responseBody}`,
+      )
+    }
+  } catch (error) {
+    console.error('[whatsapp] 360dialog request error:', error)
   }
 }
 
