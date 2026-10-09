@@ -4,7 +4,8 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 
 export const maxDuration = 30
 
-const D360_MESSAGES_URL = 'https://waba-v2.360dialog.io/v1/messages'
+// waba-v2 proxies Cloud API at /messages; the legacy /v1/messages path returns a generic 400.
+const D360_MESSAGES_URL = 'https://waba-v2.360dialog.io/messages'
 
 const GREETING_PATTERN =
   /^\s*(hola|holi|hey|buen[oa]s(\s+(d[ií]as|tardes|noches))?|qu[eé]\s+tal|saludos|hi|hello|inicio|empezar|comenzar)\b[\s!¡.,¿?]*$/i
