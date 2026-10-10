@@ -129,7 +129,7 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
       </ol>
 
       <ol
-        className="flex h-[clamp(8.5rem,calc(100svh-36.25rem),22rem)] flex-col justify-end gap-1.5 overflow-hidden bg-[#efeae2] p-3"
+        className="flex h-[clamp(8rem,calc(100svh-37.625rem),22rem)] flex-col justify-end gap-1.5 overflow-hidden bg-[#efeae2] p-3"
         aria-hidden="true"
       >
         {messages.slice(0, visibleCount).map((message, index) => (

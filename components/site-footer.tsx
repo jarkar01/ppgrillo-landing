@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { ShieldCheck, ChevronRight, Sparkles, Handshake } from 'lucide-react'
+import { BrandIdentity, CollaborationNote } from '@/components/brand-identity'
 
 function GoogleCloudMark() {
   return (
@@ -114,17 +115,7 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-slate-200 pt-8 sm:flex-row">
-          <div className="flex flex-col items-center gap-1 sm:items-start">
-            <span className="font-display text-xl font-extrabold leading-none tracking-tight sm:text-2xl">
-              <span style={{ color: '#EA4335' }}>P</span>
-              <span style={{ color: '#34A853' }}>p</span>
-              <span style={{ color: '#4285F4' }}>Grill</span>
-              <span style={{ color: '#FBBC05' }}>o</span>
-            </span>
-            <span className="font-display text-[0.7rem] font-semibold tracking-wide text-slate-500">
-              powered by Google
-            </span>
-          </div>
+          <BrandIdentity align="start" className="max-sm:items-center" />
           <nav className="relative z-20 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
             <Link
               href="/privacidad"
@@ -153,7 +144,9 @@ export function SiteFooter() {
           </nav>
         </div>
 
-        <p className="mt-6 text-center text-xs text-slate-400">
+        <CollaborationNote className="mx-auto mt-6 max-w-2xl text-center" />
+
+        <p className="mt-3 text-center text-xs text-slate-400">
           © {new Date().getFullYear()} Arka Universidad Digital S.A. de C.V. Todos los derechos
           reservados.
         </p>
