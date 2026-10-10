@@ -54,7 +54,7 @@ function ChatBubble({ from, text, withPhoto }: ChatMessage) {
             alt="Foto del cuaderno escolar con un ejercicio de suma de fracciones"
             width={220}
             height={110}
-            className="h-28 w-full rounded-lg object-cover sm:h-32"
+            className="h-32 w-full rounded-lg object-cover sm:h-36"
             priority
           />
         ) : null}
@@ -103,7 +103,7 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
   }
 
   return (
-    <div className="flex w-full max-w-sm flex-col items-center gap-1 sm:max-w-md">
+    <div className="flex w-full max-w-md flex-col items-center gap-1">
     <figure
       className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
       aria-label="Ejemplo de conversación con PpGrillo en WhatsApp"
@@ -130,7 +130,7 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
 
       <ol
         className={`flex ${
-          fitViewport ? 'h-[clamp(11rem,calc(100svh-30rem),32rem)] sm:h-[clamp(11rem,calc(100svh-35.5rem),32rem)]' : 'h-[clamp(22rem,58svh,32rem)]'
+          fitViewport ? 'h-[clamp(20rem,calc(100svh-28rem),30rem)]' : 'h-[clamp(22rem,58svh,32rem)]'
         } flex-col justify-end gap-2 overflow-hidden bg-[#efeae2] p-3.5`}
         aria-hidden="true"
       >
