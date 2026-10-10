@@ -39,7 +39,7 @@ export function CampaignLanding({
 
   return (
     <section
-      className={`mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-2 px-5 pt-4 text-center sm:max-w-lg sm:justify-center sm:gap-2.5 ${
+      className={`mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-3 px-4 pt-4 text-center sm:max-w-lg sm:justify-center sm:gap-4 ${
         ctasInStickyBar ? 'pb-24' : 'pb-[max(1.25rem,env(safe-area-inset-bottom))]'
       }`}
     >
@@ -69,10 +69,10 @@ export function CampaignLanding({
       {ctasInStickyBar ? (
         <p className="text-sm font-medium text-pretty text-slate-500">{ctaNote}</p>
       ) : (
-      <div className="flex w-full flex-col items-center gap-2">
+      <div className="flex w-full max-w-md flex-col items-center gap-2.5">
         <WhatsappCta
           href={ctaHref}
-          className="flex min-h-11 w-full max-w-sm items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2 text-[15px] leading-snug font-semibold text-balance text-white shadow-md shadow-emerald-600/20 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] bg-[#25D366] px-5 text-[15px] leading-snug font-semibold text-balance text-white shadow-md shadow-emerald-600/20 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
         >
           {secondaryHref ? (
             <Share2 className="h-5 w-5 shrink-0" aria-hidden="true" />
@@ -84,7 +84,7 @@ export function CampaignLanding({
         {secondaryHref && secondaryLabel ? (
           <WhatsappCta
             href={secondaryHref}
-            className="flex min-h-10 w-full max-w-sm items-center justify-center gap-2 rounded-full border border-[#25D366] bg-emerald-50/60 px-5 py-1.5 text-[15px] leading-snug font-medium text-balance text-[#128C7E] transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full border border-[#25D366] bg-emerald-50/60 px-5 text-[15px] leading-snug font-semibold text-balance text-[#128C7E] transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
           >
             <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
             {secondaryLabel}
