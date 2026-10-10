@@ -8,6 +8,12 @@ const nextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: '/prueba',
+        destination:
+          'https://wa.me/5215654338979?text=Hola%20PpGrillo,%20quiero%20iniciar%20mi%20prueba%20gratis%20de%2014%20d%C3%ADas',
+        permanent: false,
+      },
       { source: '/dashboard', destination: '/app', permanent: false },
       { source: '/dashboard/:path*', destination: '/app', permanent: false },
       { source: '/app/:path+', destination: '/app', permanent: false },
