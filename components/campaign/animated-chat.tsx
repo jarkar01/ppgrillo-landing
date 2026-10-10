@@ -139,7 +139,7 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
         ref={scrollRef}
         className={`flex ${
           fitViewport
-            ? 'h-[clamp(17rem,calc(100svh-27rem),26rem)] max-h-[26rem]'
+            ? 'h-[clamp(17rem,calc(100svh-27rem),26rem)] max-h-[26rem] md:h-[clamp(14rem,calc(100svh-33rem),26rem)]'
             : 'h-[clamp(20rem,55svh,28rem)] max-h-[28rem]'
         } flex-col gap-2 overflow-y-auto overscroll-contain scroll-smooth bg-[#efeae2] p-3.5 [scrollbar-width:thin]`}
         aria-hidden="true"
