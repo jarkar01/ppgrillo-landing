@@ -2,7 +2,7 @@ export const WHATSAPP_TRIAL_URL =
   'https://wa.me/5215654338979?text=Hola%20PpGrillo,%20quiero%20iniciar%20mi%20prueba%20gratis%20de%2014%20d%C3%ADas'
 
 const SHARE_MESSAGE =
-  '¡Hola! Te recomiendo PpGrillo, un tutor por WhatsApp que ayuda a los niños con la tarea paso a paso, sin darles las respuestas. Puedes probarlo gratis 14 días: https://wa.me/5215654338979'
+  '¡Hola! Te paso el contacto de PpGrillo, el tutor de tareas con IA que ayuda a los niños a razonar sin que te desgastes peleando en la tarde. Tienes 14 días gratis para probarlo: https://wa.me/5215654338979?text=Hola%20PpGrillo,%20quiero%20iniciar%20mi%20prueba%20gratis%20de%2014%20días'
 
 export const WHATSAPP_SHARE_CONTACT_URL = `https://api.whatsapp.com/send?text=${encodeURIComponent(SHARE_MESSAGE)}`
 
