@@ -11,8 +11,7 @@ import {
   Smile,
 } from 'lucide-react'
 import { BrandFonts } from '@/components/brand-fonts'
-import { SiteHeader } from '@/components/site-header'
-import { Hero } from '@/components/hero'
+import { CampaignLanding } from '@/components/campaign/campaign-landing'
 import { SiteFooter } from '@/components/site-footer'
 import { ChatWidget } from '@/components/chat-widget'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
@@ -95,9 +94,17 @@ export default function Page() {
   return (
     <BrandFonts>
         <div className="min-h-screen overflow-x-hidden bg-background pb-28 md:pb-0">
-          <SiteHeader />
           <main>
-            <Hero />
+            <CampaignLanding
+              headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
+              subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
+              chat={{
+                caption: 'Ayúdame con este, porfa',
+                reply: '¡Vamos juntos! ¿Qué operación crees que deberíamos resolver primero?',
+              }}
+              footerHref="#saber-mas"
+              footerLabel="¿Quieres conocer a fondo la metodología y el servicio? Sigue leyendo ↓"
+            />
             <div id="saber-mas" className="scroll-mt-20">
             <BenefitGrid
               id="beneficios"
@@ -129,7 +136,7 @@ export default function Page() {
           </main>
           <SiteFooter />
           <ChatWidget liftOnMobile />
-          <MobileStickyCta />
+          <MobileStickyCta revealAfterHero />
         </div>
     </BrandFonts>
   )
