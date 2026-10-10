@@ -1,4 +1,5 @@
-import { MessageCircle } from 'lucide-react'
+import { ArrowDown, MessageCircle } from 'lucide-react'
+import { WhatsappCta } from '@/components/whatsapp-cta'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
@@ -7,7 +8,6 @@ import {
   OutgoingBubble,
   NotebookMessage,
 } from '@/components/whatsapp-phone'
-import { SignupTrigger } from './signup-modal'
 
 export function StudentHero() {
   return (
@@ -24,30 +24,36 @@ export function StudentHero() {
           </span>
 
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
-            ¿Atorado con la tarea a las 9 de la noche?{' '}
-            <span className="text-[#4285F4]">Termínala en la mitad de tiempo sin que te regañen</span>
+            Tu tutor privado 24/7{' '}
+            <span className="text-[#4285F4]">en WhatsApp</span>
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            Cuando el profe explica como si hablara ruso, Pp Grillo te acompaña paso a paso. No te
-            juzga, no se desespera y te da las pistas clave para que lo entiendas tú solo en 2
-            minutos.
+            Manda foto de tu tarea y sal de la duda paso a paso. Pp Grillo no te juzga, no se
+            desespera y te da las pistas clave para que lo entiendas tú solo.
           </p>
 
-          <div className="mt-8 flex flex-col gap-3">
-            <SignupTrigger
+          <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <WhatsappCta
               className={cn(
                 buttonVariants({ size: 'lg' }),
-                'h-auto w-full cursor-pointer gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto sm:self-start',
+                'h-auto w-full gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
               )}
             >
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Probar 14 días gratis con WhatsApp
-            </SignupTrigger>
-            <p className="text-sm font-medium text-slate-500">
-              Sin contraseñas • Sin tarjetas bancarias • Acceso directo
-            </p>
+              Comenzar prueba gratis de 14 días
+            </WhatsappCta>
+            <a
+              href="#saber-mas"
+              className="inline-flex items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              ¿Quieres saber más?
+              <ArrowDown className="h-4 w-4" aria-hidden="true" />
+            </a>
           </div>
+          <p className="mt-4 text-sm font-medium text-slate-500">
+            Sin contraseñas • Sin tarjetas bancarias • Sin apps que descargar
+          </p>
         </div>
 
         <div className="relative">

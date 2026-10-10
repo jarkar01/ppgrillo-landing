@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { MessageCircle } from 'lucide-react'
+import { WhatsappCta } from '@/components/whatsapp-cta'
 
 export function SiteHeader() {
   return (
@@ -40,25 +41,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <Link
-            href="/app"
-            className={cn(
-              buttonVariants({ variant: 'ghost' }),
-              'rounded-full px-4 py-2.5 font-semibold text-slate-700 hover:bg-accent hover:text-accent-foreground',
-            )}
-          >
-            Iniciar sesión
-          </Link>
-          <Link
-            href="/app"
+          <WhatsappCta
             className={cn(
               buttonVariants(),
               'gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a] sm:min-w-[160px] sm:px-6',
             )}
           >
-            <MessageCircle className="h-4 w-4 shrink-0" />
+            <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             Probar 14 días
-          </Link>
+          </WhatsappCta>
         </div>
       </div>
     </header>

@@ -1,7 +1,14 @@
-import { CreditCard, MessageCircle, MousePointerClick, Timer, type LucideIcon } from 'lucide-react'
+import {
+  ArrowDown,
+  CreditCard,
+  MessageCircle,
+  MousePointerClick,
+  Smartphone,
+  type LucideIcon,
+} from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { SignupTrigger } from '@/components/estudiantes/signup-modal'
+import { WhatsappCta } from '@/components/whatsapp-cta'
 import {
   WhatsappPhone,
   IncomingBubble,
@@ -17,16 +24,21 @@ const badgeItems = [
 
 const defaultReassurances = [
   { icon: CreditCard, label: 'Sin tarjeta bancaria' },
-  { icon: Timer, label: 'Registro por WhatsApp en 1 minuto' },
-  { icon: MousePointerClick, label: 'Cancela en 1 clic' },
+  { icon: Smartphone, label: 'Sin apps que descargar' },
+  { icon: MousePointerClick, label: 'Cancela cuando quieras' },
 ]
 
 type HeroProps = {
   ctaIcon?: LucideIcon
   reassurances?: { icon: LucideIcon; label: string }[]
+  learnMoreHref?: string
 }
 
-export function Hero({ ctaIcon: CtaIcon = MessageCircle, reassurances = defaultReassurances }: HeroProps) {
+export function Hero({
+  ctaIcon: CtaIcon = MessageCircle,
+  reassurances = defaultReassurances,
+  learnMoreHref = '#saber-mas',
+}: HeroProps) {
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:py-24">
@@ -41,25 +53,33 @@ export function Hero({ ctaIcon: CtaIcon = MessageCircle, reassurances = defaultR
           </span>
 
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
-            Deja de pelear con tu hijo por la tarea.{' '}
+            Deja de pelear por la tarea.{' '}
             <span className="text-[#4285F4]">Recupera la paz de tus tardes.</span>
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            Llegas cansado del trabajo y la tarde se convierte en discusiones, frustración y libretas
-            cerradas. Pp Grillo acompaña a tu hijo paso a paso con paciencia infinita: él aprende a
-            razonar por su cuenta y tú vuelves a disfrutar ser su papá, no su policía escolar.
+            PpGrillo acompaña a tu hijo a razonar paso a paso por WhatsApp. Sin apps que descargar.
+            Un tutor socrático paciente que no le hace la tarea: le enseña a pensar.
           </p>
 
-          <SignupTrigger
-            className={cn(
-              buttonVariants({ size: 'lg' }),
-              'mt-8 h-auto w-full cursor-pointer gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
-            )}
-          >
-            <CtaIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-            Comenzar prueba gratis de 14 días
-          </SignupTrigger>
+          <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
+            <WhatsappCta
+              className={cn(
+                buttonVariants({ size: 'lg' }),
+                'h-auto w-full gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
+              )}
+            >
+              <CtaIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
+              Comenzar prueba gratis de 14 días
+            </WhatsappCta>
+            <a
+              href={learnMoreHref}
+              className="inline-flex items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline"
+            >
+              ¿Quieres saber más?
+              <ArrowDown className="h-4 w-4" aria-hidden="true" />
+            </a>
+          </div>
 
           <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
             {reassurances.map(({ icon: Icon, label }) => (

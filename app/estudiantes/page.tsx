@@ -1,8 +1,8 @@
 import { BookOpen, Clock, HeartHandshake, Lightbulb, MoonStar, Trophy } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { SignupModalProvider } from '@/components/estudiantes/signup-modal'
 import { StudentHero } from '@/components/estudiantes/student-hero'
+import { HowToAsk } from '@/components/estudiantes/how-to-ask'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
 import { FreeTime } from '@/components/estudiantes/free-time'
 import { StudentPricing } from '@/components/estudiantes/student-pricing'
@@ -53,14 +53,14 @@ const schoolBenefits: Benefit[] = [
 
 export default function EstudiantesPage() {
   return (
-    <SignupModalProvider>
-      <div className="min-h-screen overflow-x-hidden bg-background pb-28 md:pb-0">
-        <SiteHeader />
-        <main>
-          <StudentHero />
+    <div className="min-h-screen overflow-x-hidden bg-background pb-28 md:pb-0">
+      <SiteHeader />
+      <main>
+        <StudentHero />
+        <div id="saber-mas" className="scroll-mt-20">
           <BenefitGrid
             id="beneficios"
-            eyebrow="Cero estrés"
+            eyebrow="Apoyo sin juicio"
             title="Estudia a tu ritmo y sin pasar penas"
             benefits={emotionalBenefits}
             tinted
@@ -68,19 +68,21 @@ export default function EstudiantesPage() {
           />
           <BenefitGrid
             id="pedagogia"
-            eyebrow="Entiende de verdad"
+            eyebrow="Materias cubiertas"
             title="Entiende el truco detrás de cada problema"
             benefits={schoolBenefits}
             compactMobile
-          >
+          />
+          <HowToAsk />
+          <div className="pb-16">
             <InlineTrialCta label="Terminar mi tarea de hoy gratis" />
-          </BenefitGrid>
-          <FreeTime />
-          <StudentPricing />
-        </main>
-        <SiteFooter />
-        <MobileStickyCta legend="Sin contraseñas • Sin tarjetas bancarias" />
-      </div>
-    </SignupModalProvider>
+          </div>
+        </div>
+        <FreeTime />
+        <StudentPricing />
+      </main>
+      <SiteFooter />
+      <MobileStickyCta legend="Sin contraseñas • Sin tarjetas bancarias" />
+    </div>
   )
 }

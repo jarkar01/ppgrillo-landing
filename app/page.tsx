@@ -15,7 +15,6 @@ import { SiteHeader } from '@/components/site-header'
 import { Hero } from '@/components/hero'
 import { SiteFooter } from '@/components/site-footer'
 import { ChatWidget } from '@/components/chat-widget'
-import { SignupModalProvider } from '@/components/estudiantes/signup-modal'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
 import { FamilySection } from '@/components/home/family-section'
 import { FeaturesSection } from '@/components/home/features-section'
@@ -95,17 +94,11 @@ const schoolBenefits: Benefit[] = [
 export default function Page() {
   return (
     <BrandFonts>
-      <SignupModalProvider
-        category="padres"
-        title="Activa sus 14 días gratis"
-        subtitle="Solo el nombre de tu hijo y su WhatsApp. En 1 minuto tiene a su tutor."
-        submitLabel="Activar su tutor"
-        trustNote="Cero spam y cero llamadas comerciales. Tu WhatsApp es solo para tu acceso y reportes."
-      >
         <div className="min-h-screen overflow-x-hidden bg-background pb-28 md:pb-0">
           <SiteHeader />
           <main>
             <Hero />
+            <div id="saber-mas" className="scroll-mt-20">
             <BenefitGrid
               id="beneficios"
               eyebrow="Para ti, mamá o papá"
@@ -131,13 +124,13 @@ export default function Page() {
               <InlineTrialCta />
             </BenefitGrid>
             <FeaturesSection />
+            </div>
             <HomePricing />
           </main>
           <SiteFooter />
           <ChatWidget liftOnMobile />
           <MobileStickyCta />
         </div>
-      </SignupModalProvider>
     </BrandFonts>
   )
 }
