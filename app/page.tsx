@@ -1,7 +1,7 @@
 import { BrandFonts } from '@/components/brand-fonts'
 import { CampaignLanding } from '@/components/campaign/campaign-landing'
 import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
-import { WHATSAPP_SHARE_CONTACT_URL } from '@/lib/whatsapp'
+import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 
 export default function Page() {
   return (
@@ -12,8 +12,10 @@ export default function Page() {
           subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
           chat={PARENT_SOCRATIC_DIALOGUE}
           ctaHref={WHATSAPP_SHARE_CONTACT_URL}
-          ctaLabel="Enviar contacto de PpGrillo por WhatsApp"
-          ctaNote="O agrégalo directo a tus contactos: +52 56 5433 8979 • 14 días gratis • Sin tarjeta"
+          ctaLabel="Compartir contacto de PpGrillo por WhatsApp"
+          secondaryHref={WHATSAPP_TRIAL_URL}
+          secondaryLabel="Chatear / Guardar en este celular"
+          ctaNote="Número directo: +52 56 5433 8979 • 14 días de prueba gratis • Sin tarjeta bancaria"
           footerHref="/metodo"
           footerLabel="¿Quieres conocer a fondo la metodología y el servicio? Conoce más aquí"
         />

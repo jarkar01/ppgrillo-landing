@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { ArrowRight, MessageCircle } from 'lucide-react'
+import { ArrowRight, MessageCircle, Share2 } from 'lucide-react'
 import { WhatsappCta } from '@/components/whatsapp-cta'
 import { AnimatedChat, type ChatMessage } from '@/components/campaign/animated-chat'
 
@@ -14,6 +14,8 @@ type CampaignLandingProps = {
   ctaHref?: string
   ctaLabel?: string
   ctaNote?: string
+  secondaryHref?: string
+  secondaryLabel?: string
 }
 
 function BrandLogo() {
@@ -49,6 +51,8 @@ export function CampaignLanding({
   ctaHref,
   ctaLabel = 'Comenzar prueba gratis de 14 días',
   ctaNote = 'Sin tarjeta bancaria • Cancela cuando quieras',
+  secondaryHref,
+  secondaryLabel,
 }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith('#')
 
@@ -68,11 +72,24 @@ export function CampaignLanding({
       <div className="flex w-full flex-col items-center gap-2">
         <WhatsappCta
           href={ctaHref}
-          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-base leading-snug font-bold text-balance min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+          className="flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-2.5 text-base leading-snug font-bold text-balance min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
         >
-          <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+          {secondaryHref ? (
+            <Share2 className="h-5 w-5 shrink-0" aria-hidden="true" />
+          ) : (
+            <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+          )}
           {ctaLabel}
         </WhatsappCta>
+        {secondaryHref && secondaryLabel ? (
+          <WhatsappCta
+            href={secondaryHref}
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-full border-2 border-[#25D366] bg-emerald-50/60 px-5 py-2 text-base leading-snug font-semibold text-balance text-[#128C7E] transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+          >
+            <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+            {secondaryLabel}
+          </WhatsappCta>
+        ) : null}
         <p className="text-sm font-medium text-pretty text-slate-500">{ctaNote}</p>
       </div>
 
