@@ -1,7 +1,4 @@
-'use client'
-
 import { Pricing } from '@/components/pricing'
-import { useOpenSignup } from '@/components/estudiantes/signup-modal'
 
 const benefits = [
   'Tutor socrático 24/7 con paciencia infinita',
@@ -12,10 +9,8 @@ const benefits = [
 ]
 
 export function HomePricing() {
-  const openSignup = useOpenSignup()
   return (
     <Pricing
-      onStartTrial={openSignup}
       title="Un precio simple para devolverle la tranquilidad a tu hogar."
       benefits={benefits}
     />

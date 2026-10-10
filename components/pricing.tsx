@@ -1,7 +1,5 @@
-'use client'
-
-import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import { WhatsappCta } from '@/components/whatsapp-cta'
 import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
@@ -18,7 +16,6 @@ const defaultBenefits = [
 ]
 
 type PricingProps = {
-  onStartTrial?: () => void
   title?: string
   benefits?: string[]
 }
@@ -29,7 +26,6 @@ const ctaClass = cn(
 )
 
 export function Pricing({
-  onStartTrial,
   title = 'Un precio simple para recuperar tus tardes.',
   benefits = defaultBenefits,
 }: PricingProps = {}) {
@@ -90,27 +86,10 @@ export function Pricing({
               ))}
             </ul>
 
-            {onStartTrial ? (
-              <button
-                type="button"
-                onClick={onStartTrial}
-                className={cn(ctaClass, 'cursor-pointer')}
-              >
-                <MessageCircle className="h-5 w-5 shrink-0" />
-                Comenzar prueba gratis de 14 días
-              </button>
-            ) : (
-              <Link
-                href="/app"
-                onClick={() => {
-                  window.location.href = '/app'
-                }}
-                className={ctaClass}
-              >
-                <MessageCircle className="h-5 w-5 shrink-0" />
-                Comenzar prueba gratis de 14 días
-              </Link>
-            )}
+            <WhatsappCta className={ctaClass}>
+              <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
+              Comenzar prueba gratis de 14 días
+            </WhatsappCta>
 
             <div className="relative mt-6 flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
               <p className="text-center text-[13px] text-slate-500">
