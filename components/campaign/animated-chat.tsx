@@ -70,7 +70,7 @@ function ChatBubble({ from, text, withPhoto }: ChatMessage) {
   )
 }
 
-export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
+export function AnimatedChat({ messages, fitViewport = false }: { messages: ChatMessage[]; fitViewport?: boolean }) {
   const reducedMotion = usePrefersReducedMotion()
   const [revealed, setRevealed] = useState(0)
   const [typing, setTyping] = useState(false)
@@ -129,7 +129,9 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
       </ol>
 
       <ol
-        className="flex h-[clamp(22rem,58svh,32rem)] flex-col justify-end gap-2 overflow-hidden bg-[#efeae2] p-3.5"
+        className={`flex ${
+          fitViewport ? 'h-[clamp(11rem,calc(100svh-30rem),32rem)] sm:h-[clamp(11rem,calc(100svh-35.5rem),32rem)]' : 'h-[clamp(22rem,58svh,32rem)]'
+        } flex-col justify-end gap-2 overflow-hidden bg-[#efeae2] p-3.5`}
         aria-hidden="true"
       >
         {messages.slice(0, visibleCount).map((message, index) => (

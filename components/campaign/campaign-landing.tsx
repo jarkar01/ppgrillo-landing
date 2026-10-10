@@ -18,6 +18,7 @@ type CampaignLandingProps = {
   secondaryHref?: string
   secondaryLabel?: string
   ctasInStickyBar?: boolean
+  compact?: boolean
 }
 
 export function CampaignLanding({
@@ -32,6 +33,7 @@ export function CampaignLanding({
   secondaryHref,
   secondaryLabel,
   ctasInStickyBar = false,
+  compact = false,
 }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith('#')
 
@@ -45,14 +47,24 @@ export function CampaignLanding({
         <BrandIdentity />
       </header>
 
-      <div className="flex flex-col items-center gap-3">
-        <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-balance text-slate-900 sm:text-4xl">
+      <div className={`flex flex-col items-center ${compact ? 'gap-1.5 sm:gap-3' : 'gap-3'}`}>
+        <h1
+          className={`font-display font-extrabold leading-tight tracking-tight text-balance text-slate-900 sm:text-4xl ${
+            compact ? 'text-2xl' : 'text-3xl'
+          }`}
+        >
           {headline}
         </h1>
-        <p className="text-base leading-relaxed text-pretty text-slate-600 sm:text-lg">{subhead}</p>
+        <p
+          className={`text-pretty text-slate-600 sm:text-lg ${
+            compact ? 'text-sm leading-snug sm:leading-relaxed' : 'text-base leading-relaxed'
+          }`}
+        >
+          {subhead}
+        </p>
       </div>
 
-      <AnimatedChat messages={chat} />
+      <AnimatedChat messages={chat} fitViewport={compact} />
 
       {ctasInStickyBar ? (
         <p className="text-sm font-medium text-pretty text-slate-500">{ctaNote}</p>
