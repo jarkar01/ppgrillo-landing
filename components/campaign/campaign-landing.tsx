@@ -1,13 +1,9 @@
-import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight, MessageCircle } from 'lucide-react'
 import { WhatsappCta } from '@/components/whatsapp-cta'
+import { AnimatedChat, type ChatMessage } from '@/components/campaign/animated-chat'
 
-export type ChatMessage = {
-  from: 'student' | 'tutor'
-  text: string
-  withPhoto?: boolean
-}
+export type { ChatMessage }
 
 type CampaignLandingProps = {
   headline: string
@@ -15,6 +11,7 @@ type CampaignLandingProps = {
   chat: ChatMessage[]
   footerHref: string
   footerLabel: string
+  ctaHref?: string
 }
 
 function BrandLogo() {
@@ -41,63 +38,11 @@ function BrandLogo() {
   )
 }
 
-function ChatBubble({ from, text, withPhoto }: ChatMessage) {
-  if (from === 'student') {
-    return (
-      <div className="ml-auto flex max-w-[78%] flex-col gap-1 rounded-xl rounded-tr-sm bg-[#d9fdd3] p-1.5 shadow-sm">
-        {withPhoto ? (
-          <Image
-            src="/notebook-equation.png"
-            alt="Foto del cuaderno escolar con un ejercicio de suma de fracciones"
-            width={220}
-            height={110}
-            className="h-16 w-full rounded-lg object-cover sm:h-20"
-            priority
-          />
-        ) : null}
-        <p className="px-1 text-left text-[13px] leading-snug text-slate-800">{text}</p>
-      </div>
-    )
-  }
-
-  return (
-    <p className="mr-auto max-w-[85%] rounded-xl rounded-tl-sm bg-card px-2.5 py-1.5 text-left text-[13px] leading-snug text-slate-800 shadow-sm">
-      {text}
-    </p>
-  )
-}
-
-function ChatMockup({ messages }: { messages: ChatMessage[] }) {
-  return (
-    <figure
-      className="w-full max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
-      aria-label="Ejemplo de conversación con PpGrillo en WhatsApp"
-    >
-      <div className="flex items-center gap-2 bg-[#128C7E] px-3 py-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-card text-xs font-extrabold text-[#128C7E]">
-          Pp
-        </span>
-        <div className="flex flex-col leading-tight">
-          <span className="text-sm font-semibold text-white">PpGrillo</span>
-          <span className="text-[11px] text-white/80">en línea</span>
-        </div>
-      </div>
-      <ol className="flex flex-col gap-1.5 bg-[#efeae2] p-3">
-        {messages.map((message, index) => (
-          <li key={index} className="flex">
-            <ChatBubble {...message} />
-          </li>
-        ))}
-      </ol>
-    </figure>
-  )
-}
-
-export function CampaignLanding({ headline, subhead, chat, footerHref, footerLabel }: CampaignLandingProps) {
+export function CampaignLanding({ headline, subhead, chat, footerHref, footerLabel, ctaHref }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith('#')
 
   return (
-    <section className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-5 px-5 pt-6 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center sm:max-w-lg sm:justify-center sm:gap-7">
+    <section className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-3 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center sm:max-w-lg sm:justify-center sm:gap-3">
       <BrandLogo />
 
       <div className="flex flex-col items-center gap-3">
@@ -107,10 +52,13 @@ export function CampaignLanding({ headline, subhead, chat, footerHref, footerLab
         <p className="text-base leading-relaxed text-pretty text-slate-600 sm:text-lg">{subhead}</p>
       </div>
 
-      <ChatMockup messages={chat} />
+      <AnimatedChat messages={chat} />
 
       <div className="flex w-full flex-col items-center gap-2">
-        <WhatsappCta className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-4 text-base font-bold whitespace-nowrap min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]">
+        <WhatsappCta
+          href={ctaHref}
+          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-4 text-base font-bold whitespace-nowrap min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+        >
           <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
           Comenzar prueba gratis de 14 días
         </WhatsappCta>
@@ -124,10 +72,10 @@ export function CampaignLanding({ headline, subhead, chat, footerHref, footerLab
       ) : (
         <Link
           href={footerHref}
-          className="group inline-flex items-center gap-1 text-sm text-slate-500 underline-offset-4 hover:text-slate-800 hover:underline"
+          className="group inline-flex items-center gap-1 text-sm text-pretty text-slate-500 underline-offset-4 hover:text-slate-800 hover:underline"
         >
           {footerLabel}
-          <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+          <ArrowRight className="h-4 w-4 shrink-0 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
         </Link>
       )}
     </section>
