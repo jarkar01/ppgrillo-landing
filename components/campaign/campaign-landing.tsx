@@ -3,15 +3,16 @@ import Link from 'next/link'
 import { ArrowRight, MessageCircle } from 'lucide-react'
 import { WhatsappCta } from '@/components/whatsapp-cta'
 
-type ChatMock = {
-  caption: string
-  reply: string
+export type ChatMessage = {
+  from: 'student' | 'tutor'
+  text: string
+  withPhoto?: boolean
 }
 
 type CampaignLandingProps = {
   headline: string
   subhead: string
-  chat: ChatMock
+  chat: ChatMessage[]
   footerHref: string
   footerLabel: string
 }
@@ -40,7 +41,33 @@ function BrandLogo() {
   )
 }
 
-function ChatMockup({ caption, reply }: ChatMock) {
+function ChatBubble({ from, text, withPhoto }: ChatMessage) {
+  if (from === 'student') {
+    return (
+      <div className="ml-auto flex max-w-[78%] flex-col gap-1 rounded-xl rounded-tr-sm bg-[#d9fdd3] p-1.5 shadow-sm">
+        {withPhoto ? (
+          <Image
+            src="/notebook-equation.png"
+            alt="Foto del cuaderno escolar con un ejercicio de suma de fracciones"
+            width={220}
+            height={110}
+            className="h-16 w-full rounded-lg object-cover sm:h-20"
+            priority
+          />
+        ) : null}
+        <p className="px-1 text-left text-[13px] leading-snug text-slate-800">{text}</p>
+      </div>
+    )
+  }
+
+  return (
+    <p className="mr-auto max-w-[85%] rounded-xl rounded-tl-sm bg-card px-2.5 py-1.5 text-left text-[13px] leading-snug text-slate-800 shadow-sm">
+      {text}
+    </p>
+  )
+}
+
+function ChatMockup({ messages }: { messages: ChatMessage[] }) {
   return (
     <figure
       className="w-full max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
@@ -55,22 +82,13 @@ function ChatMockup({ caption, reply }: ChatMock) {
           <span className="text-[11px] text-white/80">en línea</span>
         </div>
       </div>
-      <div className="flex flex-col gap-2 bg-[#efeae2] p-3">
-        <div className="ml-auto flex max-w-[78%] flex-col gap-1 rounded-xl rounded-tr-sm bg-[#d9fdd3] p-1.5 shadow-sm">
-          <Image
-            src="/notebook-equation.png"
-            alt="Foto de una libreta con un ejercicio de matemáticas"
-            width={220}
-            height={110}
-            className="h-20 w-full rounded-lg object-cover"
-            priority
-          />
-          <p className="px-1 text-[13px] leading-snug text-slate-800">{caption}</p>
-        </div>
-        <p className="mr-auto max-w-[85%] rounded-xl rounded-tl-sm bg-card px-2.5 py-1.5 text-[13px] leading-snug text-slate-800 shadow-sm">
-          {reply}
-        </p>
-      </div>
+      <ol className="flex flex-col gap-1.5 bg-[#efeae2] p-3">
+        {messages.map((message, index) => (
+          <li key={index} className="flex">
+            <ChatBubble {...message} />
+          </li>
+        ))}
+      </ol>
     </figure>
   )
 }
@@ -89,7 +107,7 @@ export function CampaignLanding({ headline, subhead, chat, footerHref, footerLab
         <p className="text-base leading-relaxed text-pretty text-slate-600 sm:text-lg">{subhead}</p>
       </div>
 
-      <ChatMockup {...chat} />
+      <ChatMockup messages={chat} />
 
       <div className="flex w-full flex-col items-center gap-2">
         <WhatsappCta className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-4 text-base font-bold whitespace-nowrap min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]">

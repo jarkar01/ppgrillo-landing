@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { BrandFonts } from '@/components/brand-fonts'
 import { CampaignLanding } from '@/components/campaign/campaign-landing'
+import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
 import { SiteFooter } from '@/components/site-footer'
 import { ChatWidget } from '@/components/chat-widget'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
@@ -98,10 +99,7 @@ export default function Page() {
             <CampaignLanding
               headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
               subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
-              chat={{
-                caption: 'Ayúdame con este, porfa',
-                reply: '¡Vamos juntos! ¿Qué operación crees que deberíamos resolver primero?',
-              }}
+          chat={PARENT_SOCRATIC_DIALOGUE}
               footerHref="#saber-mas"
               footerLabel="¿Quieres conocer a fondo la metodología y el servicio? Sigue leyendo ↓"
             />

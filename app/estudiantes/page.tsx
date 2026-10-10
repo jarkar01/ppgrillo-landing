@@ -14,10 +14,10 @@ export default function EstudiantesPage() {
         <CampaignLanding
           headline="Tu tutor 24/7 en WhatsApp."
           subhead="Manda foto de tu tarea y sal de la duda. Sin descargar apps ni crear cuentas."
-          chat={{
-            caption: 'Me trabé en este, ¿me ayudas?',
-            reply: '¡Claro! Antes de despejar la x, ¿qué número está estorbando de su lado?',
-          }}
+      chat={[
+        { from: 'student', text: 'Me trabé en este, ¿me ayudas?', withPhoto: true },
+        { from: 'tutor', text: '¡Claro! Antes de despejar la x, ¿qué número está estorbando de su lado?' },
+      ]}
           footerHref="/"
           footerLabel="¿Quieres conocer a fondo la metodología y el servicio? Visita ppgrillo.io"
         />
