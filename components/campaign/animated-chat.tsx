@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { RotateCcw } from 'lucide-react'
-import { useEffect, useState, useSyncExternalStore } from 'react'
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 export type ChatMessage = {
   from: 'student' | 'tutor'
@@ -97,6 +97,13 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
   const tutorIsTyping = typingIndex >= 0 && messages[typingIndex]?.from === 'tutor'
   const finished = !reducedMotion && revealed >= messages.length
 
+  const scrollRef = useRef<HTMLOListElement>(null)
+
+  useEffect(() => {
+    const list = scrollRef.current
+    if (list) list.scrollTop = list.scrollHeight
+  }, [visibleCount, typingIndex])
+
   function replay() {
     setTyping(false)
     setRevealed(0)
@@ -129,13 +136,19 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
       </ol>
 
       <ol
+        ref={scrollRef}
         className={`flex ${
-          fitViewport ? 'h-[clamp(20rem,calc(100svh-28rem),30rem)]' : 'h-[clamp(22rem,58svh,32rem)]'
-        } flex-col justify-end gap-2 overflow-hidden bg-[#efeae2] p-3.5`}
+          fitViewport
+            ? 'h-[clamp(17rem,calc(100svh-27rem),26rem)] max-h-[26rem]'
+            : 'h-[clamp(20rem,55svh,28rem)] max-h-[28rem]'
+        } flex-col gap-2 overflow-y-auto overscroll-contain scroll-smooth bg-[#efeae2] p-3.5 [scrollbar-width:thin]`}
         aria-hidden="true"
       >
         {messages.slice(0, visibleCount).map((message, index) => (
-          <li key={index} className="flex shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <li
+            key={index}
+            className={`flex shrink-0 animate-in fade-in slide-in-from-bottom-2 duration-300 ${index === 0 ? 'mt-auto' : ''}`}
+          >
             <ChatBubble {...message} />
           </li>
         ))}
