@@ -103,7 +103,7 @@ function BackToTrialButton() {
       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-base font-bold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E]"
     >
       <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" />
-      Regresar e iniciar prueba gratis de 14 días
+      Volver y comenzar prueba gratis de 14 días
     </Link>
   )
 }

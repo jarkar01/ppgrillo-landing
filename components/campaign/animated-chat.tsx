@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import { RotateCcw } from 'lucide-react'
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
 export type ChatMessage = {
@@ -12,7 +13,6 @@ export type ChatMessage = {
 const TYPING_MS = { student: 900, tutor: 1300 } as const
 const PAUSE_BETWEEN_MS = 1500
 const FIRST_MESSAGE_DELAY_MS = 500
-const RESTART_DELAY_MS = 4000
 
 const reducedMotionQuery = '(prefers-reduced-motion: reduce)'
 
@@ -78,13 +78,10 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
   useEffect(() => {
     if (reducedMotion) return
 
+    if (revealed >= messages.length) return
+
     let timer: ReturnType<typeof setTimeout>
-    if (revealed >= messages.length) {
-      timer = setTimeout(() => {
-        setRevealed(0)
-        setTyping(true)
-      }, RESTART_DELAY_MS)
-    } else if (typing) {
+    if (typing) {
       timer = setTimeout(() => {
         setRevealed((count) => count + 1)
         setTyping(false)
@@ -98,8 +95,15 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
   const visibleCount = reducedMotion ? messages.length : revealed
   const typingIndex = !reducedMotion && typing ? revealed : -1
   const tutorIsTyping = typingIndex >= 0 && messages[typingIndex]?.from === 'tutor'
+  const finished = !reducedMotion && revealed >= messages.length
+
+  function replay() {
+    setTyping(false)
+    setRevealed(0)
+  }
 
   return (
+    <div className="flex w-full max-w-xs flex-col items-center gap-1">
     <figure
       className="w-full max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
       aria-label="Ejemplo de conversación con PpGrillo en WhatsApp"
@@ -125,7 +129,7 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
       </ol>
 
       <ol
-        className="flex h-[clamp(10rem,calc(100svh-32rem),22rem)] flex-col justify-end gap-1.5 overflow-hidden bg-[#efeae2] p-3"
+        className="flex h-[clamp(10rem,calc(100svh-33.5rem),22rem)] flex-col justify-end gap-1.5 overflow-hidden bg-[#efeae2] p-3"
         aria-hidden="true"
       >
         {messages.slice(0, visibleCount).map((message, index) => (
@@ -148,5 +152,21 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
         ) : null}
       </ol>
     </figure>
+    {reducedMotion ? null : (
+      <button
+        type="button"
+        onClick={replay}
+        disabled={!finished}
+        aria-hidden={!finished}
+        tabIndex={finished ? 0 : -1}
+        className={`inline-flex items-center gap-1 text-xs font-medium text-slate-500 underline-offset-4 transition-opacity hover:text-slate-800 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] ${
+          finished ? 'opacity-100' : 'pointer-events-none opacity-0'
+        }`}
+      >
+        <RotateCcw className="h-3 w-3 shrink-0" aria-hidden="true" />
+        Ver ejemplo de nuevo
+      </button>
+    )}
+    </div>
   )
 }
