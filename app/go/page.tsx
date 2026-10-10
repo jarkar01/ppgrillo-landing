@@ -14,16 +14,13 @@ export const metadata: Metadata = {
 export default function GoPage() {
   return (
     <BrandFonts>
-      <main className="min-h-svh bg-background pb-20 md:pb-0">
-        <CampaignStickyBar chatHref={WHATSAPP_TRIAL_URL} shareHref={WHATSAPP_SHARE_CONTACT_URL} />
+      <main className="min-h-svh bg-background">
+        <CampaignStickyBar chatHref={WHATSAPP_TRIAL_URL} shareHref={WHATSAPP_SHARE_CONTACT_URL} alwaysVisible />
         <CampaignLanding
           headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
           subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
           chat={PARENT_SOCRATIC_DIALOGUE}
-          ctaHref={WHATSAPP_SHARE_CONTACT_URL}
-          ctaLabel="Recomendar PpGrillo con un amigo"
-          secondaryHref={WHATSAPP_TRIAL_URL}
-          secondaryLabel="Chatear / Guardar en este celular"
+          ctasInStickyBar
           ctaNote="Número directo: +52 56 5433 8979 • 14 días de prueba gratis • Sin tarjeta bancaria"
           footerHref="/metodo"
           footerLabel="¿Quieres conocer a fondo la metodología y el servicio? Conoce más aquí"

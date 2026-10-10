@@ -4,11 +4,21 @@ import { useEffect, useState } from 'react'
 import { MessageCircle, Share2 } from 'lucide-react'
 import { WhatsappCta } from '@/components/whatsapp-cta'
 
-export function CampaignStickyBar({ chatHref, shareHref }: { chatHref: string; shareHref: string }) {
-  const [visible, setVisible] = useState(false)
+export function CampaignStickyBar({
+  chatHref,
+  shareHref,
+  alwaysVisible = false,
+}: {
+  chatHref: string
+  shareHref: string
+  alwaysVisible?: boolean
+}) {
+  const [scrolled, setScrolled] = useState(false)
+  const visible = alwaysVisible || scrolled
 
   useEffect(() => {
-    const onScroll = () => setVisible(window.scrollY > 60)
+    if (alwaysVisible) return
+    const onScroll = () => setScrolled(window.scrollY > 60)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -16,7 +26,7 @@ export function CampaignStickyBar({ chatHref, shareHref }: { chatHref: string; s
 
   return (
     <div
-      className={`fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-card/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.18)] backdrop-blur-md transition-transform duration-300 md:hidden ${
+      className={`fixed inset-x-0 bottom-0 z-40 border-t border-slate-200/80 bg-card/95 px-3 pt-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] shadow-[0_-8px_24px_-12px_rgba(15,23,42,0.18)] backdrop-blur-md transition-transform duration-300 ${alwaysVisible ? '' : 'md:hidden'} ${
         visible ? 'translate-y-0' : 'pointer-events-none translate-y-full'
       }`}
       aria-hidden={!visible}
