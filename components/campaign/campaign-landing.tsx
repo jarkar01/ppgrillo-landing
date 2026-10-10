@@ -12,6 +12,8 @@ type CampaignLandingProps = {
   footerHref: string
   footerLabel: string
   ctaHref?: string
+  ctaLabel?: string
+  ctaNote?: string
 }
 
 function BrandLogo() {
@@ -38,11 +40,20 @@ function BrandLogo() {
   )
 }
 
-export function CampaignLanding({ headline, subhead, chat, footerHref, footerLabel, ctaHref }: CampaignLandingProps) {
+export function CampaignLanding({
+  headline,
+  subhead,
+  chat,
+  footerHref,
+  footerLabel,
+  ctaHref,
+  ctaLabel = 'Comenzar prueba gratis de 14 días',
+  ctaNote = 'Sin tarjeta bancaria • Cancela cuando quieras',
+}: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith('#')
 
   return (
-    <section className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-3 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center sm:max-w-lg sm:justify-center sm:gap-3">
+    <section className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-2 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center sm:max-w-lg sm:justify-center sm:gap-2.5">
       <BrandLogo />
 
       <div className="flex flex-col items-center gap-3">
@@ -57,12 +68,12 @@ export function CampaignLanding({ headline, subhead, chat, footerHref, footerLab
       <div className="flex w-full flex-col items-center gap-2">
         <WhatsappCta
           href={ctaHref}
-          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-4 text-base font-bold whitespace-nowrap min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+          className="flex min-h-14 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-base leading-snug font-bold text-balance min-[400px]:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
         >
           <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-          Comenzar prueba gratis de 14 días
+          {ctaLabel}
         </WhatsappCta>
-        <p className="text-sm font-medium text-slate-500">Sin tarjeta bancaria • Cancela cuando quieras</p>
+        <p className="text-sm font-medium text-pretty text-slate-500">{ctaNote}</p>
       </div>
 
       {isAnchor ? (
