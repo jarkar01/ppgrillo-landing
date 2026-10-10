@@ -1,12 +1,14 @@
 import { BrandFonts } from '@/components/brand-fonts'
 import { CampaignLanding } from '@/components/campaign/campaign-landing'
+import { CampaignStickyBar } from '@/components/campaign/campaign-sticky-bar'
 import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
 import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 
 export default function Page() {
   return (
     <BrandFonts>
-      <main className="min-h-svh bg-background">
+      <main className="min-h-svh bg-background pb-20 md:pb-0">
+        <CampaignStickyBar chatHref={WHATSAPP_TRIAL_URL} shareHref={WHATSAPP_SHARE_CONTACT_URL} />
         <CampaignLanding
           headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
           subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
