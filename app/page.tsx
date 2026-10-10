@@ -12,7 +12,7 @@ export default function Page() {
           subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
           chat={PARENT_SOCRATIC_DIALOGUE}
           ctaHref={WHATSAPP_SHARE_CONTACT_URL}
-          ctaLabel="Compartir contacto de PpGrillo por WhatsApp"
+          ctaLabel="Recomendar PpGrillo con un amigo"
           secondaryHref={WHATSAPP_TRIAL_URL}
           secondaryLabel="Chatear / Guardar en este celular"
           ctaNote="Número directo: +52 56 5433 8979 • 14 días de prueba gratis • Sin tarjeta bancaria"

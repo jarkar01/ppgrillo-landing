@@ -54,17 +54,17 @@ function ChatBubble({ from, text, withPhoto }: ChatMessage) {
             alt="Foto del cuaderno escolar con un ejercicio de suma de fracciones"
             width={220}
             height={110}
-            className="h-16 w-full rounded-lg object-cover sm:h-20"
+            className="h-28 w-full rounded-lg object-cover sm:h-32"
             priority
           />
         ) : null}
-        <p className="px-1 text-left text-[13px] leading-snug text-slate-800">{text}</p>
+        <p className="px-1 text-left text-sm leading-snug text-slate-800">{text}</p>
       </div>
     )
   }
 
   return (
-    <p className="mr-auto max-w-[85%] rounded-xl rounded-tl-sm bg-card px-2.5 py-1.5 text-left text-[13px] leading-snug text-slate-800 shadow-sm">
+    <p className="mr-auto max-w-[85%] rounded-xl rounded-tl-sm bg-card px-3 py-2 text-left text-sm leading-snug text-slate-800 shadow-sm">
       {text}
     </p>
   )
@@ -103,9 +103,9 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
   }
 
   return (
-    <div className="flex w-full max-w-xs flex-col items-center gap-1">
+    <div className="flex w-full max-w-sm flex-col items-center gap-1 sm:max-w-md">
     <figure
-      className="w-full max-w-xs overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
+      className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
       aria-label="Ejemplo de conversación con PpGrillo en WhatsApp"
     >
       <div className="flex items-center gap-2 bg-[#128C7E] px-3 py-2">
@@ -129,7 +129,7 @@ export function AnimatedChat({ messages }: { messages: ChatMessage[] }) {
       </ol>
 
       <ol
-        className="flex h-[clamp(8rem,calc(100svh-37.625rem),22rem)] flex-col justify-end gap-1.5 overflow-hidden bg-[#efeae2] p-3"
+        className="flex h-[clamp(22rem,58svh,32rem)] flex-col justify-end gap-2 overflow-hidden bg-[#efeae2] p-3.5"
         aria-hidden="true"
       >
         {messages.slice(0, visibleCount).map((message, index) => (
