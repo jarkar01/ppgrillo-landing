@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function GoPage() {
   return (
     <BrandFonts>
-      <main className="min-h-svh bg-background pb-16 md:pb-0">
+      <main className="min-h-svh bg-background pb-20 md:pb-0">
         <CampaignStickyBar chatHref={WHATSAPP_TRIAL_URL} shareHref={WHATSAPP_SHARE_CONTACT_URL} />
         <CampaignLanding
           headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
