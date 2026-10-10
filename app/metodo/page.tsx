@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import { BrandFonts } from '@/components/brand-fonts'
 import { SiteFooter } from '@/components/site-footer'
+import { BrandIdentity, CollaborationNote } from '@/components/brand-identity'
 import { ChatWidget } from '@/components/chat-widget'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
 import { FamilySection } from '@/components/home/family-section'
@@ -112,8 +113,16 @@ export default function MetodoPage() {
   return (
     <BrandFonts>
       <div className="min-h-screen overflow-x-hidden bg-background">
-        <header className="flex justify-center px-5 py-5">
-          <BackToTrialButton />
+        <header className="border-b border-slate-200/70 bg-card/80">
+          <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 py-5 sm:flex-row sm:justify-between sm:px-8">
+            <Link href="/" aria-label="Ir al inicio de PpGrillo" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4285F4]">
+              <BrandIdentity align="start" className="max-sm:items-center" />
+            </Link>
+            <BackToTrialButton />
+          </div>
+          <div className="border-t border-slate-200/70 bg-secondary/40 px-5 py-2.5">
+            <CollaborationNote className="mx-auto max-w-3xl text-center" />
+          </div>
         </header>
         <main>
           <BenefitGrid

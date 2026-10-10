@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowRight, MessageCircle, Share2 } from 'lucide-react'
 import { WhatsappCta } from '@/components/whatsapp-cta'
+import { BrandIdentity } from '@/components/brand-identity'
 import { AnimatedChat, type ChatMessage } from '@/components/campaign/animated-chat'
 
 export type { ChatMessage }
@@ -16,30 +17,6 @@ type CampaignLandingProps = {
   ctaNote?: string
   secondaryHref?: string
   secondaryLabel?: string
-}
-
-function BrandLogo() {
-  return (
-    <div className="flex flex-col items-center leading-none" aria-label="PpGrillo, powered by Google">
-      <span className="font-display text-3xl font-extrabold tracking-tight">
-        <span style={{ color: '#EA4335' }}>P</span>
-        <span style={{ color: '#34A853' }}>p</span>
-        <span style={{ color: '#4285F4' }}>Grill</span>
-        <span style={{ color: '#FBBC05' }}>o</span>
-      </span>
-      <span className="mt-1 text-[11px] font-medium text-slate-500" aria-hidden="true">
-        powered by{' '}
-        <span className="font-semibold">
-          <span style={{ color: '#4285F4' }}>G</span>
-          <span style={{ color: '#EA4335' }}>o</span>
-          <span style={{ color: '#FBBC05' }}>o</span>
-          <span style={{ color: '#4285F4' }}>g</span>
-          <span style={{ color: '#34A853' }}>l</span>
-          <span style={{ color: '#EA4335' }}>e</span>
-        </span>
-      </span>
-    </div>
-  )
 }
 
 export function CampaignLanding({
@@ -58,7 +35,9 @@ export function CampaignLanding({
 
   return (
     <section className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-2 px-5 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center sm:max-w-lg sm:justify-center sm:gap-2.5">
-      <BrandLogo />
+      <header>
+        <BrandIdentity />
+      </header>
 
       <div className="flex flex-col items-center gap-3">
         <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight text-balance text-slate-900 sm:text-4xl">
