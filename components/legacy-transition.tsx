@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { MessageCircle } from 'lucide-react'
+import { BrandFonts } from '@/components/brand-fonts'
 import { BrandIdentity } from '@/components/brand-identity'
 import { WHATSAPP_RETURNING_USER_URL } from '@/lib/whatsapp'
 
@@ -25,27 +26,28 @@ export function LegacyTransition() {
   const progress = ((REDIRECT_SECONDS - secondsLeft) / REDIRECT_SECONDS) * 100
 
   return (
-    <main className="flex min-h-dvh flex-col items-center justify-center bg-slate-50 px-5 py-10">
-      <div className="flex w-full max-w-md flex-col items-center gap-8 text-center">
+    <BrandFonts>
+    <main className="flex min-h-dvh flex-col items-center justify-center bg-slate-50 px-5 py-5 sm:py-8">
+      <div className="flex w-full max-w-md flex-col items-center gap-5 text-center sm:gap-6">
         <BrandIdentity />
 
-        <div className="flex w-full flex-col items-center gap-5 rounded-3xl border border-slate-200 bg-white px-6 py-8 shadow-sm">
-          <span className="flex size-14 items-center justify-center rounded-full bg-emerald-50 text-[#128C7E]">
-            <MessageCircle className="size-7" aria-hidden="true" />
+        <div className="flex w-full flex-col items-center gap-4 rounded-3xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:gap-5 sm:px-6 sm:py-7">
+          <span className="flex size-12 items-center justify-center rounded-full bg-emerald-50 text-[#128C7E] sm:size-14">
+            <MessageCircle className="size-6 sm:size-7" aria-hidden="true" />
           </span>
 
-          <h1 className="font-display text-2xl font-extrabold leading-tight text-balance text-slate-900 sm:text-3xl">
+          <h1 className="font-display text-xl font-extrabold leading-tight text-balance text-slate-900 sm:text-3xl">
             PpGrillo ahora te acompaña directamente en WhatsApp.
           </h1>
 
-          <p className="text-base leading-relaxed text-pretty text-slate-600">
+          <p className="text-[15px] leading-relaxed text-pretty text-slate-600 sm:text-base">
             Ya no necesitas iniciar sesión, recordar contraseñas ni entrar a la web. Todo tu
             acompañamiento y tus días de prueba continúan en tu celular.
           </p>
 
           <a
             href={WHATSAPP_RETURNING_USER_URL}
-            className="flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-lg font-bold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-base font-bold sm:text-lg text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
           >
             <MessageCircle className="size-5" aria-hidden="true" />
             Abrir mi tutor en WhatsApp
@@ -92,5 +94,6 @@ export function LegacyTransition() {
         </Link>
       </div>
     </main>
+    </BrandFonts>
   )
 }

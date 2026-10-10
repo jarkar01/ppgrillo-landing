@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { BrandFonts } from '@/components/brand-fonts'
 import { CampaignLanding } from '@/components/campaign/campaign-landing'
+import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 
 export const metadata: Metadata = {
   title: 'PpGrillo · Tu tutor 24/7 en WhatsApp',
@@ -14,12 +15,18 @@ export default function EstudiantesPage() {
         <CampaignLanding
           headline="Tu tutor 24/7 en WhatsApp."
           subhead="Manda foto de tu tarea y sal de la duda. Sin descargar apps ni crear cuentas."
-      chat={[
-        { from: 'student', text: 'Me trabé en este, ¿me ayudas?', withPhoto: true },
-        { from: 'tutor', text: '¡Claro! Antes de despejar la x, ¿qué número está estorbando de su lado?' },
-      ]}
-          footerHref="/"
-          footerLabel="¿Quieres conocer a fondo la metodología y el servicio? Visita ppgrillo.io"
+          chat={[
+            { from: 'student', text: 'Me trabé en este, ¿me ayudas?', withPhoto: true },
+            { from: 'tutor', text: '¡Claro! Antes de despejar la x, ¿qué número está estorbando de su lado?' },
+          ]}
+          ctaHref={WHATSAPP_SHARE_CONTACT_URL}
+          ctaLabel="Recomendar PpGrillo con un amigo"
+          secondaryHref={WHATSAPP_TRIAL_URL}
+          secondaryLabel="Chatear / Guardar en este celular"
+          ctaNote="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
+          footerHref="/metodo"
+          footerLabel="Conoce la metodología y el servicio"
+          compact
         />
       </main>
     </BrandFonts>
