@@ -23,7 +23,6 @@ type CampaignLandingProps = {
   ctaNote?: string
   secondaryHref?: string
   secondaryLabel?: string
-  ctasInStickyBar?: boolean
   compact?: boolean
 }
 
@@ -38,17 +37,12 @@ export function CampaignLanding({
   ctaNote = 'Sin tarjeta bancaria • Cancela cuando quieras',
   secondaryHref,
   secondaryLabel,
-  ctasInStickyBar = false,
   compact = false,
 }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith('#')
 
   return (
-    <section
-      className={`mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-3 px-4 pt-4 text-center sm:max-w-lg sm:justify-center sm:gap-4 ${
-        ctasInStickyBar ? 'pb-24' : 'pb-[max(1.25rem,env(safe-area-inset-bottom))]'
-      }`}
-    >
+    <section className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-between gap-3 px-4 pt-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] text-center sm:max-w-lg sm:justify-center sm:gap-4">
       <header>
         <BrandIdentity />
       </header>
@@ -72,9 +66,6 @@ export function CampaignLanding({
 
       <AnimatedChat messages={chat} fitViewport={compact} />
 
-      {ctasInStickyBar ? (
-        <p className="text-sm font-medium text-pretty text-slate-500">{ctaNote}</p>
-      ) : (
       <div className="flex w-full max-w-md flex-col items-center gap-2.5">
         <WhatsappCta
           href={ctaHref}
@@ -94,7 +85,6 @@ export function CampaignLanding({
         ) : null}
         <p className="text-sm font-medium text-pretty text-slate-500">{ctaNote}</p>
       </div>
-      )}
 
       {isAnchor ? (
         <a href={footerHref} className="group text-sm text-slate-500 underline-offset-4 hover:text-slate-800 hover:underline">

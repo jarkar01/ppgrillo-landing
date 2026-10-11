@@ -19,10 +19,10 @@ export default function EstudiantesPage() {
             { from: 'student', text: 'Me trabé en este, ¿me ayudas?', withPhoto: true },
             { from: 'tutor', text: '¡Claro! Antes de despejar la x, ¿qué número está estorbando de su lado?' },
           ]}
-          ctaHref={WHATSAPP_SHARE_CONTACT_URL}
-          ctaLabel="Recomendar PpGrillo con un amigo"
-          secondaryHref={WHATSAPP_TRIAL_URL}
-          secondaryLabel="Chatear / Guardar en este celular"
+          ctaHref={WHATSAPP_TRIAL_URL}
+          ctaLabel="Chatear / Guardar en este celular"
+          secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
+          secondaryLabel="Recomendar PpGrillo con un amigo"
           ctaNote="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"

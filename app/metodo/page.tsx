@@ -14,7 +14,7 @@ import {
   Smile,
 } from 'lucide-react'
 import { BrandFonts } from '@/components/brand-fonts'
-import { CampaignStickyBar } from '@/components/campaign/campaign-sticky-bar'
+import { CampaignCtaPair } from '@/components/campaign/campaign-cta-pair'
 import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 import { SiteFooter } from '@/components/site-footer'
 import { BrandIdentity, CollaborationNote } from '@/components/brand-identity'
@@ -114,7 +114,7 @@ function BackToTrialButton() {
 export default function MetodoPage() {
   return (
     <BrandFonts>
-      <div className="min-h-screen overflow-x-hidden bg-background pb-20 md:pb-0">
+      <div className="min-h-screen overflow-x-hidden bg-background">
         <header className="border-b border-slate-200/70 bg-card/80">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-5 py-5 sm:flex-row sm:justify-between sm:px-8">
             <Link href="/" aria-label="Ir al inicio de PpGrillo" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4285F4]">
@@ -151,13 +151,16 @@ export default function MetodoPage() {
           />
           <FeaturesSection />
           <HomePricing />
-          <div className="flex justify-center px-5 py-12">
-            <BackToTrialButton />
+          <div className="px-5 py-12">
+            <CampaignCtaPair
+              chatHref={WHATSAPP_TRIAL_URL}
+              shareHref={WHATSAPP_SHARE_CONTACT_URL}
+              note="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
+            />
           </div>
         </main>
         <SiteFooter />
-        <CampaignStickyBar chatHref={WHATSAPP_TRIAL_URL} shareHref={WHATSAPP_SHARE_CONTACT_URL} />
-        <ChatWidget liftOnMobile />
+        <ChatWidget />
       </div>
     </BrandFonts>
   )
