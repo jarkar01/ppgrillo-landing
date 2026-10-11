@@ -18,10 +18,10 @@ export default function GoPage() {
           headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
           subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
           chat={PARENT_SOCRATIC_DIALOGUE}
-          ctaHref={WHATSAPP_SHARE_CONTACT_URL}
-          ctaLabel="Recomendar PpGrillo con un amigo"
-          secondaryHref={WHATSAPP_TRIAL_URL}
-          secondaryLabel="Chatear / Guardar en este celular"
+          ctaHref={WHATSAPP_TRIAL_URL}
+          ctaLabel="Chatear / Guardar en este celular"
+          secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
+          secondaryLabel="Recomendar PpGrillo con un amigo"
           ctaNote="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"

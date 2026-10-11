@@ -104,6 +104,19 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
     if (list) list.scrollTop = list.scrollHeight
   }, [visibleCount, typingIndex])
 
+  // On touch screens the chat only takes over vertical swipes after the user taps it,
+  // so swiping across the mockup scrolls the page instead of getting stuck inside it.
+  const [touchScrollActive, setTouchScrollActive] = useState(false)
+
+  useEffect(() => {
+    if (!touchScrollActive) return
+    function handleOutside(event: PointerEvent) {
+      if (!scrollRef.current?.contains(event.target as Node)) setTouchScrollActive(false)
+    }
+    document.addEventListener('pointerdown', handleOutside)
+    return () => document.removeEventListener('pointerdown', handleOutside)
+  }, [touchScrollActive])
+
   function replay() {
     setTyping(false)
     setRevealed(0)
@@ -141,7 +154,11 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
           fitViewport
             ? 'h-[clamp(17rem,calc(100svh-27rem),26rem)] max-h-[26rem] md:h-[clamp(14rem,calc(100svh-33rem),26rem)]'
             : 'h-[clamp(20rem,55svh,28rem)] max-h-[28rem]'
-        } flex-col gap-2 overflow-y-auto overscroll-contain scroll-smooth bg-[#efeae2] p-3.5 [scrollbar-width:thin]`}
+        } flex-col gap-2 overflow-y-auto overscroll-auto scroll-smooth bg-[#efeae2] p-3.5 [scrollbar-width:thin] pointer-coarse:overflow-hidden pointer-coarse:data-[touch-scroll=true]:overflow-y-auto pointer-coarse:data-[touch-scroll=true]:overscroll-contain`}
+        data-touch-scroll={touchScrollActive}
+        onPointerDown={(event) => {
+          if (event.pointerType === 'touch') setTouchScrollActive(true)
+        }}
         aria-hidden="true"
       >
         {messages.slice(0, visibleCount).map((message, index) => (
