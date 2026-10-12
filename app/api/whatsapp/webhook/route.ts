@@ -1,5 +1,6 @@
 import { after } from 'next/server'
 import { GoogleAuth } from 'google-auth-library'
+import { upsertWhatsAppUser } from '@/lib/whatsapp-users'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -23,6 +24,7 @@ type WhatsAppMessage = {
   from?: string
   id?: string
   type?: string
+  timestamp?: string
   text?: { body?: string }
 }
 
@@ -62,17 +64,44 @@ function getGoogleAuth(): GoogleAuth | null {
   }
 }
 
-function extractTextMessages(payload: WebhookPayload): IncomingTextMessage[] {
-  const raw: WhatsAppMessage[] = [
+function collectMessages(payload: WebhookPayload): WhatsAppMessage[] {
+  return [
     ...(payload.messages ?? []),
     ...(payload.entry ?? []).flatMap((entry) =>
       (entry.changes ?? []).flatMap((change) => change.value?.messages ?? []),
     ),
   ]
+}
 
+function extractTextMessages(raw: WhatsAppMessage[]): IncomingTextMessage[] {
   return raw
     .filter((m) => m.type === 'text' && m.from && m.text?.body?.trim())
     .map((m) => ({ from: m.from!, text: m.text!.body!.trim(), id: m.id }))
+}
+
+// Any message type (text, image, audio...) counts as first contact; keep the earliest per sender.
+function extractSenders(raw: WhatsAppMessage[]): Map<string, Date> {
+  const senders = new Map<string, Date>()
+  for (const m of raw) {
+    if (!m.from) continue
+    const seconds = Number(m.timestamp)
+    const sentAt = Number.isFinite(seconds) && seconds > 0 ? new Date(seconds * 1000) : new Date()
+    const previous = senders.get(m.from)
+    if (!previous || sentAt < previous) senders.set(m.from, sentAt)
+  }
+  return senders
+}
+
+async function registerSenders(senders: Map<string, Date>) {
+  const auth = getGoogleAuth()
+  if (!auth) return
+  await Promise.allSettled(
+    [...senders].map(([phone, sentAt]) =>
+      upsertWhatsAppUser(auth, phone, sentAt).catch((error) => {
+        console.error('[whatsapp] Firestore user registration error:', error)
+      }),
+    ),
+  )
 }
 
 async function detectIntent(fromNumber: string, textBody: string): Promise<string> {
@@ -167,11 +196,14 @@ export async function POST(req: Request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const messages = extractTextMessages(payload)
+  const raw = collectMessages(payload)
+  const messages = extractTextMessages(raw)
+  const senders = extractSenders(raw)
 
-  // 360dialog expects a fast 200; process replies after responding.
-  if (messages.length > 0) {
+  // 360dialog expects a fast 200; register users and send replies after responding.
+  if (senders.size > 0) {
     after(async () => {
+      await registerSenders(senders)
       await Promise.allSettled(messages.map(handleMessage))
     })
   }
