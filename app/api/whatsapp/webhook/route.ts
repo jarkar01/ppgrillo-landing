@@ -79,27 +79,32 @@ function extractTextMessages(raw: WhatsAppMessage[]): IncomingTextMessage[] {
     .map((m) => ({ from: m.from!, text: m.text!.body!.trim(), id: m.id }))
 }
 
+type Sender = { rawPhone: string; sentAt: Date }
+
 // Any message type (text, image, audio...) counts as first contact; keep the earliest per sender.
-function extractSenders(raw: WhatsAppMessage[]): Map<string, Date> {
-  const senders = new Map<string, Date>()
+// Keyed by the 10-digit normalized phone so different formats of one number collapse into one user.
+function extractSenders(raw: WhatsAppMessage[]): Map<string, Sender> {
+  const senders = new Map<string, Sender>()
   for (const m of raw) {
     if (!m.from) continue
+    const phone = normalizePhone(m.from)
+    if (!phone) continue
     const seconds = Number(m.timestamp)
     const sentAt = Number.isFinite(seconds) && seconds > 0 ? new Date(seconds * 1000) : new Date()
-    const previous = senders.get(m.from)
-    if (!previous || sentAt < previous) senders.set(m.from, sentAt)
+    const previous = senders.get(phone)
+    if (!previous || sentAt < previous.sentAt) senders.set(phone, { rawPhone: m.from, sentAt })
   }
   return senders
 }
 
-async function registerSenders(senders: Map<string, Date>): Promise<Map<string, UserProfile>> {
+async function registerSenders(senders: Map<string, Sender>): Promise<Map<string, UserProfile>> {
   const profiles = new Map<string, UserProfile>()
   const auth = getGoogleAuth()
   if (!auth) return profiles
   await Promise.allSettled(
-    [...senders].map(async ([phone, sentAt]) => {
+    [...senders].map(async ([phone, { rawPhone, sentAt }]) => {
       try {
-        const profile = await upsertWhatsAppUser(auth, phone, sentAt)
+        const profile = await upsertWhatsAppUser(auth, rawPhone, sentAt)
         if (profile) profiles.set(phone, profile)
       } catch (error) {
         console.error('[whatsapp] Firestore user registration error:', error)
@@ -243,7 +248,9 @@ export async function POST(req: Request) {
   if (senders.size > 0) {
     after(async () => {
       const profiles = await registerSenders(senders)
-      await Promise.allSettled(messages.map((m) => handleMessage(m, profiles.get(m.from))))
+      await Promise.allSettled(
+        messages.map((m) => handleMessage(m, profiles.get(normalizePhone(m.from)))),
+      )
     })
   }
 

@@ -25,9 +25,13 @@ export type UserProfile = {
 }
 
 // WhatsApp sends E.164 digits without "+": 5215512345678 (MX mobile), 573001234567 (CO)...
-// Keeping only the last 10 digits drops the country code and the legacy Mexican mobile "1".
+// Firestore users/{id} always uses the 10-digit national number, so every format maps to one doc.
 export function normalizePhone(rawPhone: string): string {
-  const digits = rawPhone.replace(/\D/g, '')
+  let digits = rawPhone.replace(/\D/g, '')
+  if (digits.startsWith('00')) digits = digits.slice(2)
+  if (digits.length === NATIONAL_DIGITS + 3 && digits.startsWith('521')) return digits.slice(3)
+  if (digits.length === NATIONAL_DIGITS + 2 && digits.startsWith('52')) return digits.slice(2)
+  if (digits.length === NATIONAL_DIGITS + 1 && digits.startsWith('1')) return digits.slice(1)
   return digits.length > NATIONAL_DIGITS ? digits.slice(-NATIONAL_DIGITS) : digits
 }
 
