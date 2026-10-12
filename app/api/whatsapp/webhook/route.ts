@@ -193,12 +193,16 @@ async function detectIntent(
   }
 }
 
+// 360dialog delivers to the full international number (e.g. 5215654338979), never the 10-digit ID.
 async function sendWhatsAppText(fromNumber: string, replyText: string) {
   const apiKey = process.env.D360_API_KEY
   if (!apiKey) {
     console.error('[whatsapp] D360_API_KEY is not configured')
     return
   }
+
+  const recipient = fromNumber.replace(/\D/g, '')
+  if (!recipient) return
 
   try {
     const res = await fetch(D360_MESSAGES_URL, {
@@ -210,7 +214,7 @@ async function sendWhatsAppText(fromNumber: string, replyText: string) {
       body: JSON.stringify({
         messaging_product: 'whatsapp',
         recipient_type: 'individual',
-        to: fromNumber,
+        to: recipient,
         type: 'text',
         text: { body: replyText.slice(0, 4096) },
       }),
