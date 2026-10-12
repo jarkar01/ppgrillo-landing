@@ -1,6 +1,6 @@
 import { after } from 'next/server'
 import { GoogleAuth } from 'google-auth-library'
-import { upsertWhatsAppUser } from '@/lib/whatsapp-users'
+import { normalizePhone, upsertWhatsAppUser, type UserProfile } from '@/lib/whatsapp-users'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
@@ -92,24 +92,62 @@ function extractSenders(raw: WhatsAppMessage[]): Map<string, Date> {
   return senders
 }
 
-async function registerSenders(senders: Map<string, Date>) {
+async function registerSenders(senders: Map<string, Date>): Promise<Map<string, UserProfile>> {
+  const profiles = new Map<string, UserProfile>()
   const auth = getGoogleAuth()
-  if (!auth) return
+  if (!auth) return profiles
   await Promise.allSettled(
-    [...senders].map(([phone, sentAt]) =>
-      upsertWhatsAppUser(auth, phone, sentAt).catch((error) => {
+    [...senders].map(async ([phone, sentAt]) => {
+      try {
+        const profile = await upsertWhatsAppUser(auth, phone, sentAt)
+        if (profile) profiles.set(phone, profile)
+      } catch (error) {
         console.error('[whatsapp] Firestore user registration error:', error)
-      }),
-    ),
+      }
+    }),
   )
+  return profiles
 }
 
-async function detectIntent(fromNumber: string, textBody: string): Promise<string> {
+function buildTutorContext(profile: UserProfile) {
+  const instructions = [
+    `El estudiante vive en ${profile.country}.`,
+    `Sistema educativo: ${profile.educationSystem}.`,
+    profile.grade ? `Grado escolar: ${profile.grade}.` : null,
+    profile.name ? `Nombre del estudiante: ${profile.name}.` : null,
+    `Adapta explicaciones, terminología, unidades, moneda, ejemplos y temario al plan de estudios oficial de ${profile.country}, manteniendo el método socrático de PpGrillo.`,
+  ]
+    .filter(Boolean)
+    .join(' ')
+
+  return {
+    endUserMetadata: {
+      country: profile.country,
+      education_system: profile.educationSystem,
+      ...(profile.grade ? { grade: profile.grade } : {}),
+      ...(profile.name ? { student_name: profile.name } : {}),
+      tutor_instructions: instructions,
+    },
+    parameters: {
+      student_country: profile.country,
+      education_system: profile.educationSystem,
+      student_grade: profile.grade ?? '',
+      student_name: profile.name ?? '',
+      student_context: instructions,
+    },
+  }
+}
+
+async function detectIntent(
+  profile: UserProfile | undefined,
+  fromNumber: string,
+  textBody: string,
+): Promise<string> {
   const auth = getGoogleAuth()
   if (!auth) return FALLBACK_REPLY
 
-  // One session per phone number lets Dialogflow CX keep each student's conversation memory.
-  const sessionId = fromNumber.replace(/[^a-zA-Z0-9]/g, '')
+  // One session per normalized phone keeps each student's memory stable across number formats.
+  const sessionId = profile?.phone ?? normalizePhone(fromNumber)
 
   try {
     const token = await auth.getAccessToken()
@@ -124,6 +162,7 @@ async function detectIntent(fromNumber: string, textBody: string): Promise<strin
           text: { text: textBody },
           languageCode: 'es',
         },
+        ...(profile ? { queryParams: buildTutorContext(profile) } : {}),
       }),
     })
 
@@ -183,8 +222,8 @@ async function sendWhatsAppText(fromNumber: string, replyText: string) {
   }
 }
 
-async function handleMessage(message: IncomingTextMessage) {
-  const reply = await detectIntent(message.from, message.text)
+async function handleMessage(message: IncomingTextMessage, profile: UserProfile | undefined) {
+  const reply = await detectIntent(profile, message.from, message.text)
   await sendWhatsAppText(message.from, reply)
 }
 
@@ -203,8 +242,8 @@ export async function POST(req: Request) {
   // 360dialog expects a fast 200; register users and send replies after responding.
   if (senders.size > 0) {
     after(async () => {
-      await registerSenders(senders)
-      await Promise.allSettled(messages.map(handleMessage))
+      const profiles = await registerSenders(senders)
+      await Promise.allSettled(messages.map((m) => handleMessage(m, profiles.get(m.from))))
     })
   }
 
