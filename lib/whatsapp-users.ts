@@ -191,7 +191,17 @@ export async function upsertWhatsAppUser(
 
   if (createRes.ok) {
     console.log(`[whatsapp] Registered new user ${docId} (trial until ${trialEnd})`)
-  } else if (createRes.status !== 409) {
+    return buildProfile(docId, rawPhone, fields)
+  }
+
+  // 409: a concurrent message created the doc first; use the stored profile, not our draft.
+  if (createRes.status === 409) {
+    const storedRes = await fetch(docUrl, { headers })
+    if (storedRes.ok) {
+      const stored = (await storedRes.json()) as FirestoreDocument
+      return buildProfile(docId, rawPhone, stored.fields ?? {})
+    }
+  } else {
     console.error(
       `[whatsapp] Firestore user create failed - status: ${createRes.status} - body: ${await createRes.text()}`,
     )
