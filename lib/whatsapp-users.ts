@@ -112,7 +112,7 @@ function resolveProjectId(auth: GoogleAuth): Promise<string | null> {
 }
 
 /**
- * Finds `users/{10 digits}` and returns the profile. Existing users only get `last_message_at`
+ * Finds `users/{10 digits}` and returns the profile. Existing users only get `last_message_date`
  * touched, so name, grade, country and trial dates are never overwritten. New senders get a
  * 14-day trial document.
  */
@@ -142,10 +142,10 @@ export async function upsertWhatsAppUser(
 
   if (existingRes.ok) {
     const existing = (await existingRes.json()) as FirestoreDocument
-    const updateRes = await fetch(`${docUrl}?updateMask.fieldPaths=last_message_at`, {
+    const updateRes = await fetch(`${docUrl}?updateMask.fieldPaths=last_message_date`, {
       method: 'PATCH',
       headers,
-      body: JSON.stringify({ fields: { last_message_at: { timestampValue: now } } }),
+      body: JSON.stringify({ fields: { last_message_date: { timestampValue: now } } }),
     })
     if (!updateRes.ok) {
       console.error(
@@ -174,7 +174,7 @@ export async function upsertWhatsAppUser(
     trial_end_date: { timestampValue: trialEnd },
     status: { stringValue: 'active_trial' },
     source: { stringValue: 'whatsapp' },
-    last_message_at: { timestampValue: now },
+    last_message_date: { timestampValue: now },
     ...(country ? { country: { stringValue: country } } : {}),
   }
 
