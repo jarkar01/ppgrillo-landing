@@ -64,17 +64,12 @@ function cleanDigits(rawPhone: string): string {
 
 /**
  * Meta sends Mexican mobiles as `521` + 10 digits, while users and other systems write
- * `52` + 10, `+52 1 ...` or the bare 10 digits. Every format collapses to the 10-digit national
- * number, which is the Firestore `users/{id}`, so a returning student always hits the same doc.
+ * `52` + 10, `+52 1 ...`, `044 ...` or the bare 10 digits. Every prefix (country code, mobile "1",
+ * long-distance codes) sits in front of the national number, so keeping the last 10 digits gives
+ * the Firestore `users/{id}` and a returning student always hits the same doc.
  */
 export function normalizePhone(rawPhone: string): string {
-  const digits = cleanDigits(rawPhone)
-  if (digits.length === NATIONAL_DIGITS + 3 && digits.startsWith('521')) return digits.slice(3)
-  // Old Mexican long-distance mobile prefixes (044/045 + 10 digits).
-  if (digits.length === NATIONAL_DIGITS + 3 && /^04[45]/.test(digits)) return digits.slice(3)
-  if (digits.length === NATIONAL_DIGITS + 2 && digits.startsWith(MX_COUNTRY_CODE)) return digits.slice(2)
-  if (digits.length === NATIONAL_DIGITS + 1 && digits.startsWith('1')) return digits.slice(1)
-  return digits.length > NATIONAL_DIGITS ? digits.slice(-NATIONAL_DIGITS) : digits
+  return cleanDigits(rawPhone).slice(-NATIONAL_DIGITS)
 }
 
 /** Country code + 10 digits without the Mexican mobile "1": 5215512345678 -> 525512345678. */
@@ -300,7 +295,13 @@ async function findLegacyUser(ctx: FirestoreContext, rawPhone: string): Promise<
       continue
     }
     const rows = (await res.json()) as Array<{ document?: { name: string; fields?: FirestoreFields } }>
-    const match = rows.find((r) => r.document && !readString(r.document.fields ?? {}, ['merged_into']))
+    const currentId = normalizePhone(rawPhone)
+    const match = rows.find(
+      (r) =>
+        r.document &&
+        r.document.name.split('/').pop() !== currentId &&
+        !readString(r.document.fields ?? {}, ['merged_into']),
+    )
     if (match?.document) {
       return { id: match.document.name.split('/').pop() ?? '', fields: match.document.fields ?? {} }
     }
@@ -382,6 +383,31 @@ export async function upsertWhatsAppUser(
     if (!existingFields.task_count) {
       touch.task_count = { integerValue: String(buildUsage(existingFields).taskCount) }
     }
+    // A blank doc may have been created under the 10-digit ID while the student's registration
+    // still lives under an older ID; pull name, grade and a paid plan from it instead of re-asking.
+    const hasName = Boolean(readString(existingFields, ['name']))
+    const hasGrade = Boolean(readString(existingFields, ['grade']))
+    let legacyId: string | null = null
+    if (!hasName || !hasGrade) {
+      const legacy = await findLegacyUser(ctx, rawPhone)
+      if (legacy) {
+        const legacyName = readString(legacy.fields, ['name'])
+        const legacyGrade = readString(legacy.fields, ['grade'])
+        const legacyPlan = readString(legacy.fields, ['plan'])
+        const currentPlan = readString(existingFields, ['plan'])
+        if (!hasName && legacyName) touch.name = { stringValue: legacyName }
+        if (!hasGrade && legacyGrade) touch.grade = { stringValue: legacyGrade }
+        if (legacyPlan && legacyPlan !== 'free' && (!currentPlan || currentPlan === 'free')) {
+          touch.plan = { stringValue: legacyPlan }
+          const legacyStatus = readString(legacy.fields, ['status'])
+          if (legacyStatus) touch.status = { stringValue: legacyStatus }
+        }
+        if (touch.name || touch.grade || touch.plan) {
+          touch.legacy_doc_id = { stringValue: legacy.id }
+          legacyId = legacy.id
+        }
+      }
+    }
     const touchMask = Object.keys(touch).map((f) => `updateMask.fieldPaths=${f}`).join('&')
     const updateRes = await fetch(`${docUrl}?${touchMask}`, {
       method: 'PATCH',
@@ -392,6 +418,13 @@ export async function upsertWhatsAppUser(
       console.error(
         `[whatsapp] Firestore user update failed - status: ${updateRes.status} - body: ${await updateRes.text()}`,
       )
+    } else if (legacyId) {
+      await fetch(`${base}/${encodeURIComponent(legacyId)}?updateMask.fieldPaths=merged_into`, {
+        method: 'PATCH',
+        headers,
+        body: JSON.stringify({ fields: { merged_into: { stringValue: docId } } }),
+      })
+      console.log(`[whatsapp] Recovered profile from legacy user ${legacyId} -> ${docId}`)
     }
     return buildProfile(docId, rawPhone, { ...existingFields, ...touch }, false)
   }
