@@ -53,15 +53,46 @@ export type AccessDecision =
   | { allowed: true; startedTask: boolean; isLastFreeTask: boolean }
   | { allowed: false; reason: 'free_exhausted' | 'standard_limit' }
 
-// WhatsApp sends E.164 digits without "+": 5215512345678 (MX mobile), 573001234567 (CO)...
-// Firestore users/{id} always uses the 10-digit national number, so every format maps to one doc.
+const MX_COUNTRY_CODE = '52'
+
+function cleanDigits(rawPhone: string): string {
+  const digits = rawPhone.replace(/\D/g, '')
+  return digits.startsWith('00') ? digits.slice(2) : digits
+}
+
+/**
+ * Meta sends Mexican mobiles as `521` + 10 digits, while users and other systems write
+ * `52` + 10, `+52 1 ...` or the bare 10 digits. Every format collapses to the 10-digit national
+ * number, which is the Firestore `users/{id}`, so a returning student always hits the same doc.
+ */
 export function normalizePhone(rawPhone: string): string {
-  let digits = rawPhone.replace(/\D/g, '')
-  if (digits.startsWith('00')) digits = digits.slice(2)
+  const digits = cleanDigits(rawPhone)
   if (digits.length === NATIONAL_DIGITS + 3 && digits.startsWith('521')) return digits.slice(3)
-  if (digits.length === NATIONAL_DIGITS + 2 && digits.startsWith('52')) return digits.slice(2)
+  // Old Mexican long-distance mobile prefixes (044/045 + 10 digits).
+  if (digits.length === NATIONAL_DIGITS + 3 && /^04[45]/.test(digits)) return digits.slice(3)
+  if (digits.length === NATIONAL_DIGITS + 2 && digits.startsWith(MX_COUNTRY_CODE)) return digits.slice(2)
   if (digits.length === NATIONAL_DIGITS + 1 && digits.startsWith('1')) return digits.slice(1)
   return digits.length > NATIONAL_DIGITS ? digits.slice(-NATIONAL_DIGITS) : digits
+}
+
+/** Country code + 10 digits without the Mexican mobile "1": 5215512345678 -> 525512345678. */
+export function phoneE164(rawPhone: string): string {
+  const digits = cleanDigits(rawPhone)
+  const national = normalizePhone(rawPhone)
+  if (digits.length <= NATIONAL_DIGITS) return `${MX_COUNTRY_CODE}${national}`
+  const prefix = digits.slice(0, digits.length - NATIONAL_DIGITS)
+  const countryCode = prefix === '521' || /^04[45]$/.test(prefix) ? MX_COUNTRY_CODE : prefix
+  return `${countryCode}${national}`
+}
+
+/** IDs older versions or manual imports may have used for the same number. */
+function legacyPhoneIds(rawPhone: string): string[] {
+  const docId = normalizePhone(rawPhone)
+  const digits = cleanDigits(rawPhone)
+  const e164 = phoneE164(rawPhone)
+  const ids = [digits, `+${digits}`, e164, `+${e164}`]
+  if (e164.startsWith(MX_COUNTRY_CODE)) ids.push(`521${docId}`, `+521${docId}`)
+  return [...new Set(ids)].filter((id) => id && id !== docId)
 }
 
 const COUNTRY_BY_PREFIX: Array<[string, string]> = [
@@ -229,6 +260,94 @@ async function getFirestoreContext(auth: GoogleAuth): Promise<FirestoreContext |
   }
 }
 
+type LegacyUser = { id: string; fields: FirestoreFields }
+
+/**
+ * Looks for the same number saved under an older ID (e.g. `5215512345678`, `+525512345678`)
+ * or with a different `phone`/`whatsapp_id` field, so returning students keep their profile.
+ */
+async function findLegacyUser(ctx: FirestoreContext, rawPhone: string): Promise<LegacyUser | null> {
+  const ids = legacyPhoneIds(rawPhone)
+
+  for (const id of ids) {
+    const res = await fetch(`${ctx.base}/${encodeURIComponent(id)}`, { headers: ctx.headers })
+    if (res.ok) {
+      const doc = (await res.json()) as FirestoreDocument
+      if (!readString(doc.fields ?? {}, ['merged_into'])) return { id, fields: doc.fields ?? {} }
+    }
+  }
+
+  const documentsRoot = ctx.base.slice(0, -`/${USERS_COLLECTION}`.length)
+  const values = [normalizePhone(rawPhone), ...ids].map((v) => ({ stringValue: v }))
+
+  for (const fieldPath of ['whatsapp_id', 'phone', 'phone_e164']) {
+    const res = await fetch(`${documentsRoot}:runQuery`, {
+      method: 'POST',
+      headers: ctx.headers,
+      body: JSON.stringify({
+        structuredQuery: {
+          from: [{ collectionId: USERS_COLLECTION }],
+          where: { fieldFilter: { field: { fieldPath }, op: 'IN', value: { arrayValue: { values } } } },
+          limit: 5,
+        },
+      }),
+    })
+    if (!res.ok) {
+      console.error(`[whatsapp] Legacy user query failed - status: ${res.status} - body: ${await res.text()}`)
+      continue
+    }
+    const rows = (await res.json()) as Array<{ document?: { name: string; fields?: FirestoreFields } }>
+    const match = rows.find((r) => r.document && !readString(r.document.fields ?? {}, ['merged_into']))
+    if (match?.document) {
+      return { id: match.document.name.split('/').pop() ?? '', fields: match.document.fields ?? {} }
+    }
+  }
+
+  return null
+}
+
+/** Copies a legacy profile into `users/{10 digits}` and marks the old doc as merged. */
+async function migrateLegacyUser(
+  ctx: FirestoreContext,
+  docId: string,
+  rawPhone: string,
+  legacy: LegacyUser,
+  now: string,
+): Promise<FirestoreFields | null> {
+  const fields: FirestoreFields = {
+    ...legacy.fields,
+    phone: { stringValue: docId },
+    phone_e164: { stringValue: phoneE164(rawPhone) },
+    whatsapp_id: { stringValue: rawPhone.replace(/\D/g, '') },
+    legacy_doc_id: { stringValue: legacy.id },
+    last_message_date: { timestampValue: now },
+  }
+
+  const createRes = await fetch(`${ctx.base}?documentId=${encodeURIComponent(docId)}`, {
+    method: 'POST',
+    headers: ctx.headers,
+    body: JSON.stringify({ fields }),
+  })
+
+  if (!createRes.ok && createRes.status !== 409) {
+    console.error(
+      `[whatsapp] Legacy user migration failed - status: ${createRes.status} - body: ${await createRes.text()}`,
+    )
+    return legacy.fields
+  }
+
+  if (legacy.id !== docId) {
+    await fetch(`${ctx.base}/${encodeURIComponent(legacy.id)}?updateMask.fieldPaths=merged_into`, {
+      method: 'PATCH',
+      headers: ctx.headers,
+      body: JSON.stringify({ fields: { merged_into: { stringValue: docId } } }),
+    })
+  }
+
+  console.log(`[whatsapp] Migrated legacy user ${legacy.id} -> ${docId}`)
+  return fields
+}
+
 /**
  * Finds `users/{10 digits}` and returns the profile with its task usage. Existing users only get
  * `last_message_date` touched. New senders get a free-plan document with 3 lifetime tasks.
@@ -271,11 +390,18 @@ export async function upsertWhatsAppUser(
     return null
   }
 
+  const legacy = await findLegacyUser(ctx, rawPhone)
+  if (legacy) {
+    const migrated = await migrateLegacyUser(ctx, docId, rawPhone, legacy, now)
+    if (migrated) return buildProfile(docId, rawPhone, migrated, false)
+  }
+
   const startedAt = firstMessageAt.toISOString()
   const country = countryFromPhone(rawPhone)
 
   const fields: FirestoreFields = {
     phone: { stringValue: docId },
+    phone_e164: { stringValue: phoneE164(rawPhone) },
     whatsapp_id: { stringValue: rawPhone.replace(/\D/g, '') },
     created_at: { timestampValue: startedAt },
     plan: { stringValue: 'free' },
