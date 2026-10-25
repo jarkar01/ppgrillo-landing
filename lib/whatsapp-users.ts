@@ -30,6 +30,9 @@ export type TaskUsage = {
   periodKey?: string
   periodTasksUsed: number
   currentTaskStartedAt?: Date
+  weekKey?: string
+  weekTasks: number
+  weekTopics: string[]
 }
 
 export type UserProfile = {
@@ -140,7 +143,39 @@ function buildUsage(fields: FirestoreFields): TaskUsage {
     periodKey: readString(fields, ['tasks_period']),
     periodTasksUsed: readInt(fields, 'period_tasks_used'),
     currentTaskStartedAt: readDate(fields, 'current_task_started_at'),
+    weekKey: readString(fields, ['week_key']),
+    weekTasks: readInt(fields, 'week_tasks'),
+    weekTopics: splitTopics(readString(fields, ['week_topics'])),
   }
+}
+
+const MAX_WEEK_TOPICS = 8
+const MAX_TOPIC_LENGTH = 80
+
+function splitTopics(raw: string | undefined): string[] {
+  return raw ? raw.split('\n').filter(Boolean) : []
+}
+
+function topicFromMessage(text: string): string {
+  const clean = text.replace(/\s+/g, ' ').trim()
+  return clean.length > MAX_TOPIC_LENGTH ? `${clean.slice(0, MAX_TOPIC_LENGTH - 1)}…` : clean
+}
+
+/** ISO week (e.g. "2026-W43") in Mexico City time, so the Sunday report covers Monday–Sunday. */
+export function weekKey(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value)
+  const local = new Date(Date.UTC(get('year'), get('month') - 1, get('day')))
+  const dayOfWeek = local.getUTCDay() || 7
+  local.setUTCDate(local.getUTCDate() + 4 - dayOfWeek)
+  const yearStart = new Date(Date.UTC(local.getUTCFullYear(), 0, 1))
+  const week = Math.ceil(((local.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7)
+  return `${local.getUTCFullYear()}-W${String(week).padStart(2, '0')}`
 }
 
 function buildProfile(
@@ -292,7 +327,20 @@ function effectivePlan(usage: TaskUsage, now: Date): PlanId {
 
 type Evaluation = { decision: AccessDecision; updates: FirestoreFields }
 
-export function evaluateTaskAccess(usage: TaskUsage, now: Date): Evaluation {
+function weeklyActivityUpdates(usage: TaskUsage, now: Date, topic: string): FirestoreFields {
+  const week = weekKey(now)
+  const sameWeek = usage.weekKey === week
+  const topics = [...(sameWeek ? usage.weekTopics : []), topicFromMessage(topic)]
+    .filter(Boolean)
+    .slice(-MAX_WEEK_TOPICS)
+  return {
+    week_key: { stringValue: week },
+    week_tasks: { integerValue: String((sameWeek ? usage.weekTasks : 0) + 1) },
+    week_topics: { stringValue: topics.join('\n') },
+  }
+}
+
+export function evaluateTaskAccess(usage: TaskUsage, now: Date, topic = ''): Evaluation {
   const plan = effectivePlan(usage, now)
 
   const continuingTask =
@@ -336,6 +384,7 @@ export function evaluateTaskAccess(usage: TaskUsage, now: Date): Evaluation {
     decision: { allowed: true, startedTask: true, isLastFreeTask: false },
     updates: {
       ...startTask,
+      ...weeklyActivityUpdates(usage, now, topic),
       tasks_period: { stringValue: period },
       period_tasks_used: { integerValue: String(usedThisPeriod + 1) },
       status: { stringValue: plan },
@@ -348,8 +397,9 @@ export async function consumeTask(
   auth: GoogleAuth,
   profile: UserProfile,
   now: Date,
+  topic = '',
 ): Promise<AccessDecision> {
-  const { decision, updates } = evaluateTaskAccess(profile.usage, now)
+  const { decision, updates } = evaluateTaskAccess(profile.usage, now, topic)
   const fieldPaths = Object.keys(updates)
   if (fieldPaths.length === 0) return decision
 
@@ -368,4 +418,108 @@ export async function consumeTask(
     )
   }
   return decision
+}
+
+export type ReportRecipient = {
+  docId: string
+  recipient: string
+  studentName?: string
+  plan: Exclude<PlanId, 'free'>
+  weekTasks: number
+  weekTopics: string[]
+}
+
+type RunQueryRow = { document?: { name: string; fields?: FirestoreFields } }
+
+/**
+ * Paid subscribers (Estándar and Familiar) who have not received the report for `week` yet.
+ * Reports go to `parent_phone` when the family registered one, otherwise to the student's line.
+ */
+export async function listReportRecipients(
+  auth: GoogleAuth,
+  week: string,
+  now: Date,
+): Promise<ReportRecipient[]> {
+  const ctx = await getFirestoreContext(auth)
+  if (!ctx) return []
+  const documentsRoot = ctx.base.slice(0, -`/${USERS_COLLECTION}`.length)
+
+  const res = await fetch(`${documentsRoot}:runQuery`, {
+    method: 'POST',
+    headers: ctx.headers,
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: USERS_COLLECTION }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: 'plan' },
+            op: 'IN',
+            value: {
+              arrayValue: {
+                values: ['standard', 'family', 'estandar', 'estándar', 'familiar'].map((v) => ({
+                  stringValue: v,
+                })),
+              },
+            },
+          },
+        },
+      },
+    }),
+  })
+
+  if (!res.ok) {
+    console.error(`[report] Firestore runQuery failed - status: ${res.status} - body: ${await res.text()}`)
+    return []
+  }
+
+  const rows = (await res.json()) as RunQueryRow[]
+  const recipients: ReportRecipient[] = []
+
+  for (const row of rows) {
+    if (!row.document) continue
+    const fields = row.document.fields ?? {}
+    const docId = row.document.name.split('/').pop() ?? ''
+    const usage = buildUsage(fields)
+    const plan = effectivePlan(usage, now)
+    if (plan === 'free') continue
+    if (readString(fields, ['last_report_week']) === week) continue
+
+    const parentPhone = readString(fields, ['parent_phone', 'telefono_padre', 'parentPhone'])
+    const whatsappId = readString(fields, ['whatsapp_id'])
+    const recipient = (parentPhone ?? whatsappId ?? `52${docId}`).replace(/\D/g, '')
+    if (!recipient) continue
+
+    const sameWeek = usage.weekKey === week
+    recipients.push({
+      docId,
+      recipient,
+      studentName: readString(fields, ['student_name', 'studentName', 'child_name', 'name', 'nombre']),
+      plan,
+      weekTasks: sameWeek ? usage.weekTasks : 0,
+      weekTopics: sameWeek ? usage.weekTopics : [],
+    })
+  }
+
+  return recipients
+}
+
+export async function markReportSent(auth: GoogleAuth, docId: string, week: string, now: Date) {
+  const ctx = await getFirestoreContext(auth)
+  if (!ctx) return
+  const mask = ['last_report_week', 'last_report_at']
+    .map((f) => `updateMask.fieldPaths=${f}`)
+    .join('&')
+  const res = await fetch(`${ctx.base}/${encodeURIComponent(docId)}?${mask}`, {
+    method: 'PATCH',
+    headers: ctx.headers,
+    body: JSON.stringify({
+      fields: {
+        last_report_week: { stringValue: week },
+        last_report_at: { timestampValue: now.toISOString() },
+      },
+    }),
+  })
+  if (!res.ok) {
+    console.error(`[report] Firestore mark sent failed - status: ${res.status} - body: ${await res.text()}`)
+  }
 }

@@ -17,7 +17,7 @@ const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 const defaultBenefits = [
   'Tutor socrático 24/7 con paciencia infinita',
   'Lectura de fotos y audios de la libreta',
-  'Reportes para padres bajo demanda',
+  'Reporte semanal de avance para padres en WhatsApp',
   'Campamento de verano incluido',
   'Pagos vía Mercado Pago o Stripe',
 ]
@@ -72,10 +72,11 @@ export function Pricing({
                 <span className="pb-1.5 text-lg font-semibold text-slate-500">MXN / mes</span>
               </div>
               <p className="mt-1.5 text-sm text-slate-500">
-                Plan Estándar · hasta {STANDARD_MONTHLY_TASKS} tareas al mes
+                Plan Estándar · tareas semanales (hasta {STANDARD_MONTHLY_TASKS} al mes) + reporte
+                semanal para padres
               </p>
               <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">
-                ¿Varios hermanos o tareas ilimitadas? Plan Familiar por ${FAMILY_PRICE_MXN} MXN / mes.
+                ¿Consultas ilimitadas o varios hijos? Plan Familiar por ${FAMILY_PRICE_MXN} MXN / mes.
               </p>
             </div>
 

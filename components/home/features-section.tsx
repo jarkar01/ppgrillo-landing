@@ -35,8 +35,8 @@ const features = [
   {
     icon: BarChart3,
     color: '#34A853',
-    title: 'Reportes para padres bajo demanda',
-    body: 'Evolución periódica y materias consultadas, directo a tu WhatsApp cuando tú los pidas.',
+    title: 'Reporte semanal para padres',
+    body: 'Cada domingo, las tareas y temas de la semana directo a tu WhatsApp. Incluido en el Plan Estándar.',
   },
 ]
 
@@ -59,7 +59,7 @@ export function FeaturesSection() {
             <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#25D366]" aria-hidden="true" />
             <span>
               WhatsApp se usa solo para el registro rápido con tu número, las notificaciones de
-              acceso y los reportes para padres bajo demanda.
+              acceso y el reporte semanal para padres.
             </span>
           </p>
         </div>

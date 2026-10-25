@@ -41,8 +41,8 @@ const PLANS: Plan[] = [
     featured: true,
     payment: true,
     features: [
-      `Hasta ${STANDARD_MONTHLY_TASKS} tareas al mes`,
-      'Cubre las tareas semanales del ciclo escolar',
+      `Tareas semanales del ciclo escolar (hasta ${STANDARD_MONTHLY_TASKS} al mes)`,
+      'Reporte semanal de avance para padres en WhatsApp',
       'Fotos y notas de voz de la libreta',
     ],
     cta: 'Contratar Estándar',
@@ -54,9 +54,9 @@ const PLANS: Plan[] = [
     period: 'MXN / mes',
     payment: true,
     features: [
-      'Tareas ilimitadas',
-      'Varios hermanos en la misma línea de WhatsApp',
-      'Reportes de progreso para papás',
+      'Consultas ilimitadas',
+      'Multi-hijo en la misma línea de WhatsApp',
+      'Reporte semanal de avance para padres',
     ],
     cta: 'Contratar Familiar',
     href: MERCADOPAGO_FAMILY_URL,
