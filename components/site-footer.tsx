@@ -1,6 +1,4 @@
-import Link from 'next/link'
 import { ShieldCheck, ChevronRight, Sparkles, Handshake } from 'lucide-react'
-import { BrandIdentity, CollaborationNote } from '@/components/brand-identity'
 
 function GoogleCloudMark() {
   return (
@@ -36,7 +34,7 @@ function PartnerCard({
 
 export function SiteFooter() {
   return (
-    <footer className="relative z-20 border-t border-slate-200/70 bg-secondary/40">
+    <footer className="border-t border-slate-200/70 bg-secondary/40">
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
         <div className="text-center">
           <p className="font-display text-sm font-bold uppercase tracking-widest text-slate-500">
@@ -114,42 +112,22 @@ export function SiteFooter() {
           </span>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-slate-200 pt-8 sm:flex-row">
-          <BrandIdentity align="start" className="max-sm:items-center" />
-          <nav className="relative z-20 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
-            <Link
-              href="/privacidad"
-              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
-            >
-              Aviso de Privacidad
-            </Link>
-            <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
-              |
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 sm:flex-row">
+          <div className="flex flex-col items-center gap-1 sm:items-start">
+            <span className="font-display text-xl font-extrabold leading-none tracking-tight sm:text-2xl">
+              <span style={{ color: '#EA4335' }}>P</span>
+              <span style={{ color: '#34A853' }}>p</span>
+              <span style={{ color: '#4285F4' }}>Grill</span>
+              <span style={{ color: '#FBBC05' }}>o</span>
             </span>
-            <Link
-              href="/terminos"
-              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
-            >
-              Términos del Servicio
-            </Link>
-            <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
-              |
+            <span className="font-display text-[0.7rem] font-semibold tracking-wide text-slate-500">
+              powered by Google
             </span>
-            <a
-              href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
-              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
-            >
-              Contacto
-            </a>
-          </nav>
+          </div>
+          <p className="text-sm text-slate-500">
+            © {new Date().getFullYear()} PpGrillo. Aprender a pensar, en familia.
+          </p>
         </div>
-
-        <CollaborationNote className="mx-auto mt-6 max-w-2xl text-center" />
-
-        <p className="mt-3 text-center text-xs text-slate-400">
-          © {new Date().getFullYear()} Arka Universidad Digital S.A. de C.V. Todos los derechos
-          reservados.
-        </p>
       </div>
     </footer>
   )

@@ -1,14 +1,5 @@
-import {
-  ArrowDown,
-  CreditCard,
-  MessageCircle,
-  MousePointerClick,
-  Smartphone,
-  type LucideIcon,
-} from 'lucide-react'
-import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
-import { WhatsappCta } from '@/components/whatsapp-cta'
+import { Button } from '@/components/ui/button'
+import { CreditCard, ShieldCheck, MousePointerClick, MessageCircle, Play } from 'lucide-react'
 import {
   WhatsappPhone,
   IncomingBubble,
@@ -16,93 +7,84 @@ import {
   NotebookMessage,
 } from '@/components/whatsapp-phone'
 
-const badgeItems = [
-  { label: 'Paz en el hogar', color: '#34A853' },
-  { label: 'K-8 a K-12', color: '#4285F4' },
-  { label: 'Método Socrático', color: '#FBBC05' },
-]
-
-const defaultReassurances = [
+const badges = [
   { icon: CreditCard, label: 'Sin tarjeta bancaria' },
-  { icon: Smartphone, label: 'Sin apps que descargar' },
-  { icon: MousePointerClick, label: 'Cancela cuando quieras' },
+  { icon: ShieldCheck, label: 'WhatsApp oficial' },
+  { icon: MousePointerClick, label: 'Cancelación en 1 clic' },
 ]
 
-type HeroProps = {
-  ctaIcon?: LucideIcon
-  reassurances?: { icon: LucideIcon; label: string }[]
-  learnMoreHref?: string
-}
-
-export function Hero({
-  ctaIcon: CtaIcon = MessageCircle,
-  reassurances = defaultReassurances,
-  learnMoreHref = '#saber-mas',
-}: HeroProps) {
+export function Hero() {
   return (
     <section className="relative overflow-hidden">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-10 lg:py-24">
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(60%_50%_at_75%_0%,rgba(37,211,102,0.12),transparent_70%)]"
+        aria-hidden="true"
+      />
+      <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-16 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-24">
+        {/* copy */}
         <div className="max-w-xl">
-          <span className="inline-flex flex-wrap items-center gap-x-3 gap-y-1.5 rounded-full border border-slate-200 bg-card px-3.5 py-1.5 text-xs font-semibold text-slate-700 shadow-sm">
-            {badgeItems.map(({ label, color }) => (
-              <span key={label} className="inline-flex items-center gap-1.5">
-                <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
-                {label}
-              </span>
-            ))}
+          <span className="inline-flex items-center gap-2 rounded-full bg-accent px-3.5 py-1.5 text-xs font-semibold text-accent-foreground">
+            <span className="h-1.5 w-1.5 rounded-full bg-primary" />
+            Tutor socrático K-12 en WhatsApp
           </span>
 
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
-            Deja de pelear por la tarea.{' '}
-            <span className="text-[#4285F4]">Recupera la paz de tus tardes.</span>
+            Tu hijo no necesita que le hagan la tarea.{' '}
+            <span style={{ color: '#4285F4' }}>Recupera la armonía del hogar.</span>
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            PpGrillo acompaña a tu hijo a razonar paso a paso por WhatsApp. Sin apps que descargar.
-            Un tutor socrático paciente que no le hace la tarea: le enseña a pensar.
+            El tutor socrático en WhatsApp con paciencia infinita que acompaña a tus hijos paso a
+            paso para que ellos aprendan a pensar, tú disfrutes de tu hogar y las tardes recuperen
+            la paz.
           </p>
 
-          <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <WhatsappCta
-              className={cn(
-                buttonVariants({ size: 'lg' }),
-                'h-auto w-full gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
-              )}
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <Button
+              asChild
+              size="lg"
+              className="h-auto w-full whitespace-normal rounded-full px-6 py-3 text-center text-base font-semibold shadow-md shadow-emerald-600/20 sm:w-auto"
             >
-              <CtaIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Comenzar prueba gratis de 14 días
-            </WhatsappCta>
-            <a
-              href={learnMoreHref}
-              className="inline-flex items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline"
+              <a href="#precios">
+                <MessageCircle className="h-5 w-5 shrink-0" />
+                Activar 14 días gratis en WhatsApp
+              </a>
+            </Button>
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="h-auto w-full whitespace-normal rounded-full border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 sm:w-auto"
             >
-              ¿Quieres saber más?
-              <ArrowDown className="h-4 w-4" aria-hidden="true" />
-            </a>
+              <a href="#pedagogia">
+                <Play className="h-4 w-4 shrink-0" />
+                Ver cómo responde
+              </a>
+            </Button>
           </div>
 
-          <ul className="mt-6 flex flex-wrap gap-x-6 gap-y-3">
-            {reassurances.map(({ icon: Icon, label }) => (
+          <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
+            {badges.map(({ icon: Icon, label }) => (
               <li key={label} className="flex items-center gap-2 text-sm font-medium text-slate-600">
-                <Icon className="h-4 w-4 text-[#34A853]" aria-hidden="true" />
+                <Icon className="h-4 w-4 text-primary" />
                 {label}
               </li>
             ))}
           </ul>
         </div>
 
+        {/* phone */}
         <div className="relative">
           <WhatsappPhone>
             <NotebookMessage />
             <IncomingBubble>
-              ¡Recibí tu foto! Tranquilo, no hay prisa: lo resolvemos juntos. Imagina una balanza en
-              equilibrio. Para dejar sola a la <strong>x</strong>, ¿qué pasa si quitamos 4 de ambos
-              lados?
+              ¡Foto recibida! Tómate tu tiempo, aquí lo resolvemos juntos sin prisa. Imagina una
+              balanza en equilibrio: para dejar sola a la <strong>x</strong>, ¿qué pasa si restamos
+              4 a ambos lados?
             </IncomingBubble>
             <OutgoingBubble>Mmm... ¿quedaría 2x = 8?</OutgoingBubble>
             <IncomingBubble>
-              ¡Eso es, lo razonaste tú solo! Último paso: si 2 cajas iguales pesan 8 kilos, ¿cuánto
-              pesa cada una?
+              ¡Exacto! Ahora: si 2 cajas iguales pesan 8 kilos en total, ¿cuánto pesa cada una?
             </IncomingBubble>
           </WhatsappPhone>
         </div>
