@@ -1,4 +1,7 @@
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { ArkaSeal } from '@/components/arka-seal'
+import { WHATSAPP_URL } from '@/lib/whatsapp'
 import { CreditCard, ShieldCheck, MousePointerClick, MessageCircle, Play } from 'lucide-react'
 import {
   WhatsappPhone,
@@ -31,7 +34,7 @@ export function Hero() {
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
             Tu hijo no necesita que le hagan la tarea.{' '}
             <span className="block" style={{ color: '#4285F4' }}>
-              Recupera la paz de la tarde.
+              Recupera la armonía del hogar.
             </span>
           </h1>
 
@@ -43,25 +46,23 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <Button
-              asChild
+              nativeButton={false}
+              render={<a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" />}
               size="lg"
               className="h-auto w-full whitespace-normal rounded-full px-6 py-3 text-center text-base font-semibold shadow-md shadow-emerald-600/20 sm:w-auto"
             >
-              <a href="#precios">
-                <MessageCircle className="h-5 w-5 shrink-0" />
-                Activar 14 días gratis en WhatsApp
-              </a>
+              <MessageCircle className="h-5 w-5 shrink-0" />
+              Empezar gratis en WhatsApp
             </Button>
             <Button
-              asChild
+              nativeButton={false}
+              render={<a href="#pedagogia" />}
               size="lg"
               variant="outline"
               className="h-auto w-full whitespace-normal rounded-full border-slate-300 bg-white px-6 py-3 text-base font-semibold text-slate-700 sm:w-auto"
             >
-              <a href="#pedagogia">
-                <Play className="h-4 w-4 shrink-0" />
-                Ver cómo responde
-              </a>
+              <Play className="h-4 w-4 shrink-0" />
+              Ver cómo responde
             </Button>
           </div>
 
@@ -73,10 +74,20 @@ export function Hero() {
               </li>
             ))}
           </ul>
+
+          <ArkaSeal className="mt-8" />
         </div>
 
         {/* phone */}
         <div className="relative">
+          <Image
+            src="/grillo-mascot.png"
+            alt="Mascota de PpGrillo: un grillo metálico con lentes y lápiz"
+            width={180}
+            height={180}
+            priority
+            className="absolute -bottom-6 -left-2 z-10 hidden h-40 w-40 rounded-full bg-white object-cover shadow-xl ring-4 ring-white sm:block lg:-left-10"
+          />
           <WhatsappPhone>
             <NotebookMessage />
             <IncomingBubble>
