@@ -29,6 +29,8 @@ export type TaskUsage = {
   plan: PlanId
   planExpiresAt?: Date
   freeTasksUsed: number
+  /** Lifetime exercises started on any plan (Firestore `task_count`). */
+  taskCount: number
   periodKey?: string
   periodTasksUsed: number
   currentTaskStartedAt?: Date
@@ -175,6 +177,7 @@ function buildUsage(fields: FirestoreFields): TaskUsage {
     plan: readPlan(fields),
     planExpiresAt: readDate(fields, 'plan_expires_at'),
     freeTasksUsed: readInt(fields, 'free_tasks_used'),
+    taskCount: fields.task_count ? readInt(fields, 'task_count') : readInt(fields, 'free_tasks_used'),
     periodKey: readString(fields, ['tasks_period']),
     periodTasksUsed: readInt(fields, 'period_tasks_used'),
     currentTaskStartedAt: readDate(fields, 'current_task_started_at'),
@@ -232,7 +235,7 @@ function buildProfile(
 
   return {
     phone: docId,
-    name: readString(fields, ['student_name', 'studentName', 'child_name', 'childName', 'name', 'nombre']),
+    name: readString(fields, ['name', 'student_name', 'studentName', 'child_name', 'childName', 'nombre']),
     grade: readString(fields, ['grade', 'grado', 'school_grade', 'grado_escolar', 'nivel']),
     country,
     educationSystem,
@@ -370,17 +373,27 @@ export async function upsertWhatsAppUser(
 
   if (existingRes.ok) {
     const existing = (await existingRes.json()) as FirestoreDocument
-    const updateRes = await fetch(`${docUrl}?updateMask.fieldPaths=last_message_date`, {
+    const existingFields = existing.fields ?? {}
+    // Older profiles predate `phone_e164` / `task_count`; backfill them on the next message.
+    const touch: FirestoreFields = {
+      last_message_date: { timestampValue: now },
+      phone_e164: { stringValue: phoneE164(rawPhone) },
+    }
+    if (!existingFields.task_count) {
+      touch.task_count = { integerValue: String(buildUsage(existingFields).taskCount) }
+    }
+    const touchMask = Object.keys(touch).map((f) => `updateMask.fieldPaths=${f}`).join('&')
+    const updateRes = await fetch(`${docUrl}?${touchMask}`, {
       method: 'PATCH',
       headers,
-      body: JSON.stringify({ fields: { last_message_date: { timestampValue: now } } }),
+      body: JSON.stringify({ fields: touch }),
     })
     if (!updateRes.ok) {
       console.error(
         `[whatsapp] Firestore user update failed - status: ${updateRes.status} - body: ${await updateRes.text()}`,
       )
     }
-    return buildProfile(docId, rawPhone, existing.fields ?? {}, false)
+    return buildProfile(docId, rawPhone, { ...existingFields, ...touch }, false)
   }
 
   if (existingRes.status !== 404) {
@@ -407,6 +420,7 @@ export async function upsertWhatsAppUser(
     plan: { stringValue: 'free' },
     status: { stringValue: 'free_active' },
     free_tasks_used: { integerValue: '0' },
+    task_count: { integerValue: '0' },
     source: { stringValue: 'whatsapp' },
     last_message_date: { timestampValue: now },
     ...(country ? { country: { stringValue: country } } : {}),
@@ -519,6 +533,7 @@ export function evaluateTaskAccess(
     current_task_started_at: { timestampValue: now.toISOString() },
     last_task_activity_at: { timestampValue: now.toISOString() },
     current_task_text: { stringValue: message.replace(/\s+/g, ' ').trim().slice(0, MAX_EXERCISE_CHARS) },
+    task_count: { integerValue: String(usage.taskCount + 1) },
   }
 
   if (plan === 'free') {
@@ -565,6 +580,7 @@ function usageToFields(usage: TaskUsage): FirestoreFields {
   const fields: FirestoreFields = {
     plan: { stringValue: usage.plan },
     free_tasks_used: { integerValue: String(usage.freeTasksUsed) },
+    task_count: { integerValue: String(usage.taskCount) },
     period_tasks_used: { integerValue: String(usage.periodTasksUsed) },
     week_tasks: { integerValue: String(usage.weekTasks) },
     week_topics: { stringValue: usage.weekTopics.join('\n') },
@@ -611,6 +627,43 @@ export async function consumeTask(
     )
   }
   return decision
+}
+
+/**
+ * Stores the student's `name` and `grade` once they tell the bot, so later conversations
+ * never ask again. Only fills fields that are still empty; returns what was saved.
+ */
+export async function saveStudentProfile(
+  auth: GoogleAuth,
+  profile: UserProfile,
+  data: { name?: string; grade?: string },
+): Promise<{ name?: string; grade?: string }> {
+  const saved: { name?: string; grade?: string } = {}
+  if (data.name && !profile.name) saved.name = data.name
+  if (data.grade && !profile.grade) saved.grade = data.grade
+  if (!saved.name && !saved.grade) return saved
+
+  const updates: FirestoreFields = {
+    profile_updated_at: { timestampValue: new Date().toISOString() },
+  }
+  if (saved.name) updates.name = { stringValue: saved.name }
+  if (saved.grade) updates.grade = { stringValue: saved.grade }
+  Object.assign(profile, saved)
+
+  const ctx = await getFirestoreContext(auth)
+  if (!ctx) return saved
+  const mask = Object.keys(updates).map((f) => `updateMask.fieldPaths=${f}`).join('&')
+  const res = await fetch(`${ctx.base}/${encodeURIComponent(profile.phone)}?${mask}`, {
+    method: 'PATCH',
+    headers: ctx.headers,
+    body: JSON.stringify({ fields: updates }),
+  })
+  if (!res.ok) {
+    console.error(`[whatsapp] Firestore profile update failed - status: ${res.status} - body: ${await res.text()}`)
+  } else {
+    console.log(`[whatsapp] Saved student profile for ${profile.phone}: ${Object.keys(saved).join(', ')}`)
+  }
+  return saved
 }
 
 export type ReportRecipient = {
@@ -686,7 +739,7 @@ export async function listReportRecipients(
     recipients.push({
       docId,
       recipient,
-      studentName: readString(fields, ['student_name', 'studentName', 'child_name', 'name', 'nombre']),
+      studentName: readString(fields, ['name', 'student_name', 'studentName', 'child_name', 'nombre']),
       plan,
       weekTasks: sameWeek ? usage.weekTasks : 0,
       weekTopics: sameWeek ? usage.weekTopics : [],
