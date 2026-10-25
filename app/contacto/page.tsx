@@ -1,0 +1,139 @@
+import type { Metadata } from 'next'
+import Link from 'next/link'
+import { Mail, Clock, ShieldCheck, HelpCircle } from 'lucide-react'
+import { LegalBackButton } from '@/components/legal-back-button'
+
+export const metadata: Metadata = {
+  title: 'Contacto y Atención a Familias · PpGrillo',
+  description:
+    'Contacta a PpGrillo (Arka Universidad Digital S.A. de C.V.) para dudas pedagógicas, suscripciones y el ejercicio de tus derechos ARCO. Escríbenos a jfalomir@arkaedu.com.',
+}
+
+function Brand() {
+  return (
+    <span className="font-display text-xl font-extrabold leading-none tracking-tight">
+      <span style={{ color: '#EA4335' }}>P</span>
+      <span style={{ color: '#34A853' }}>p</span>
+      <span style={{ color: '#4285F4' }}>Grill</span>
+      <span style={{ color: '#FBBC05' }}>o</span>
+    </span>
+  )
+}
+
+function Card({
+  icon: Icon,
+  title,
+  children,
+}: {
+  icon: React.ComponentType<{ className?: string }>
+  title: string
+  children: React.ReactNode
+}) {
+  return (
+    <section className="rounded-2xl border border-slate-200 bg-card p-6 shadow-sm sm:p-8">
+      <div className="flex items-center gap-3">
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+          <Icon className="h-5 w-5" />
+        </span>
+        <h2 className="font-display text-lg font-bold tracking-tight text-slate-900 sm:text-xl">
+          {title}
+        </h2>
+      </div>
+      <div className="mt-4 space-y-3 text-sm leading-relaxed text-slate-600">{children}</div>
+    </section>
+  )
+}
+
+export default function ContactoPage() {
+  return (
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6 sm:py-16">
+        <LegalBackButton />
+
+        <header className="mt-8">
+          <Brand />
+          <h1 className="mt-4 font-display text-3xl font-extrabold tracking-tight text-balance text-slate-900 sm:text-4xl">
+            Contacto y Atención a Familias
+          </h1>
+          <p className="mt-4 text-pretty text-base leading-relaxed text-slate-600">
+            Estamos para ayudarte. Escríbenos para resolver dudas pedagógicas, gestionar tu
+            suscripción o ejercer tus derechos de privacidad y protección de datos de menores.
+          </p>
+        </header>
+
+        <div className="mt-10 space-y-6">
+          <Card icon={Mail} title="Correo de atención">
+            <p>
+              Puedes escribirnos directamente a nuestro correo oficial de atención a familias:
+            </p>
+            <a
+              href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
+              className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 font-semibold text-primary transition-colors hover:bg-primary/10"
+            >
+              <Mail className="h-4 w-4" />
+              jfalomir@arkaedu.com
+            </a>
+          </Card>
+
+          <Card icon={HelpCircle} title="Dudas y soporte">
+            <p>
+              Atendemos dudas pedagógicas sobre el tutor socrático, gestión de suscripciones y el
+              periodo de prueba de 14 días, métodos de pago (Mercado Pago) y solicitudes de derechos
+              ARCO y privacidad de menores. Incluye el mayor detalle posible para ayudarte mejor.
+            </p>
+          </Card>
+
+          <Card icon={ShieldCheck} title="Ejercicio de derechos ARCO">
+            <p>
+              Como titular de datos personales, tienes derecho a <strong>Acceder</strong>,{' '}
+              <strong>Rectificar</strong>, <strong>Cancelar</strong> u <strong>Oponerte</strong> al
+              tratamiento de tus datos (derechos ARCO), conforme a la LFPDPPP.
+            </p>
+            <p>
+              Para ejercerlos, envía tu solicitud a{' '}
+              <a
+                href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
+                className="font-semibold text-primary hover:underline"
+              >
+                jfalomir@arkaedu.com
+              </a>{' '}
+              indicando tu nombre, la cuenta asociada y el derecho que deseas ejercer. Consulta más
+              detalles en nuestro{' '}
+              <Link href="/privacidad" className="font-semibold text-primary hover:underline">
+                Aviso de Privacidad
+              </Link>
+              .
+            </p>
+          </Card>
+
+          <Card icon={Clock} title="Tiempos de respuesta">
+            <p>
+              Atendemos las solicitudes en un plazo máximo de <strong>48 horas hábiles</strong>. Las
+              solicitudes de eliminación de datos se procesan dentro de ese mismo periodo.
+            </p>
+          </Card>
+        </div>
+
+        <div className="mt-10 rounded-2xl border border-slate-200 bg-card p-6 text-sm text-slate-600 shadow-sm">
+          <p className="font-semibold text-slate-900">Arka Universidad Digital S.A. de C.V.</p>
+          <p className="mt-1">Chihuahua, México</p>
+        </div>
+
+        <footer className="mt-10 flex flex-wrap items-center gap-x-5 gap-y-2 border-t border-slate-200 pt-6">
+          <Link
+            href="/privacidad"
+            className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+          >
+            Aviso de Privacidad
+          </Link>
+          <Link
+            href="/terminos"
+            className="text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+          >
+            Términos del Servicio
+          </Link>
+        </footer>
+      </div>
+    </main>
+  )
+}

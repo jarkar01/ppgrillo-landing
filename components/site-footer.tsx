@@ -1,5 +1,6 @@
+import Link from 'next/link'
 import { ShieldCheck, ChevronRight, Sparkles, Handshake } from 'lucide-react'
-import { ArkaSeal } from '@/components/arka-seal'
+import { BrandIdentity, CollaborationNote } from '@/components/brand-identity'
 
 function GoogleCloudMark() {
   return (
@@ -35,7 +36,7 @@ function PartnerCard({
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-slate-200/70 bg-secondary/40">
+    <footer className="relative z-20 border-t border-slate-200/70 bg-secondary/40">
       <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8">
         <div className="text-center">
           <p className="font-display text-sm font-bold uppercase tracking-widest text-slate-500">
@@ -113,80 +114,42 @@ export function SiteFooter() {
           </span>
         </div>
 
-        <div className="mt-8 flex justify-center">
-          <ArkaSeal />
-        </div>
-
-        <div className="mt-12 grid gap-8 border-t border-slate-200 pt-10 md:grid-cols-3">
-          <section id="metodo-socratico" aria-labelledby="metodo-title" className="scroll-mt-24">
-            <h3 id="metodo-title" className="font-display text-base font-bold text-slate-900">
-              El Método Socrático
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
-              PpGrillo guía al alumno paso a paso con preguntas detonadoras, nunca con respuestas
-              directas. Así fomenta el esfuerzo cognitivo: tu hijo razona, se equivoca, ajusta y
-              llega por sí mismo a la solución, construyendo comprensión real y confianza.
-            </p>
-          </section>
-
-          <section id="privacidad" aria-labelledby="privacidad-title" className="scroll-mt-24">
-            <h3 id="privacidad-title" className="font-display text-base font-bold text-slate-900">
-              Política de Privacidad
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
-              Los datos personales se tratan conforme a la Ley Federal de Protección de Datos
-              Personales en Posesión de los Particulares. Solo usamos la información para brindar
-              la tutoría y los reportes a padres; no vendemos ni compartimos datos con terceros con
-              fines comerciales.
-            </p>
-          </section>
-
-          <section id="proteccion-menores" aria-labelledby="menores-title" className="scroll-mt-24">
-            <h3 id="menores-title" className="font-display text-base font-bold text-slate-900">
-              Protección de Menores
-            </h3>
-            <p className="mt-3 text-sm leading-relaxed text-slate-600">
-              El servicio requiere consentimiento de madre, padre o tutor. Aplicamos estándares de
-              seguridad escolar alineados con COPPA y FERPA, conversaciones limitadas al ámbito
-              educativo y acceso de los padres al seguimiento del aprendizaje.
-            </p>
-          </section>
-        </div>
-
-        <nav
-          aria-label="Enlaces legales"
-          className="mt-8 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm font-medium text-slate-600"
-        >
-          <a href="#metodo-socratico" className="hover:text-[#4285F4]">
-            Método Socrático
-          </a>
-          <a href="#privacidad" className="hover:text-[#4285F4]">
-            Políticas de Privacidad
-          </a>
-          <a href="#proteccion-menores" className="hover:text-[#4285F4]">
-            Regulaciones de Protección de Menores
-          </a>
-        </nav>
-
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-8 sm:flex-row">
-          <div className="flex flex-col items-center gap-1 sm:items-start">
-            <span className="font-display text-xl font-extrabold leading-none tracking-tight sm:text-2xl">
-              <span style={{ color: '#EA4335' }}>Pp</span>
-              <span style={{ color: '#4285F4' }}>Grillo</span>
+        <div className="mt-12 flex flex-col items-center justify-between gap-5 border-t border-slate-200 pt-8 sm:flex-row">
+          <BrandIdentity align="start" className="max-sm:items-center" />
+          <nav className="relative z-20 flex flex-wrap items-center justify-center gap-x-5 gap-y-1">
+            <Link
+              href="/privacidad"
+              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            >
+              Aviso de Privacidad
+            </Link>
+            <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
+              |
             </span>
-            <span className="font-display text-[0.7rem] font-semibold tracking-wide text-slate-500">
-              powered by Google
+            <Link
+              href="/terminos"
+              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            >
+              Términos del Servicio
+            </Link>
+            <span className="hidden text-slate-300 sm:inline" aria-hidden="true">
+              |
             </span>
-          </div>
-          <p className="text-sm text-slate-500">
-            © {new Date().getFullYear()} PpGrillo. Aprender a pensar, en familia.
-          </p>
+            <a
+              href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
+              className="inline-block cursor-pointer px-1 py-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
+            >
+              Contacto
+            </a>
+          </nav>
         </div>
 
-        <address className="mt-6 text-pretty text-center text-xs not-italic leading-relaxed text-slate-500">
-          Arka Universidad Digital, S.A. de C.V. | RFC: AUD2010054C2 | Domicilio fiscal: Calle
-          Acequia de los Lodazales #7649, Chihuahua, Chihuahua.
-        </address>
+        <CollaborationNote className="mx-auto mt-6 max-w-2xl text-center" />
+
+        <p className="mt-3 text-center text-xs text-slate-400">
+          © {new Date().getFullYear()} Arka Universidad Digital S.A. de C.V. Todos los derechos
+          reservados.
+        </p>
       </div>
     </footer>
   )
