@@ -2,6 +2,7 @@ import { Check, CreditCard, MessageCircle } from 'lucide-react'
 import { WhatsappCta } from '@/components/whatsapp-cta'
 import { WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 import {
+  FAMILY_MAX_USERS,
   FAMILY_PRICE_MXN,
   FREE_LIFETIME_TASKS,
   MERCADOPAGO_FAMILY_URL,
@@ -55,7 +56,7 @@ const PLANS: Plan[] = [
     payment: true,
     features: [
       'Consultas ilimitadas',
-      'Multi-hijo en la misma línea de WhatsApp',
+      `Hasta ${FAMILY_MAX_USERS} usuarios en la misma línea de WhatsApp`,
       'Reporte semanal de avance para padres',
     ],
     cta: 'Contratar Familiar',

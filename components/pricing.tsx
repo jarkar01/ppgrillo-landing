@@ -4,6 +4,7 @@ import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
 import {
+  FAMILY_MAX_USERS,
   FAMILY_PRICE_MXN,
   FREE_LIFETIME_TASKS,
   MERCADOPAGO_FAMILY_URL,
@@ -76,7 +77,8 @@ export function Pricing({
                 semanal para padres
               </p>
               <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">
-                ¿Consultas ilimitadas o varios hijos? Plan Familiar por ${FAMILY_PRICE_MXN} MXN / mes.
+                ¿Consultas ilimitadas o varios hijos? Plan Familiar (hasta {FAMILY_MAX_USERS} usuarios) por $
+                {FAMILY_PRICE_MXN} MXN / mes.
               </p>
             </div>
 
@@ -118,7 +120,7 @@ export function Pricing({
                 rel="noopener noreferrer"
                 className="inline-flex w-full items-center justify-center rounded-full border-2 border-slate-300 px-6 py-3 text-[15px] font-bold text-slate-700 transition-colors hover:bg-slate-50"
               >
-                Plan Familiar · ${FAMILY_PRICE_MXN} MXN al mes
+                Plan Familiar · ${FAMILY_PRICE_MXN} MXN al mes · hasta {FAMILY_MAX_USERS} usuarios
                 <span className="sr-only"> (abre Mercado Pago en una pestaña nueva)</span>
               </a>
               <p className="text-center text-xs text-slate-500">
