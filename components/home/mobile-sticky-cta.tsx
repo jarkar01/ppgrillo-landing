@@ -30,7 +30,7 @@ export function MobileStickyCta({
         aria-hidden={!visible}
       >
         <WhatsappCta className="flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-base font-bold text-white shadow-md shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] active:scale-[0.99]">
-          Probar 14 días gratis
+          Empezar con 3 tareas gratis
           <ArrowRight className="h-5 w-5" aria-hidden="true" />
         </WhatsappCta>
         <p className="mt-1.5 text-center text-xs font-medium text-slate-500">{legend}</p>
@@ -44,7 +44,7 @@ export function MobileStickyCta({
           aria-hidden={!visible}
         >
           <WhatsappCta className="flex items-center gap-2 rounded-full bg-[#25D366] px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-emerald-600/30 transition-colors hover:bg-[#20bd5a]">
-            Comenzar prueba gratis de 14 días
+            Empezar con 3 tareas gratis
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </WhatsappCta>
         </div>

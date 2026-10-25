@@ -3,14 +3,21 @@ import { WhatsappCta } from '@/components/whatsapp-cta'
 import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
-const MERCADOPAGO_CHECKOUT_URL = 'https://mpago.la/22zK26j'
+import {
+  FAMILY_PRICE_MXN,
+  FREE_LIFETIME_TASKS,
+  MERCADOPAGO_FAMILY_URL,
+  MERCADOPAGO_STANDARD_URL,
+  STANDARD_MONTHLY_TASKS,
+  STANDARD_PRICE_MXN,
+} from '@/lib/plans'
 
 const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
 const defaultBenefits = [
   'Tutor socrático 24/7 con paciencia infinita',
   'Lectura de fotos y audios de la libreta',
-  'Reportes semanales para padres bajo demanda',
+  'Reporte semanal de avance para padres en WhatsApp',
   'Campamento de verano incluido',
   'Pagos vía Mercado Pago o Stripe',
 ]
@@ -53,22 +60,23 @@ export function Pricing({
             />
             <div className="relative flex justify-center">
               <span className="rounded-full bg-accent px-4 py-1.5 text-xs font-bold text-accent-foreground">
-                14 días gratis • Sin tarjeta
+                {FREE_LIFETIME_TASKS} tareas gratis de por vida • Sin tarjeta
               </span>
             </div>
 
             <div className="relative mt-6 text-center">
               <div className="flex items-end justify-center gap-1.5">
                 <span className="font-display text-5xl font-extrabold tracking-tight text-slate-900">
-                  $25
+                  ${STANDARD_PRICE_MXN}
                 </span>
                 <span className="pb-1.5 text-lg font-semibold text-slate-500">MXN / mes</span>
               </div>
               <p className="mt-1.5 text-sm text-slate-500">
-                Menos de $1 peso al día · por estudiante
+                Plan Estándar · tareas semanales (hasta {STANDARD_MONTHLY_TASKS} al mes) + reporte
+                semanal para padres
               </p>
               <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">
-                Educación accesible para todos (menos de lo que cuesta un refresco o café).
+                ¿Consultas ilimitadas o varios hijos? Plan Familiar por ${FAMILY_PRICE_MXN} MXN / mes.
               </p>
             </div>
 
@@ -88,7 +96,7 @@ export function Pricing({
 
             <WhatsappCta className={ctaClass}>
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Comenzar prueba gratis de 14 días
+              Empezar con {FREE_LIFETIME_TASKS} tareas gratis
             </WhatsappCta>
 
             <div className="relative mt-6 flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
@@ -96,12 +104,21 @@ export function Pricing({
                 ¿Ya decidido? Suscríbete directo con Mercado Pago
               </p>
               <a
-                href={MERCADOPAGO_CHECKOUT_URL}
+                href={MERCADOPAGO_STANDARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex w-full items-center justify-center rounded-full border-2 border-primary px-6 py-3 text-[15px] font-bold text-primary transition-colors hover:bg-primary/10"
               >
-                Suscribirme por $25 MXN al mes
+                Plan Estándar · ${STANDARD_PRICE_MXN} MXN al mes
+                <span className="sr-only"> (abre Mercado Pago en una pestaña nueva)</span>
+              </a>
+              <a
+                href={MERCADOPAGO_FAMILY_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex w-full items-center justify-center rounded-full border-2 border-slate-300 px-6 py-3 text-[15px] font-bold text-slate-700 transition-colors hover:bg-slate-50"
+              >
+                Plan Familiar · ${FAMILY_PRICE_MXN} MXN al mes
                 <span className="sr-only"> (abre Mercado Pago en una pestaña nueva)</span>
               </a>
               <p className="text-center text-xs text-slate-500">

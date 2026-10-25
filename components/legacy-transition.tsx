@@ -42,7 +42,7 @@ export function LegacyTransition() {
 
           <p className="text-[15px] leading-relaxed text-pretty text-slate-600 sm:text-base">
             Ya no necesitas iniciar sesión, recordar contraseñas ni entrar a la web. Todo tu
-            acompañamiento y tus días de prueba continúan en tu celular.
+            acompañamiento y tus tareas de cortesía continúan en tu celular.
           </p>
 
           <a

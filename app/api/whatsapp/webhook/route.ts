@@ -1,12 +1,23 @@
 import { createHmac, timingSafeEqual } from 'node:crypto'
 import { after } from 'next/server'
-import { GoogleAuth } from 'google-auth-library'
-import { normalizePhone, upsertWhatsAppUser, type UserProfile } from '@/lib/whatsapp-users'
+import { getGoogleAuth } from '@/lib/google-auth'
+import { sendWhatsAppText } from '@/lib/whatsapp-cloud'
+import {
+  consumeTask,
+  normalizePhone,
+  upsertWhatsAppUser,
+  type UserProfile,
+} from '@/lib/whatsapp-users'
+import {
+  LAST_FREE_TASK_NOTICE,
+  WELCOME_MESSAGE,
+  freeExhaustedPaywall,
+  plansMessage,
+  standardLimitPaywall,
+} from '@/lib/plans'
 
 export const runtime = 'nodejs'
 export const maxDuration = 30
-
-const GRAPH_API_VERSION = process.env.WHATSAPP_GRAPH_API_VERSION || 'v23.0'
 
 const DIALOGFLOW_AGENT_URL =
   'https://us-central1-dialogflow.googleapis.com/v3/projects/ppgrillo-06/locations/us-central1/agents/600bbe0a-3f7b-405c-9ea3-b89eee47d816'
@@ -76,27 +87,6 @@ function isValidSignature(rawBody: string, signatureHeader: string | null): bool
     expectedBuffer.length === receivedBuffer.length &&
     timingSafeEqual(expectedBuffer, receivedBuffer)
   )
-}
-
-let googleAuth: GoogleAuth | null = null
-
-function getGoogleAuth(): GoogleAuth | null {
-  if (googleAuth) return googleAuth
-  const rawKey = process.env.GCP_SERVICE_ACCOUNT_KEY
-  if (!rawKey) {
-    console.error('[whatsapp] GCP_SERVICE_ACCOUNT_KEY is not configured')
-    return null
-  }
-  try {
-    googleAuth = new GoogleAuth({
-      credentials: JSON.parse(rawKey),
-      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
-    })
-    return googleAuth
-  } catch (error) {
-    console.error('[whatsapp] GCP_SERVICE_ACCOUNT_KEY is not valid JSON:', error)
-    return null
-  }
 }
 
 function collectMessages(payload: WebhookPayload): ReceivedMessage[] {
@@ -233,60 +223,60 @@ async function detectIntent(
   }
 }
 
-// Cloud API delivers to the full international number (e.g. 5215654338979), never the 10-digit ID.
-async function sendWhatsAppText(
-  fromNumber: string,
-  replyText: string,
-  payloadPhoneNumberId: string | undefined,
-) {
-  const accessToken = process.env.WHATSAPP_ACCESS_TOKEN
-  if (!accessToken) {
-    console.error('[whatsapp] WHATSAPP_ACCESS_TOKEN is not configured')
-    return
-  }
+const PLANS_KEYWORDS = new Set(['planes', 'plan', 'precios', 'pagar', 'suscribirme'])
 
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID || payloadPhoneNumberId
-  if (!phoneNumberId) {
-    console.error('[whatsapp] WHATSAPP_PHONE_NUMBER_ID is not configured')
-    return
-  }
-
-  const recipient = fromNumber.replace(/\D/g, '')
-  if (!recipient) return
-
-  try {
-    const res = await fetch(
-      `https://graph.facebook.com/${GRAPH_API_VERSION}/${phoneNumberId}/messages`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: JSON.stringify({
-          messaging_product: 'whatsapp',
-          recipient_type: 'individual',
-          to: recipient,
-          type: 'text',
-          text: { preview_url: false, body: replyText.slice(0, 4096) },
-        }),
-      },
-    )
-
-    if (!res.ok) {
-      const responseBody = await res.text()
-      console.error(
-        `[whatsapp] Cloud API send failed - status: ${res.status} ${res.statusText} - body: ${responseBody}`,
-      )
-    }
-  } catch (error) {
-    console.error('[whatsapp] Cloud API request error:', error)
-  }
+function isPlansRequest(text: string): boolean {
+  const normalized = text
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z\s]/g, '')
+    .trim()
+  return PLANS_KEYWORDS.has(normalized)
 }
 
-async function handleMessage(message: IncomingTextMessage, profile: UserProfile | undefined) {
-  const reply = await detectIntent(profile, message.from, message.text)
-  await sendWhatsAppText(message.from, reply, message.phoneNumberId)
+// Messages from one sender in a batch are handled in order so replies keep the chat's sequence.
+async function handleSender(
+  phone: string,
+  sender: Sender,
+  messages: IncomingTextMessage[],
+  profile: UserProfile | undefined,
+) {
+  const phoneNumberId = messages[0]?.phoneNumberId
+
+  if (profile?.isNew) {
+    await sendWhatsAppText(sender.rawPhone, WELCOME_MESSAGE, phoneNumberId)
+  }
+
+  const auth = getGoogleAuth()
+  let access: Awaited<ReturnType<typeof consumeTask>> | null = null
+
+  for (const message of messages) {
+    if (isPlansRequest(message.text)) {
+      await sendWhatsAppText(message.from, plansMessage(), message.phoneNumberId)
+      continue
+    }
+
+    // Fail open when Firestore is unavailable so a storage outage never silences the tutor.
+    if (!access && profile && auth) {
+      access = await consumeTask(auth, profile, new Date(), message.text)
+    }
+
+    if (access && !access.allowed) {
+      const paywall =
+        access.reason === 'standard_limit' ? standardLimitPaywall() : freeExhaustedPaywall()
+      await sendWhatsAppText(message.from, paywall, message.phoneNumberId)
+      console.log(`[whatsapp] Paywall (${access.reason}) sent to ${phone}`)
+      return
+    }
+
+    const reply = await detectIntent(profile, message.from, message.text)
+    await sendWhatsAppText(message.from, reply, message.phoneNumberId)
+  }
+
+  if (access?.allowed && access.isLastFreeTask) {
+    await sendWhatsAppText(sender.rawPhone, LAST_FREE_TASK_NOTICE, phoneNumberId)
+  }
 }
 
 // Meta webhook verification handshake.
@@ -331,7 +321,14 @@ export async function POST(req: Request) {
     after(async () => {
       const profiles = await registerSenders(senders)
       await Promise.allSettled(
-        messages.map((m) => handleMessage(m, profiles.get(normalizePhone(m.from)))),
+        [...senders].map(([phone, sender]) =>
+          handleSender(
+            phone,
+            sender,
+            messages.filter((m) => normalizePhone(m.from) === phone),
+            profiles.get(phone),
+          ),
+        ),
       )
     })
   }

@@ -5,7 +5,7 @@ import { FileText, GraduationCap, ShieldAlert, CreditCard, Scale } from 'lucide-
 export const metadata: Metadata = {
   title: 'Términos y Condiciones · PpGrillo',
   description:
-    'Términos y Condiciones de Uso de PpGrillo (Arka Universidad Digital S.A. de C.V.): naturaleza del servicio, uso aceptable, suscripción, periodo de prueba y limitación de responsabilidad.',
+    'Términos y Condiciones de Uso de PpGrillo (Arka Universidad Digital S.A. de C.V.): naturaleza del servicio, uso aceptable, suscripción, tareas de cortesía y limitación de responsabilidad.',
 }
 
 function Brand() {
@@ -92,13 +92,18 @@ export default function TerminosPage() {
             </p>
           </Section>
 
-          <Section icon={CreditCard} title="3. Suscripción, Periodo de Prueba y Cancelación">
+          <Section icon={CreditCard} title="3. Suscripción, Tareas de Cortesía y Cancelación">
             <ul className="list-disc space-y-2 pl-5">
-              <li>El servicio ofrece un periodo de prueba gratuito de 14 días.</li>
               <li>
-                Tras la prueba, la suscripción mensual recurrente es de{' '}
-                <strong className="text-slate-800">$25.00 MXN</strong>, gestionada a través de la
-                pasarela de pagos de Mercado Pago.
+                Cada usuario nuevo recibe 3 tareas de cortesía de por vida, sin necesidad de tarjeta.
+              </li>
+              <li>
+                Al agotarlas, el servicio continúa mediante suscripción mensual recurrente:{' '}
+                <strong className="text-slate-800">Plan Estándar de $49.00 MXN</strong> (hasta 20
+                tareas al mes) o{' '}
+                <strong className="text-slate-800">Plan Familiar de $149.00 MXN</strong> (tareas
+                ilimitadas y varios hermanos en la misma línea), gestionadas a través de la pasarela
+                de pagos de Mercado Pago.
               </li>
               <li>
                 El usuario puede cancelar la domiciliación en cualquier momento desde su cuenta de

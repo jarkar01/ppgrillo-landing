@@ -48,7 +48,7 @@ export function SiteHeader() {
             )}
           >
             <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-            Probar 14 días
+            3 tareas gratis
           </WhatsappCta>
         </div>
       </div>

@@ -78,7 +78,7 @@ export default function ContactoPage() {
           <Card icon={HelpCircle} title="Dudas y soporte">
             <p>
               Atendemos dudas pedagógicas sobre el tutor socrático, gestión de suscripciones y el
-              periodo de prueba de 14 días, métodos de pago (Mercado Pago) y solicitudes de derechos
+              las 3 tareas de cortesía, métodos de pago (Mercado Pago) y solicitudes de derechos
               ARCO y privacidad de menores. Incluye el mayor detalle posible para ayudarte mejor.
             </p>
           </Card>
