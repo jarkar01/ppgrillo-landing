@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { MessageCircle, X, ChevronLeft, ArrowLeft, HelpCircle } from 'lucide-react'
 
 const WHATSAPP_URL =
-  'https://wa.me/526141202790?text=' +
+  'https://wa.me/5215649712244?text=' +
   encodeURIComponent('Hola, quiero hablar con un asesor de PpGrillo.')
 
 type Faq = {
@@ -28,9 +28,9 @@ const FAQS: Faq[] = [
   },
   {
     id: 'gratis',
-    question: '¿Cómo funcionan los 14 días gratis?',
+    question: '¿Qué incluye el plan gratuito y el Pro?',
     answer:
-      'Activas la prueba directo en WhatsApp y tienes acceso completo al tutor durante 14 días sin costo. No se cobra nada hasta que termine la prueba, y puedes cancelar cuando quieras.',
+      'El Plan Gratuito ($0 MXN) incluye 3 tareas semanales para el alumno (se renuevan cada lunes) y 1 consulta mensual de seguimiento para papás. El Plan Pro Ilimitado ($49 MXN al mes) da acceso socrático ilimitado al alumno y hasta 8 peticiones mensuales de seguimiento para papás. Sin tarjeta para empezar.',
   },
   {
     id: 'pago',

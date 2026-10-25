@@ -22,7 +22,7 @@ import { ChatWidget } from '@/components/chat-widget'
 import { BenefitGrid, type Benefit } from '@/components/estudiantes/benefit-grid'
 import { FamilySection } from '@/components/home/family-section'
 import { FeaturesSection } from '@/components/home/features-section'
-import { HomePricing } from '@/components/home/home-pricing'
+import { CampaignPlans } from '@/components/campaign/campaign-plans'
 
 export const metadata: Metadata = {
   title: 'Metodología PpGrillo · Tutor socrático por WhatsApp',
@@ -150,12 +150,12 @@ export default function MetodoPage() {
             compactMobile
           />
           <FeaturesSection />
-          <HomePricing />
+          <CampaignPlans />
           <div className="px-5 py-12">
             <CampaignCtaPair
               chatHref={WHATSAPP_TRIAL_URL}
               shareHref={WHATSAPP_SHARE_CONTACT_URL}
-              note="+52 56 4971 2244 • 14 días gratis • Sin tarjeta"
+              note="+52 56 4971 2244 • Sin tarjeta • Acceso inmediato"
             />
           </div>
         </main>

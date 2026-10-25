@@ -5,7 +5,7 @@ import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
 import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 
 export const metadata: Metadata = {
-  title: 'PpGrillo · Prueba gratis 14 días por WhatsApp',
+  title: 'PpGrillo · Empieza gratis por WhatsApp',
   description:
     'Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas. Sin tarjeta bancaria.',
 }
@@ -22,7 +22,7 @@ export default function GoPage() {
           ctaLabel="Chatear / Guardar en este celular"
           secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
           secondaryLabel="Recomendar PpGrillo con un amigo"
-          ctaNote="+52 56 4971 2244 • 14 días gratis • Sin tarjeta"
+          ctaNote="+52 56 4971 2244 • Sin tarjeta • Acceso inmediato"
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"
           compact

@@ -5,7 +5,7 @@ import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 
 export const metadata: Metadata = {
   title: 'PpGrillo · Tu tutor 24/7 en WhatsApp',
-  description: 'Manda foto de tu tarea y sal de la duda. Pistas paso a paso, sin respuestas regaladas. 14 días gratis.',
+  description: 'Manda foto de tu tarea y sal de la duda. Pistas paso a paso, sin respuestas regaladas. Empieza gratis.',
 }
 
 export default function EstudiantesPage() {
@@ -23,7 +23,7 @@ export default function EstudiantesPage() {
           ctaLabel="Chatear / Guardar en este celular"
           secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
           secondaryLabel="Recomendar PpGrillo con un amigo"
-          ctaNote="+52 56 4971 2244 • 14 días gratis • Sin tarjeta"
+          ctaNote="+52 56 4971 2244 • Sin tarjeta • Acceso inmediato"
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"
           compact
