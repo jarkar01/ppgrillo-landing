@@ -1,26 +1,25 @@
-import { BrandFonts } from '@/components/brand-fonts'
-import { CampaignLanding } from '@/components/campaign/campaign-landing'
-import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
-import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
+import { SiteHeader } from '@/components/site-header'
+import { Hero } from '@/components/hero'
+import { PainSection } from '@/components/pain-section'
+import { SocraticSection } from '@/components/socratic-section'
+import { ReportSection } from '@/components/report-section'
+import { SummerCamp } from '@/components/summer-camp'
+import { Pricing } from '@/components/pricing'
+import { SiteFooter } from '@/components/site-footer'
 
 export default function Page() {
   return (
-    <BrandFonts>
-      <main className="min-h-svh bg-background">
-        <CampaignLanding
-          headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
-          subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
-          chat={PARENT_SOCRATIC_DIALOGUE}
-          ctaHref={WHATSAPP_TRIAL_URL}
-          ctaLabel="Chatear / Guardar en este celular"
-          secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
-          secondaryLabel="Recomendar PpGrillo con un amigo"
-          ctaNote="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
-          footerHref="/metodo"
-          footerLabel="Conoce la metodología y el servicio"
-          compact
-        />
+    <div className="min-h-screen overflow-x-hidden bg-background">
+      <SiteHeader />
+      <main>
+        <Hero />
+        <PainSection />
+        <SocraticSection />
+        <ReportSection />
+        <SummerCamp />
+        <Pricing />
       </main>
-    </BrandFonts>
+      <SiteFooter />
+    </div>
   )
 }

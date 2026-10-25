@@ -4,13 +4,13 @@ import { Phone, Video, MoreVertical, ChevronLeft, Check, CheckCheck } from 'luci
 
 function GrilloAvatar({ className = '' }: { className?: string }) {
   return (
-    <div
-      className={`flex items-center justify-center rounded-full text-white font-display font-extrabold ${className}`}
-      style={{ backgroundColor: '#4285F4' }}
-      aria-hidden="true"
-    >
-      Pp
-    </div>
+    <Image
+      src="/grillo-mascot.png"
+      alt=""
+      width={72}
+      height={72}
+      className={`shrink-0 rounded-full bg-white object-cover ${className}`}
+    />
   )
 }
 
