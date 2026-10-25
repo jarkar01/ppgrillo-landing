@@ -155,7 +155,7 @@ export default function MetodoPage() {
             <CampaignCtaPair
               chatHref={WHATSAPP_TRIAL_URL}
               shareHref={WHATSAPP_SHARE_CONTACT_URL}
-              note="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
+              note="+52 56 4971 2244 • 14 días gratis • Sin tarjeta"
             />
           </div>
         </main>

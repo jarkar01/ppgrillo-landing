@@ -15,7 +15,7 @@ export default function Page() {
           ctaLabel="Chatear / Guardar en este celular"
           secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
           secondaryLabel="Recomendar PpGrillo con un amigo"
-          ctaNote="+52 56 5433 8979 • 14 días gratis • Sin tarjeta"
+          ctaNote="+52 56 4971 2244 • 14 días gratis • Sin tarjeta"
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"
           compact
