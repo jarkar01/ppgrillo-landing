@@ -10,17 +10,10 @@ export const TASK_WINDOW_MINUTES = 120
 export const STANDARD_PRICE_MXN = 49
 export const FAMILY_PRICE_MXN = 149
 
-const WHATSAPP_BASE = 'https://wa.me/5215649712244'
+export const FAMILY_MAX_USERS = 3
 
-const familyFallbackUrl = `${WHATSAPP_BASE}?text=${encodeURIComponent(
-  'Hola PpGrillo, quiero contratar el Plan Familiar de $149 MXN al mes',
-)}`
-
-export const MERCADOPAGO_STANDARD_URL =
-  process.env.NEXT_PUBLIC_MERCADOPAGO_CHECKOUT_URL || 'https://mpago.la/22zK26j'
-
-export const MERCADOPAGO_FAMILY_URL =
-  process.env.NEXT_PUBLIC_MERCADOPAGO_FAMILY_CHECKOUT_URL || familyFallbackUrl
+export const MERCADOPAGO_STANDARD_URL = 'https://mpago.la/22zK26'
+export const MERCADOPAGO_FAMILY_URL = 'https://mpago.la/1H2S9ET'
 
 export type PaidPlanId = 'standard' | 'family'
 export type PlanId = 'free' | PaidPlanId
@@ -41,7 +34,7 @@ function plansBreakdown() {
     MERCADOPAGO_STANDARD_URL,
     '',
     `*Plan Familiar / Ilimitado — $${FAMILY_PRICE_MXN} MXN/mes*`,
-    'Consultas ilimitadas y multi-hijo en esta misma línea, con reporte semanal para papás.',
+    `Consultas ilimitadas para hasta ${FAMILY_MAX_USERS} usuarios en esta misma línea, con reporte semanal para papás.`,
     MERCADOPAGO_FAMILY_URL,
   ].join('\n')
 }
@@ -65,7 +58,7 @@ export function freeExhaustedPaywall() {
 export function standardLimitPaywall() {
   return [
     `Llegaste a las ${STANDARD_MONTHLY_TASKS} tareas de tu Plan Estándar este mes. Se renuevan el día 1.`,
-    `Si necesitas más, el Plan Familiar ($${FAMILY_PRICE_MXN} MXN/mes) incluye tareas ilimitadas y varios hermanos:`,
+    `Si necesitas más, el Plan Familiar ($${FAMILY_PRICE_MXN} MXN/mes) incluye tareas ilimitadas para hasta ${FAMILY_MAX_USERS} usuarios:`,
     MERCADOPAGO_FAMILY_URL,
   ].join('\n\n')
 }
