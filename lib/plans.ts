@@ -12,7 +12,7 @@ export const FAMILY_PRICE_MXN = 149
 
 export const FAMILY_MAX_USERS = 3
 
-export const MERCADOPAGO_STANDARD_URL = 'https://mpago.la/22zK26'
+export const MERCADOPAGO_STANDARD_URL = 'https://mpago.la/22zK26j'
 export const MERCADOPAGO_FAMILY_URL = 'https://mpago.la/1H2S9ET'
 
 export type PaidPlanId = 'standard' | 'family'
