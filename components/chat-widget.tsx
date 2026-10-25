@@ -28,9 +28,9 @@ const FAQS: Faq[] = [
   },
   {
     id: 'gratis',
-    question: '¿Qué incluye el plan gratuito y el Pro?',
+    question: '¿Qué incluye la versión gratuita y los planes?',
     answer:
-      'El Plan Gratuito ($0 MXN) incluye 3 tareas semanales para el alumno (se renuevan cada lunes) y 1 consulta mensual de seguimiento para papás. El Plan Pro Ilimitado ($49 MXN al mes) da acceso socrático ilimitado al alumno y hasta 8 peticiones mensuales de seguimiento para papás. Sin tarjeta para empezar.',
+      'La Versión Gratuita ($0 MXN) incluye 3 tareas de cortesía de por vida, sin tarjeta. El Plan Estándar ($49 MXN al mes) cubre hasta 20 tareas al mes, ideal para las tareas semanales del ciclo escolar. El Plan Familiar ($149 MXN al mes) da tareas ilimitadas y soporte para varios hermanos en la misma línea de WhatsApp. Pagos seguros con Mercado Pago.',
   },
   {
     id: 'pago',

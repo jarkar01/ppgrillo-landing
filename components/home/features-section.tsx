@@ -29,8 +29,8 @@ const features = [
   {
     icon: Gauge,
     color: '#EA4335',
-    title: '25 consultas diarias',
-    body: 'Un límite consciente que fomenta la concentración y el avance genuino.',
+    title: '3 tareas gratis para empezar',
+    body: 'Pruébalo sin tarjeta. Después, Plan Estándar ($49 MXN/mes) o Familiar ilimitado ($149 MXN/mes).',
   },
   {
     icon: BarChart3,

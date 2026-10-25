@@ -41,7 +41,7 @@ export function StudentHero() {
               )}
             >
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Comenzar prueba gratis de 14 días
+              Empezar con 3 tareas gratis
             </WhatsappCta>
             <a
               href="#saber-mas"

@@ -1,8 +1,14 @@
 import type { GoogleAuth } from 'google-auth-library'
+import {
+  FREE_LIFETIME_TASKS,
+  STANDARD_MONTHLY_TASKS,
+  TASK_WINDOW_MINUTES,
+  type PlanId,
+} from '@/lib/plans'
 
-const TRIAL_DAYS = 14
 const USERS_COLLECTION = 'users'
 const NATIONAL_DIGITS = 10
+const TASK_WINDOW_MS = TASK_WINDOW_MINUTES * 60_000
 
 type FirestoreValue =
   | { stringValue: string }
@@ -14,7 +20,17 @@ type FirestoreValue =
   | { mapValue: unknown }
   | { arrayValue: unknown }
 
-type FirestoreDocument = { fields?: Record<string, FirestoreValue> }
+type FirestoreFields = Record<string, FirestoreValue>
+type FirestoreDocument = { fields?: FirestoreFields }
+
+export type TaskUsage = {
+  plan: PlanId
+  planExpiresAt?: Date
+  freeTasksUsed: number
+  periodKey?: string
+  periodTasksUsed: number
+  currentTaskStartedAt?: Date
+}
 
 export type UserProfile = {
   phone: string
@@ -22,7 +38,13 @@ export type UserProfile = {
   grade?: string
   country: string
   educationSystem: string
+  isNew: boolean
+  usage: TaskUsage
 }
+
+export type AccessDecision =
+  | { allowed: true; startedTask: boolean; isLastFreeTask: boolean }
+  | { allowed: false; reason: 'free_exhausted' | 'standard_limit' }
 
 // WhatsApp sends E.164 digits without "+": 5215512345678 (MX mobile), 573001234567 (CO)...
 // Firestore users/{id} always uses the 10-digit national number, so every format maps to one doc.
@@ -76,7 +98,7 @@ function countryFromPhone(rawPhone: string): string | undefined {
   return match?.[1]
 }
 
-function readString(fields: Record<string, FirestoreValue>, keys: string[]): string | undefined {
+function readString(fields: FirestoreFields, keys: string[]): string | undefined {
   for (const key of keys) {
     const value = fields[key]
     if (!value) continue
@@ -86,10 +108,46 @@ function readString(fields: Record<string, FirestoreValue>, keys: string[]): str
   return undefined
 }
 
+function readInt(fields: FirestoreFields, key: string): number {
+  const value = fields[key]
+  if (!value) return 0
+  if ('integerValue' in value) return Number(value.integerValue) || 0
+  if ('doubleValue' in value) return Math.floor(value.doubleValue) || 0
+  return 0
+}
+
+function readDate(fields: FirestoreFields, key: string): Date | undefined {
+  const value = fields[key]
+  if (!value) return undefined
+  const raw = 'timestampValue' in value ? value.timestampValue : 'stringValue' in value ? value.stringValue : null
+  if (!raw) return undefined
+  const date = new Date(raw)
+  return Number.isNaN(date.getTime()) ? undefined : date
+}
+
+function readPlan(fields: FirestoreFields): PlanId {
+  const plan = readString(fields, ['plan'])?.toLowerCase()
+  if (plan === 'standard' || plan === 'estandar' || plan === 'estándar') return 'standard'
+  if (plan === 'family' || plan === 'familiar' || plan === 'unlimited' || plan === 'ilimitado') return 'family'
+  return 'free'
+}
+
+function buildUsage(fields: FirestoreFields): TaskUsage {
+  return {
+    plan: readPlan(fields),
+    planExpiresAt: readDate(fields, 'plan_expires_at'),
+    freeTasksUsed: readInt(fields, 'free_tasks_used'),
+    periodKey: readString(fields, ['tasks_period']),
+    periodTasksUsed: readInt(fields, 'period_tasks_used'),
+    currentTaskStartedAt: readDate(fields, 'current_task_started_at'),
+  }
+}
+
 function buildProfile(
   docId: string,
   rawPhone: string,
-  fields: Record<string, FirestoreValue>,
+  fields: FirestoreFields,
+  isNew: boolean,
 ): UserProfile {
   const country =
     readString(fields, ['country', 'pais', 'país', 'ubicacion', 'location']) ??
@@ -106,19 +164,33 @@ function buildProfile(
     grade: readString(fields, ['grade', 'grado', 'school_grade', 'grado_escolar', 'nivel']),
     country,
     educationSystem,
+    isNew,
+    usage: buildUsage(fields),
   }
 }
 
-function resolveProjectId(auth: GoogleAuth): Promise<string | null> {
-  return auth
+type FirestoreContext = { base: string; headers: Record<string, string> }
+
+async function getFirestoreContext(auth: GoogleAuth): Promise<FirestoreContext | null> {
+  const projectId = await auth
     .getProjectId()
     .catch(() => process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID ?? null)
+  if (!projectId) {
+    console.error('[whatsapp] Firestore project id could not be resolved')
+    return null
+  }
+  return {
+    base: `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${USERS_COLLECTION}`,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${await auth.getAccessToken()}`,
+    },
+  }
 }
 
 /**
- * Finds `users/{10 digits}` and returns the profile. Existing users only get `last_message_date`
- * touched, so name, grade, country and trial dates are never overwritten. New senders get a
- * 14-day trial document.
+ * Finds `users/{10 digits}` and returns the profile with its task usage. Existing users only get
+ * `last_message_date` touched. New senders get a free-plan document with 3 lifetime tasks.
  */
 export async function upsertWhatsAppUser(
   auth: GoogleAuth,
@@ -128,18 +200,10 @@ export async function upsertWhatsAppUser(
   const docId = normalizePhone(rawPhone)
   if (!docId) return null
 
-  const projectId = await resolveProjectId(auth)
-  if (!projectId) {
-    console.error('[whatsapp] Firestore project id could not be resolved')
-    return null
-  }
-
-  const base = `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${USERS_COLLECTION}`
+  const ctx = await getFirestoreContext(auth)
+  if (!ctx) return null
+  const { base, headers } = ctx
   const docUrl = `${base}/${encodeURIComponent(docId)}`
-  const headers = {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${await auth.getAccessToken()}`,
-  }
   const now = new Date().toISOString()
 
   const existingRes = await fetch(docUrl, { headers })
@@ -156,27 +220,26 @@ export async function upsertWhatsAppUser(
         `[whatsapp] Firestore user update failed - status: ${updateRes.status} - body: ${await updateRes.text()}`,
       )
     }
-    return buildProfile(docId, rawPhone, existing.fields ?? {})
+    return buildProfile(docId, rawPhone, existing.fields ?? {}, false)
   }
 
   if (existingRes.status !== 404) {
     console.error(
       `[whatsapp] Firestore user lookup failed - status: ${existingRes.status} - body: ${await existingRes.text()}`,
     )
-    return buildProfile(docId, rawPhone, {})
+    return null
   }
 
   const startedAt = firstMessageAt.toISOString()
-  const trialEnd = new Date(firstMessageAt.getTime() + TRIAL_DAYS * 86_400_000).toISOString()
   const country = countryFromPhone(rawPhone)
 
-  const fields: Record<string, FirestoreValue> = {
+  const fields: FirestoreFields = {
     phone: { stringValue: docId },
     whatsapp_id: { stringValue: rawPhone.replace(/\D/g, '') },
     created_at: { timestampValue: startedAt },
-    trial_start_date: { timestampValue: startedAt },
-    trial_end_date: { timestampValue: trialEnd },
-    status: { stringValue: 'active_trial' },
+    plan: { stringValue: 'free' },
+    status: { stringValue: 'free_active' },
+    free_tasks_used: { integerValue: '0' },
     source: { stringValue: 'whatsapp' },
     last_message_date: { timestampValue: now },
     ...(country ? { country: { stringValue: country } } : {}),
@@ -190,8 +253,8 @@ export async function upsertWhatsAppUser(
   })
 
   if (createRes.ok) {
-    console.log(`[whatsapp] Registered new user ${docId} (trial until ${trialEnd})`)
-    return buildProfile(docId, rawPhone, fields)
+    console.log(`[whatsapp] Registered new user ${docId} (${FREE_LIFETIME_TASKS} free tasks)`)
+    return buildProfile(docId, rawPhone, fields, true)
   }
 
   // 409: a concurrent message created the doc first; use the stored profile, not our draft.
@@ -199,7 +262,7 @@ export async function upsertWhatsAppUser(
     const storedRes = await fetch(docUrl, { headers })
     if (storedRes.ok) {
       const stored = (await storedRes.json()) as FirestoreDocument
-      return buildProfile(docId, rawPhone, stored.fields ?? {})
+      return buildProfile(docId, rawPhone, stored.fields ?? {}, false)
     }
   } else {
     console.error(
@@ -207,5 +270,102 @@ export async function upsertWhatsAppUser(
     )
   }
 
-  return buildProfile(docId, rawPhone, fields)
+  return buildProfile(docId, rawPhone, fields, true)
+}
+
+function monthKey(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+  }).formatToParts(date)
+  const year = parts.find((p) => p.type === 'year')?.value
+  const month = parts.find((p) => p.type === 'month')?.value
+  return `${year}-${month}`
+}
+
+function effectivePlan(usage: TaskUsage, now: Date): PlanId {
+  if (usage.plan === 'free') return 'free'
+  if (usage.planExpiresAt && usage.planExpiresAt <= now) return 'free'
+  return usage.plan
+}
+
+type Evaluation = { decision: AccessDecision; updates: FirestoreFields }
+
+export function evaluateTaskAccess(usage: TaskUsage, now: Date): Evaluation {
+  const plan = effectivePlan(usage, now)
+
+  const continuingTask =
+    usage.currentTaskStartedAt &&
+    now.getTime() - usage.currentTaskStartedAt.getTime() < TASK_WINDOW_MS
+  if (continuingTask) {
+    return { decision: { allowed: true, startedTask: false, isLastFreeTask: false }, updates: {} }
+  }
+
+  const startTask = { current_task_started_at: { timestampValue: now.toISOString() } }
+
+  if (plan === 'free') {
+    if (usage.freeTasksUsed >= FREE_LIFETIME_TASKS) {
+      return {
+        decision: { allowed: false, reason: 'free_exhausted' },
+        updates: { status: { stringValue: 'free_exhausted' } },
+      }
+    }
+    const used = usage.freeTasksUsed + 1
+    return {
+      decision: { allowed: true, startedTask: true, isLastFreeTask: used === FREE_LIFETIME_TASKS },
+      updates: {
+        ...startTask,
+        free_tasks_used: { integerValue: String(used) },
+        status: { stringValue: used >= FREE_LIFETIME_TASKS ? 'free_last_task' : 'free_active' },
+      },
+    }
+  }
+
+  const period = monthKey(now)
+  const usedThisPeriod = usage.periodKey === period ? usage.periodTasksUsed : 0
+
+  if (plan === 'standard' && usedThisPeriod >= STANDARD_MONTHLY_TASKS) {
+    return {
+      decision: { allowed: false, reason: 'standard_limit' },
+      updates: { tasks_period: { stringValue: period } },
+    }
+  }
+
+  return {
+    decision: { allowed: true, startedTask: true, isLastFreeTask: false },
+    updates: {
+      ...startTask,
+      tasks_period: { stringValue: period },
+      period_tasks_used: { integerValue: String(usedThisPeriod + 1) },
+      status: { stringValue: plan },
+    },
+  }
+}
+
+/** Decides whether this message may reach the tutor and persists the task counters. */
+export async function consumeTask(
+  auth: GoogleAuth,
+  profile: UserProfile,
+  now: Date,
+): Promise<AccessDecision> {
+  const { decision, updates } = evaluateTaskAccess(profile.usage, now)
+  const fieldPaths = Object.keys(updates)
+  if (fieldPaths.length === 0) return decision
+
+  const ctx = await getFirestoreContext(auth)
+  if (!ctx) return decision
+
+  const mask = fieldPaths.map((f) => `updateMask.fieldPaths=${encodeURIComponent(f)}`).join('&')
+  const res = await fetch(`${ctx.base}/${encodeURIComponent(profile.phone)}?${mask}`, {
+    method: 'PATCH',
+    headers: ctx.headers,
+    body: JSON.stringify({ fields: updates }),
+  })
+  if (!res.ok) {
+    console.error(
+      `[whatsapp] Firestore usage update failed - status: ${res.status} - body: ${await res.text()}`,
+    )
+  }
+  return decision
 }
