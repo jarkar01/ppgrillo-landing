@@ -22,8 +22,19 @@ export type PlanId = 'free' | PaidPlanId
 export const WELCOME_MESSAGE = [
   '¡Hola! Soy PpGrillo, tu tutor socrático en WhatsApp.',
   `Tienes *${FREE_LIFETIME_TASKS} tareas de cortesía de por vida*, sin tarjeta. Cada tarea es un ejercicio completo, con todos los mensajes que necesitemos para resolverlo.`,
-  'Envíame la duda de tu tarea y la resolvemos paso a paso, pensando juntos.',
-].join('\n\n')
+  'Para empezar, cuéntame: *¿cómo te llamas y en qué grado vas?* (por ejemplo: "Soy Ana y voy en 5º de primaria").',
+  ].join('\n\n')
+
+export function profileSavedMessage(profile: { name?: string; grade?: string }) {
+  const greeting = profile.name ? `¡Mucho gusto, ${profile.name}!` : '¡Perfecto!'
+  if (!profile.grade) {
+    return `${greeting} ¿En qué grado vas? Así adapto las explicaciones a tu nivel.`
+  }
+  if (!profile.name) {
+    return `${greeting} Ya anoté que vas en ${profile.grade}. ¿Cómo te llamas?`
+  }
+  return `${greeting} Ya anoté que vas en ${profile.grade}. Envíame el ejercicio de tu tarea y lo resolvemos paso a paso, pensando juntos.`
+}
 
 export const LAST_FREE_TASK_NOTICE =
   'Dato importante: esta es tu última tarea de cortesía. Para seguir aprendiendo después, escribe "planes".'

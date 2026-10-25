@@ -3,10 +3,12 @@ import { after } from 'next/server'
 import { getGoogleAuth } from '@/lib/google-auth'
 import { sendWhatsAppText } from '@/lib/whatsapp-cloud'
 import { classifyMessage } from '@/lib/exercise-classifier'
+import { extractStudentData } from '@/lib/profile-extractor'
 import {
   activeExercise,
   consumeTask,
   normalizePhone,
+  saveStudentProfile,
   upsertWhatsAppUser,
   type UserProfile,
 } from '@/lib/whatsapp-users'
@@ -15,6 +17,7 @@ import {
   WELCOME_MESSAGE,
   freeExhaustedPaywall,
   plansMessage,
+  profileSavedMessage,
   standardLimitPaywall,
 } from '@/lib/plans'
 
@@ -262,7 +265,19 @@ async function handleSender(
     // Fail open when Firestore is unavailable so a storage outage never silences the tutor.
     if (profile && auth) {
       const now = new Date()
-      const kind = await classifyMessage(activeExercise(profile.usage, now), message.text)
+      const needsProfile = !profile.name || !profile.grade
+      const [kind, extracted] = await Promise.all([
+        classifyMessage(activeExercise(profile.usage, now), message.text),
+        needsProfile ? extractStudentData(message.text) : Promise.resolve({}),
+      ])
+
+      const saved = needsProfile ? await saveStudentProfile(auth, profile, extracted) : {}
+      // A reply like "Soy Ana, voy en 5º" is registration, not an exercise: confirm and wait.
+      if ((saved.name || saved.grade) && kind !== 'new') {
+        await sendWhatsAppText(message.from, profileSavedMessage(profile), message.phoneNumberId)
+        continue
+      }
+
       const access = await consumeTask(auth, profile, now, kind, message.text)
 
       if (!access.allowed) {
