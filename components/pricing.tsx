@@ -5,10 +5,10 @@ const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 
 const benefits = [
   'Tutor socrático 24/7 con paciencia infinita',
-  'Lectura de fotos y audios de la libreta',
-  'Reportes semanales para padres bajo demanda',
+  'Interpretación de fotos y notas de voz de la libreta',
+  'Reportes para padres: conoce su progreso sin necesidad de supervisar',
   'Campamento de verano incluido',
-  'Pagos vía Mercado Pago o Stripe',
+  'Pago seguro vía Mercado Pago y Stripe',
 ]
 
 export function Pricing() {

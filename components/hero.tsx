@@ -30,13 +30,15 @@ export function Hero() {
 
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
             Tu hijo no necesita que le hagan la tarea.{' '}
-            <span style={{ color: '#4285F4' }}>Recupera la armonía del hogar.</span>
+            <span className="block" style={{ color: '#4285F4' }}>
+              Recupera la paz de la tarde.
+            </span>
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            El tutor socrático en WhatsApp con paciencia infinita que acompaña a tus hijos paso a
-            paso para que ellos aprendan a pensar, tú disfrutes de tu hogar y las tardes recuperen
-            la paz.
+            El tutor socrático en WhatsApp con paciencia infinita: guía a tus hijos paso a paso
+            para que aprendan a razonar por sí mismos, mientras tú recuperas el tiempo en familia y
+            la tranquilidad del hogar.
           </p>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
