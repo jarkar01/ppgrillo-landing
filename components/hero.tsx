@@ -65,6 +65,7 @@ export function Hero() {
               Ver cómo responde
             </Button>
           </div>
+          <p className="mt-3 text-sm font-medium text-slate-500">Sin tarjeta • Acceso inmediato</p>
 
           <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-3">
             {badges.map(({ icon: Icon, label }) => (
