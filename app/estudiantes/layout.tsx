@@ -5,7 +5,7 @@ import { BrandFonts } from '@/components/brand-fonts'
 export const metadata: Metadata = {
   title: 'PpGrillo para Estudiantes · Termina tu tarea en la mitad de tiempo',
   description:
-    'Tutor socrático en WhatsApp para secundaria y prepa. Pistas paso a paso, sin juicios y con paciencia infinita. Prueba 14 días gratis, sin tarjeta.',
+    'Tutor socrático en WhatsApp para secundaria y prepa. Pistas paso a paso, sin juicios y con paciencia infinita. Sin tarjeta, acceso inmediato.',
   alternates: { canonical: '/estudiantes' },
   openGraph: {
     title: '¿Atorado con la tarea a las 9 de la noche? · PpGrillo',
