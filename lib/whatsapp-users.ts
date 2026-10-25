@@ -2,13 +2,15 @@ import type { GoogleAuth } from 'google-auth-library'
 import {
   FREE_LIFETIME_TASKS,
   STANDARD_MONTHLY_TASKS,
-  TASK_WINDOW_MINUTES,
+  TASK_IDLE_RESET_HOURS,
   type PlanId,
 } from '@/lib/plans'
+import type { MessageKind } from '@/lib/exercise-classifier'
 
 const USERS_COLLECTION = 'users'
 const NATIONAL_DIGITS = 10
-const TASK_WINDOW_MS = TASK_WINDOW_MINUTES * 60_000
+const TASK_IDLE_RESET_MS = TASK_IDLE_RESET_HOURS * 3_600_000
+const MAX_EXERCISE_CHARS = 600
 
 type FirestoreValue =
   | { stringValue: string }
@@ -30,6 +32,8 @@ export type TaskUsage = {
   periodKey?: string
   periodTasksUsed: number
   currentTaskStartedAt?: Date
+  currentTaskText?: string
+  lastTaskActivityAt?: Date
   weekKey?: string
   weekTasks: number
   weekTopics: string[]
@@ -143,6 +147,8 @@ function buildUsage(fields: FirestoreFields): TaskUsage {
     periodKey: readString(fields, ['tasks_period']),
     periodTasksUsed: readInt(fields, 'period_tasks_used'),
     currentTaskStartedAt: readDate(fields, 'current_task_started_at'),
+    currentTaskText: readString(fields, ['current_task_text']),
+    lastTaskActivityAt: readDate(fields, 'last_task_activity_at'),
     weekKey: readString(fields, ['week_key']),
     weekTasks: readInt(fields, 'week_tasks'),
     weekTopics: splitTopics(readString(fields, ['week_topics'])),
@@ -340,25 +346,57 @@ function weeklyActivityUpdates(usage: TaskUsage, now: Date, topic: string): Fire
   }
 }
 
-export function evaluateTaskAccess(usage: TaskUsage, now: Date, topic = ''): Evaluation {
-  const plan = effectivePlan(usage, now)
+/** The exercise in progress, unless it has been idle long enough to be considered finished. */
+export function activeExercise(usage: TaskUsage, now: Date): string | undefined {
+  const lastActivity = usage.lastTaskActivityAt ?? usage.currentTaskStartedAt
+  if (!usage.currentTaskText || !lastActivity) return undefined
+  return now.getTime() - lastActivity.getTime() < TASK_IDLE_RESET_MS ? usage.currentTaskText : undefined
+}
 
-  const continuingTask =
-    usage.currentTaskStartedAt &&
-    now.getTime() - usage.currentTaskStartedAt.getTime() < TASK_WINDOW_MS
-  if (continuingTask) {
+function isFreeExhausted(usage: TaskUsage, now: Date) {
+  return effectivePlan(usage, now) === 'free' && usage.freeTasksUsed >= FREE_LIFETIME_TASKS
+}
+
+const blockedFree: Evaluation = {
+  decision: { allowed: false, reason: 'free_exhausted' },
+  updates: { status: { stringValue: 'free_exhausted' } },
+}
+
+/**
+ * 1 tarea = 1 ejercicio completo. Follow-up messages about the active exercise never consume a
+ * task; only a NEW exercise does. Free users get 3 lifetime exercises; the 4th is blocked.
+ */
+export function evaluateTaskAccess(
+  usage: TaskUsage,
+  now: Date,
+  kind: MessageKind,
+  message = '',
+): Evaluation {
+  const plan = effectivePlan(usage, now)
+  const current = activeExercise(usage, now)
+
+  if (kind === 'same' && current) {
+    return {
+      decision: { allowed: true, startedTask: false, isLastFreeTask: false },
+      updates: { last_task_activity_at: { timestampValue: now.toISOString() } },
+    }
+  }
+
+  if (kind === 'other') {
+    // Exhausted free users only keep access to the exercise they were already solving.
+    if (isFreeExhausted(usage, now)) return blockedFree
     return { decision: { allowed: true, startedTask: false, isLastFreeTask: false }, updates: {} }
   }
 
-  const startTask = { current_task_started_at: { timestampValue: now.toISOString() } }
+  const topic = message
+  const startTask: FirestoreFields = {
+    current_task_started_at: { timestampValue: now.toISOString() },
+    last_task_activity_at: { timestampValue: now.toISOString() },
+    current_task_text: { stringValue: message.replace(/\s+/g, ' ').trim().slice(0, MAX_EXERCISE_CHARS) },
+  }
 
   if (plan === 'free') {
-    if (usage.freeTasksUsed >= FREE_LIFETIME_TASKS) {
-      return {
-        decision: { allowed: false, reason: 'free_exhausted' },
-        updates: { status: { stringValue: 'free_exhausted' } },
-      }
-    }
+    if (usage.freeTasksUsed >= FREE_LIFETIME_TASKS) return blockedFree
     const used = usage.freeTasksUsed + 1
     return {
       decision: { allowed: true, startedTask: true, isLastFreeTask: used === FREE_LIFETIME_TASKS },
@@ -392,16 +430,45 @@ export function evaluateTaskAccess(usage: TaskUsage, now: Date, topic = ''): Eva
   }
 }
 
-/** Decides whether this message may reach the tutor and persists the task counters. */
+function applyUpdatesLocally(usage: TaskUsage, updates: FirestoreFields) {
+  const next = buildUsage({ ...usageToFields(usage), ...updates })
+  Object.assign(usage, next)
+}
+
+function usageToFields(usage: TaskUsage): FirestoreFields {
+  const fields: FirestoreFields = {
+    plan: { stringValue: usage.plan },
+    free_tasks_used: { integerValue: String(usage.freeTasksUsed) },
+    period_tasks_used: { integerValue: String(usage.periodTasksUsed) },
+    week_tasks: { integerValue: String(usage.weekTasks) },
+    week_topics: { stringValue: usage.weekTopics.join('\n') },
+  }
+  if (usage.planExpiresAt) fields.plan_expires_at = { timestampValue: usage.planExpiresAt.toISOString() }
+  if (usage.periodKey) fields.tasks_period = { stringValue: usage.periodKey }
+  if (usage.weekKey) fields.week_key = { stringValue: usage.weekKey }
+  if (usage.currentTaskText) fields.current_task_text = { stringValue: usage.currentTaskText }
+  if (usage.currentTaskStartedAt)
+    fields.current_task_started_at = { timestampValue: usage.currentTaskStartedAt.toISOString() }
+  if (usage.lastTaskActivityAt)
+    fields.last_task_activity_at = { timestampValue: usage.lastTaskActivityAt.toISOString() }
+  return fields
+}
+
+/**
+ * Decides whether this message may reach the tutor and persists the task state in Firestore.
+ * `profile.usage` is updated in place so later messages in the same webhook batch see it.
+ */
 export async function consumeTask(
   auth: GoogleAuth,
   profile: UserProfile,
   now: Date,
-  topic = '',
+  kind: MessageKind,
+  message = '',
 ): Promise<AccessDecision> {
-  const { decision, updates } = evaluateTaskAccess(profile.usage, now, topic)
+  const { decision, updates } = evaluateTaskAccess(profile.usage, now, kind, message)
   const fieldPaths = Object.keys(updates)
   if (fieldPaths.length === 0) return decision
+  applyUpdatesLocally(profile.usage, updates)
 
   const ctx = await getFirestoreContext(auth)
   if (!ctx) return decision

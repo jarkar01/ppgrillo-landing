@@ -2,7 +2,9 @@ import { createHmac, timingSafeEqual } from 'node:crypto'
 import { after } from 'next/server'
 import { getGoogleAuth } from '@/lib/google-auth'
 import { sendWhatsAppText } from '@/lib/whatsapp-cloud'
+import { classifyMessage } from '@/lib/exercise-classifier'
 import {
+  activeExercise,
   consumeTask,
   normalizePhone,
   upsertWhatsAppUser,
@@ -249,7 +251,7 @@ async function handleSender(
   }
 
   const auth = getGoogleAuth()
-  let access: Awaited<ReturnType<typeof consumeTask>> | null = null
+  let startedLastFreeTask = false
 
   for (const message of messages) {
     if (isPlansRequest(message.text)) {
@@ -258,23 +260,29 @@ async function handleSender(
     }
 
     // Fail open when Firestore is unavailable so a storage outage never silences the tutor.
-    if (!access && profile && auth) {
-      access = await consumeTask(auth, profile, new Date(), message.text)
-    }
+    if (profile && auth) {
+      const now = new Date()
+      const kind = await classifyMessage(activeExercise(profile.usage, now), message.text)
+      const access = await consumeTask(auth, profile, now, kind, message.text)
 
-    if (access && !access.allowed) {
-      const paywall =
-        access.reason === 'standard_limit' ? standardLimitPaywall() : freeExhaustedPaywall()
-      await sendWhatsAppText(message.from, paywall, message.phoneNumberId)
-      console.log(`[whatsapp] Paywall (${access.reason}) sent to ${phone}`)
-      return
+      if (!access.allowed) {
+        const paywall =
+          access.reason === 'standard_limit' ? standardLimitPaywall() : freeExhaustedPaywall()
+        await sendWhatsAppText(message.from, paywall, message.phoneNumberId)
+        console.log(`[whatsapp] Paywall (${access.reason}) sent to ${phone} - message kind: ${kind}`)
+        return
+      }
+      if (access.startedTask) {
+        console.log(`[whatsapp] New exercise for ${phone} (free used: ${profile.usage.freeTasksUsed})`)
+      }
+      if (access.isLastFreeTask) startedLastFreeTask = true
     }
 
     const reply = await detectIntent(profile, message.from, message.text)
     await sendWhatsAppText(message.from, reply, message.phoneNumberId)
   }
 
-  if (access?.allowed && access.isLastFreeTask) {
+  if (startedLastFreeTask) {
     await sendWhatsAppText(sender.rawPhone, LAST_FREE_TASK_NOTICE, phoneNumberId)
   }
 }

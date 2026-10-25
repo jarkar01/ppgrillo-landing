@@ -4,8 +4,9 @@ export const FREE_LIFETIME_TASKS = 3
 // por debajo de $20 MXN por alumno al mes.
 export const STANDARD_MONTHLY_TASKS = 20
 
-// Mensajes dentro de esta ventana desde el inicio de una tarea cuentan como la misma tarea.
-export const TASK_WINDOW_MINUTES = 120
+// 1 tarea = 1 ejercicio completo, con todo su diálogo socrático. Si el ejercicio en curso
+// queda inactivo más de este tiempo, el siguiente mensaje académico cuenta como tarea nueva.
+export const TASK_IDLE_RESET_HOURS = 24
 
 export const STANDARD_PRICE_MXN = 49
 export const FAMILY_PRICE_MXN = 149
@@ -20,7 +21,7 @@ export type PlanId = 'free' | PaidPlanId
 
 export const WELCOME_MESSAGE = [
   '¡Hola! Soy PpGrillo, tu tutor socrático en WhatsApp.',
-  `Tienes *${FREE_LIFETIME_TASKS} tareas de cortesía de por vida*, sin tarjeta.`,
+  `Tienes *${FREE_LIFETIME_TASKS} tareas de cortesía de por vida*, sin tarjeta. Cada tarea es un ejercicio completo, con todos los mensajes que necesitemos para resolverlo.`,
   'Envíame la duda de tu tarea y la resolvemos paso a paso, pensando juntos.',
 ].join('\n\n')
 
@@ -48,9 +49,12 @@ export function plansMessage() {
 
 export function freeExhaustedPaywall() {
   return [
-    `Ya usaste tus ${FREE_LIFETIME_TASKS} tareas de cortesía. ¡Qué gusto haber aprendido contigo!`,
-    'Para seguir con PpGrillo elige un plan (pago seguro con Mercado Pago):',
-    plansBreakdown(),
+    `Ya completaste tus ${FREE_LIFETIME_TASKS} tareas gratuitas (${FREE_LIFETIME_TASKS} ejercicios). ¡Qué gusto haber aprendido contigo!`,
+    'Para resolver este nuevo ejercicio y seguir aprendiendo, elige tu plan (pago seguro con Mercado Pago):',
+    [
+      `- Plan Estándar ($${STANDARD_PRICE_MXN} MXN/mes): ${MERCADOPAGO_STANDARD_URL}`,
+      `- Plan Familiar ($${FAMILY_PRICE_MXN} MXN/mes): ${MERCADOPAGO_FAMILY_URL}`,
+    ].join('\n'),
     'En cuanto se confirme tu pago, tu acceso se activa en esta misma conversación.',
   ].join('\n\n')
 }
