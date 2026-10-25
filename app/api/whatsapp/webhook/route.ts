@@ -15,6 +15,7 @@ import {
 import {
   LAST_FREE_TASK_NOTICE,
   WELCOME_MESSAGE,
+  enforceTrialCopy,
   freeExhaustedPaywall,
   plansMessage,
   profileSavedMessage,
@@ -221,7 +222,10 @@ async function detectIntent(
       .join('\n\n')
       .trim()
 
-    return reply || FALLBACK_REPLY
+    if (reply && reply !== enforceTrialCopy(reply)) {
+      console.warn('[whatsapp] Dialogflow reply mentioned a day-based trial; replaced with 3-task copy')
+    }
+    return reply ? enforceTrialCopy(reply) : FALLBACK_REPLY
   } catch (error) {
     console.error('[whatsapp] Dialogflow request error:', error)
     return FALLBACK_REPLY
@@ -277,6 +281,9 @@ async function handleSender(
         await sendWhatsAppText(message.from, profileSavedMessage(profile), message.phoneNumberId)
         continue
       }
+      // A brand-new user's greeting is already answered by WELCOME_MESSAGE; a second
+      // reply from Dialogflow's welcome intent would contradict it.
+      if (profile.isNew && kind !== 'new') continue
 
       const access = await consumeTask(auth, profile, now, kind, message.text)
 
