@@ -249,12 +249,67 @@ async function getFirestoreContext(auth: GoogleAuth): Promise<FirestoreContext |
     console.error('[whatsapp] Firestore project id could not be resolved')
     return null
   }
+  const token = await auth.getAccessToken().catch((error: unknown) => {
+    console.error('[whatsapp] Firestore access token could not be obtained:', error)
+    return null
+  })
+  if (!token) return null
   return {
     base: `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${USERS_COLLECTION}`,
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${await auth.getAccessToken()}`,
+      Authorization: `Bearer ${token}`,
     },
+  }
+}
+
+const SESSION_LOOKUP_TIMEOUT_MS = 5_000
+
+export type StudentSessionParams =
+  | { registrado: true; nombre: string; grado: string; lookup: 'found' }
+  | { registrado: false; nombre: string; grado: string; lookup: 'incomplete' | 'not_found' }
+  | { registrado: false; lookup: 'error' }
+
+/**
+ * Reads `users/{10 digits}` for Dialogflow's session parameters. It never throws: a missing doc
+ * returns `registrado: false` so the Playbook starts the welcome flow, and any Firestore/auth
+ * failure also returns `registrado: false` (without blank `nombre`/`grado`, so values Dialogflow
+ * already holds in the session are not wiped by a transient outage).
+ */
+export async function getStudentSessionParams(
+  auth: GoogleAuth,
+  rawPhone: string,
+): Promise<StudentSessionParams> {
+  const docId = normalizePhone(rawPhone)
+  if (docId.length !== NATIONAL_DIGITS) {
+    console.error(`[whatsapp] Session lookup skipped - invalid phone: ${rawPhone}`)
+    return { registrado: false, lookup: 'error' }
+  }
+
+  try {
+    const ctx = await getFirestoreContext(auth)
+    if (!ctx) return { registrado: false, lookup: 'error' }
+
+    const res = await fetch(`${ctx.base}/${encodeURIComponent(docId)}`, {
+      headers: ctx.headers,
+      signal: AbortSignal.timeout(SESSION_LOOKUP_TIMEOUT_MS),
+    })
+
+    if (res.status === 404) return { registrado: false, nombre: '', grado: '', lookup: 'not_found' }
+    if (!res.ok) {
+      console.error(`[whatsapp] Session lookup failed - status: ${res.status} - body: ${await res.text()}`)
+      return { registrado: false, lookup: 'error' }
+    }
+
+    const fields = ((await res.json()) as FirestoreDocument).fields ?? {}
+    const nombre = readString(fields, ['nombre', 'name', 'student_name', 'studentName']) ?? ''
+    const grado = readString(fields, ['grado', 'grade', 'grado_escolar', 'school_grade']) ?? ''
+    return nombre && grado
+      ? { registrado: true, nombre, grado, lookup: 'found' }
+      : { registrado: false, nombre, grado, lookup: 'incomplete' }
+  } catch (error) {
+    console.error('[whatsapp] Session lookup error:', error)
+    return { registrado: false, lookup: 'error' }
   }
 }
 

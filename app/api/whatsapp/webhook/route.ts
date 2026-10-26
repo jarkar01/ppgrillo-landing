@@ -7,6 +7,7 @@ import { extractStudentData } from '@/lib/profile-extractor'
 import {
   activeExercise,
   consumeTask,
+  getStudentSessionParams,
   normalizePhone,
   phoneE164,
   saveStudentProfile,
@@ -192,16 +193,22 @@ async function detectIntent(
   const sessionId = profile?.phone ?? normalizePhone(fromNumber)
   const tutorContext = profile ? buildTutorContext(profile) : undefined
 
-  // The profile was already read from Firestore users/{phone} before this call, so the Playbook
-  // reads $session.params.nombre / grado / registrado instead of calling an external tool.
-  const registrado = Boolean(profile?.name && profile?.grade)
+  // The Playbook reads $session.params.nombre / grado / registrado instead of calling an external
+  // tool. Read them straight from Firestore users/{phone}; this never throws.
+  const session = await getStudentSessionParams(auth, fromNumber)
+  const studentParams =
+    session.lookup === 'error'
+      ? profile?.name && profile?.grade
+        ? { registrado: true, nombre: profile.name, grado: profile.grade }
+        : { registrado: false }
+      : { registrado: session.registrado, nombre: session.nombre, grado: session.grado }
+  console.log(`[whatsapp] Session params for ${sessionId}: lookup=${session.lookup} registrado=${studentParams.registrado}`)
+
   const queryParams = {
     ...(tutorContext?.endUserMetadata ? { endUserMetadata: tutorContext.endUserMetadata } : {}),
     parameters: {
       ...(tutorContext?.parameters ?? {}),
-      nombre: profile?.name ?? '',
-      grado: profile?.grade ?? '',
-      registrado,
+      ...studentParams,
       phone: sessionId,
       phone_number: sessionId,
       phone_e164: phoneE164(fromNumber),
