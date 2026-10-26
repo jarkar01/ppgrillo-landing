@@ -8,6 +8,7 @@ import {
   activeExercise,
   consumeTask,
   normalizePhone,
+  phoneE164,
   saveStudentProfile,
   upsertWhatsAppUser,
   type UserProfile,
@@ -189,6 +190,18 @@ async function detectIntent(
 
   // One session per normalized phone keeps each student's memory stable across number formats.
   const sessionId = profile?.phone ?? normalizePhone(fromNumber)
+  const tutorContext = profile ? buildTutorContext(profile) : undefined
+
+  // The Dialogflow profile tool looks up Firestore by these, so they are sent on every turn.
+  const queryParams = {
+    ...(tutorContext?.endUserMetadata ? { endUserMetadata: tutorContext.endUserMetadata } : {}),
+    parameters: {
+      ...(tutorContext?.parameters ?? {}),
+      phone: sessionId,
+      phone_number: sessionId,
+      phone_e164: phoneE164(fromNumber),
+    },
+  }
 
   try {
     const token = await auth.getAccessToken()
@@ -203,7 +216,7 @@ async function detectIntent(
           text: { text: textBody },
           languageCode: 'es',
         },
-        ...(profile ? { queryParams: buildTutorContext(profile) } : {}),
+        queryParams,
       }),
     })
 
