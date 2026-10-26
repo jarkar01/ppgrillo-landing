@@ -202,6 +202,11 @@ async function detectIntent(
         ? { registrado: true, nombre: profile.name, grado: profile.grade }
         : { registrado: false }
       : { registrado: session.registrado, nombre: session.nombre, grado: session.grado }
+  const cxParams: { Registrado: boolean; Nombre?: string; Grado?: string } = {
+    Registrado: studentParams.registrado,
+    ...('nombre' in studentParams ? { Nombre: studentParams.nombre } : {}),
+    ...('grado' in studentParams ? { Grado: studentParams.grado } : {}),
+  }
   console.log(`[whatsapp] Session params for ${sessionId}: lookup=${session.lookup} registrado=${studentParams.registrado}`)
 
   const queryParams = {
@@ -209,6 +214,7 @@ async function detectIntent(
     parameters: {
       ...(tutorContext?.parameters ?? {}),
       ...studentParams,
+      ...cxParams,
       phone: sessionId,
       phone_number: sessionId,
       phone_e164: phoneE164(fromNumber),
