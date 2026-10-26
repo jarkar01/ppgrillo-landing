@@ -192,11 +192,16 @@ async function detectIntent(
   const sessionId = profile?.phone ?? normalizePhone(fromNumber)
   const tutorContext = profile ? buildTutorContext(profile) : undefined
 
-  // The Dialogflow profile tool looks up Firestore by these, so they are sent on every turn.
+  // The profile was already read from Firestore users/{phone} before this call, so the Playbook
+  // reads $session.params.nombre / grado / registrado instead of calling an external tool.
+  const registrado = Boolean(profile?.name && profile?.grade)
   const queryParams = {
     ...(tutorContext?.endUserMetadata ? { endUserMetadata: tutorContext.endUserMetadata } : {}),
     parameters: {
       ...(tutorContext?.parameters ?? {}),
+      nombre: profile?.name ?? '',
+      grado: profile?.grade ?? '',
+      registrado,
       phone: sessionId,
       phone_number: sessionId,
       phone_e164: phoneE164(fromNumber),
