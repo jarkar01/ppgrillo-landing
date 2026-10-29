@@ -14,8 +14,7 @@ import {
   Smile,
 } from 'lucide-react'
 import { BrandFonts } from '@/components/brand-fonts'
-import { CampaignCtaPair } from '@/components/campaign/campaign-cta-pair'
-import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
+import { StartFreeButton } from '@/components/web/start-free'
 import { SiteFooter } from '@/components/site-footer'
 import { BrandIdentity, CollaborationNote } from '@/components/brand-identity'
 import { ChatWidget } from '@/components/chat-widget'
@@ -151,12 +150,11 @@ export default function MetodoPage() {
           />
           <FeaturesSection />
           <CampaignPlans />
-          <div className="px-5 py-12">
-            <CampaignCtaPair
-              chatHref={WHATSAPP_TRIAL_URL}
-              shareHref={WHATSAPP_SHARE_CONTACT_URL}
-              note="+52 56 4971 2244 • Sin tarjeta • Acceso inmediato"
-            />
+          <div className="mx-auto flex w-full max-w-md flex-col items-center gap-2.5 px-5 py-12 text-center">
+            <StartFreeButton />
+            <p className="text-sm font-medium text-pretty text-slate-500">
+              Solo tu nombre • Sin tarjeta • 3 tareas gratis de por vida
+            </p>
           </div>
         </main>
         <SiteFooter />

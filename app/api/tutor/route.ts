@@ -7,14 +7,20 @@ import {
   type UIMessage,
 } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { cookies } from 'next/headers'
 import { lightenHistory } from '@/components/app/compress-image'
+import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
+import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
+import type { TutorMetadata } from '@/lib/tutor-types'
+import { WEB_USER_COOKIE, getWebUser, saveTaskProgress } from '@/lib/web-users'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
 
+const MAX_EXERCISE_CHARS = 600
+
 type TutorBody = {
   messages: UIMessage[]
-  studentName?: string
   grade?: string
 }
 
@@ -63,14 +69,18 @@ function demoSocraticReply(student: string, userText: string): string {
 _(Modo demostración: para respuestas completas del tutor, configura la variable GEMINI_API_KEY.)_`
 }
 
-async function streamDemo(student: string, userText: string): Promise<Response> {
+async function streamDemo(
+  student: string,
+  userText: string,
+  metadata: TutorMetadata,
+): Promise<Response> {
   const text = demoSocraticReply(student, userText)
   const words = text.split(/(\s+)/)
   const id = 'demo-text'
 
   const stream = createUIMessageStream({
     async execute({ writer }) {
-      writer.write({ type: 'start' })
+      writer.write({ type: 'start', messageMetadata: metadata })
       writer.write({ type: 'text-start', id })
       for (const word of words) {
         writer.write({ type: 'text-delta', id, delta: word })
@@ -84,11 +94,66 @@ async function streamDemo(student: string, userText: string): Promise<Response> 
   return createUIMessageStreamResponse({ stream })
 }
 
-export async function POST(req: Request) {
-  const { messages, studentName, grade }: TutorBody = await req.json()
+function latestUserHasImage(messages: UIMessage[]): boolean {
+  const lastUser = [...messages].reverse().find((m) => m.role === 'user')
+  return Boolean(lastUser?.parts.some((p) => p.type === 'file'))
+}
 
-  const student = studentName?.trim() || 'el alumno'
-  const level = grade?.trim() || 'K-12'
+function streamStatic(text: string, metadata: TutorMetadata): Response {
+  const id = 'static-text'
+  const stream = createUIMessageStream({
+    execute({ writer }) {
+      writer.write({ type: 'start', messageMetadata: metadata })
+      writer.write({ type: 'text-start', id })
+      writer.write({ type: 'text-delta', id, delta: text })
+      writer.write({ type: 'text-end', id })
+    },
+  })
+  return createUIMessageStreamResponse({ stream })
+}
+
+function limitReachedReply(name: string) {
+  const first = name.split(' ')[0]
+  return `¡Qué gusto haber aprendido contigo, ${first}! Ya usaste tus ${FREE_LIFETIME_TASKS} tareas de cortesía. Para resolver este nuevo ejercicio y seguir aprendiendo, elige un plan aquí abajo.`
+}
+
+export async function POST(req: Request) {
+  const { messages, grade }: TutorBody = await req.json()
+
+  const user = await getWebUser((await cookies()).get(WEB_USER_COOKIE)?.value)
+  if (!user) {
+    return Response.json({ error: 'registro_requerido' }, { status: 401 })
+  }
+
+  const now = new Date()
+  const userText = latestUserText(messages)
+  const hasImage = latestUserHasImage(messages)
+  const idle =
+    user.lastTaskActivityAt &&
+    now.getTime() - user.lastTaskActivityAt.getTime() > TASK_IDLE_RESET_HOURS * 3_600_000
+  const currentExercise = idle ? undefined : user.currentTaskText
+  const classifierInput = userText || (hasImage ? '[Foto de un ejercicio de la libreta]' : '')
+  const kind: MessageKind =
+    hasImage && !currentExercise ? 'new' : await classifyMessage(currentExercise, classifierInput)
+
+  if (kind === 'new' && user.taskCount >= FREE_LIFETIME_TASKS) {
+    return streamStatic(limitReachedReply(user.name), {
+      tasksUsed: user.taskCount,
+      limitReached: true,
+    })
+  }
+
+  if (kind !== 'other') {
+    const taskCount = kind === 'new' ? user.taskCount + 1 : user.taskCount
+    const currentTaskText =
+      kind === 'new' ? classifierInput.slice(0, MAX_EXERCISE_CHARS) : currentExercise
+    await saveTaskProgress(user, { taskCount, currentTaskText, activityAt: now })
+    user.taskCount = taskCount
+  }
+
+  const metadata: TutorMetadata = { tasksUsed: user.taskCount, limitReached: false }
+  const student = user.name || 'el alumno'
+  const level = grade?.trim() || 'K-12 (pregúntale su grado si no lo sabes)'
   const system = buildSystemPrompt(student, level)
 
   const apiKey = process.env.GEMINI_API_KEY
@@ -96,7 +161,7 @@ export async function POST(req: Request) {
   // Demo mode: no API key configured yet. Return a simulated Socratic response
   // so the interface remains fully testable in Preview.
   if (!apiKey) {
-    return streamDemo(student, latestUserText(messages))
+    return streamDemo(student, userText, metadata)
   }
 
   // Real mode: call the official Google Gemini API directly with the API key,
@@ -109,5 +174,7 @@ export async function POST(req: Request) {
     messages: await convertToModelMessages(lightenHistory(messages)),
   })
 
-  return result.toUIMessageStreamResponse()
+  return result.toUIMessageStreamResponse({
+    messageMetadata: ({ part }) => (part.type === 'start' ? metadata : undefined),
+  })
 }

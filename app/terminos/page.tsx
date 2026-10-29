@@ -99,7 +99,7 @@ export default function TerminosPage() {
               </li>
               <li>
                 Al agotarlas, el servicio continúa mediante suscripción mensual recurrente:{' '}
-                <strong className="text-slate-800">Plan Estándar de $49.00 MXN</strong> (hasta 20
+                <strong className="text-slate-800">Plan Estándar de $39.00 MXN</strong> (hasta 20
                 tareas al mes) o{' '}
                 <strong className="text-slate-800">Plan Familiar de $149.00 MXN</strong> (tareas
                 ilimitadas y varios hermanos en la misma línea), gestionadas a través de la pasarela
