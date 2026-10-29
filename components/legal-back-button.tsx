@@ -1,27 +1,14 @@
-'use client'
-
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
-export function LegalBackButton({ fallbackHref = '/go' }: { fallbackHref?: string }) {
-  const router = useRouter()
-
-  function handleBack() {
-    if (window.history.length > 1) {
-      router.back()
-    } else {
-      router.push(fallbackHref)
-    }
-  }
-
+export function LegalBackButton({ href = '/' }: { href?: string }) {
   return (
-    <button
-      type="button"
-      onClick={handleBack}
+    <Link
+      href={href}
       className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition-colors hover:text-primary"
     >
       <ArrowLeft className="h-4 w-4" aria-hidden="true" />
-      Volver
-    </button>
+      Volver al inicio
+    </Link>
   )
 }

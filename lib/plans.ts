@@ -8,7 +8,7 @@ export const STANDARD_MONTHLY_TASKS = 20
 // queda inactivo más de este tiempo, el siguiente mensaje académico cuenta como tarea nueva.
 export const TASK_IDLE_RESET_HOURS = 24
 
-export const STANDARD_PRICE_MXN = 49
+export const STANDARD_PRICE_MXN = 39
 export const FAMILY_PRICE_MXN = 149
 
 export const FAMILY_MAX_USERS = 3

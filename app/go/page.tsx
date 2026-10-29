@@ -2,12 +2,11 @@ import type { Metadata } from 'next'
 import { BrandFonts } from '@/components/brand-fonts'
 import { CampaignLanding } from '@/components/campaign/campaign-landing'
 import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
-import { WHATSAPP_SHARE_CONTACT_URL, WHATSAPP_TRIAL_URL } from '@/lib/whatsapp'
 
 export const metadata: Metadata = {
-  title: 'PpGrillo · Empieza gratis por WhatsApp',
+  title: 'PpGrillo · Empieza gratis',
   description:
-    'Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas. Sin tarjeta bancaria.',
+    'Tu hijo aprende a razonar paso a paso. 3 tareas gratis de por vida con solo tu nombre. Sin tarjeta bancaria.',
 }
 
 export default function GoPage() {
@@ -16,13 +15,8 @@ export default function GoPage() {
       <main className="min-h-svh bg-background">
         <CampaignLanding
           headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
-          subhead="Tu hijo aprende a razonar paso a paso por WhatsApp. Sin descargar apps ni crear cuentas."
+          subhead="Tu hijo aprende a razonar paso a paso en nuestro chat web, directo en el navegador. Sin descargar apps ni dar tu teléfono."
           chat={PARENT_SOCRATIC_DIALOGUE}
-          ctaHref={WHATSAPP_TRIAL_URL}
-          ctaLabel="Chatear / Guardar en este celular"
-          secondaryHref={WHATSAPP_SHARE_CONTACT_URL}
-          secondaryLabel="Recomendar PpGrillo con un amigo"
-          ctaNote="+52 56 4971 2244 • Sin tarjeta • Acceso inmediato"
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"
           compact

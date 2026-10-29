@@ -1,18 +1,13 @@
 import Link from "next/link";
-import { ArrowRight, MessageCircle, Share2 } from "lucide-react";
-import { WhatsappCta } from "@/components/whatsapp-cta";
+import { ArrowRight } from "lucide-react";
 import { BrandIdentity } from "@/components/brand-identity";
 import {
   AnimatedChat,
   type ChatMessage,
 } from "@/components/campaign/animated-chat";
 import { CampaignPlans } from "@/components/campaign/campaign-plans";
-import { WHATSAPP_SHARE_CONTACT_URL } from "@/lib/whatsapp";
-
-function CtaIcon({ href }: { href?: string }) {
-  const Icon = href === WHATSAPP_SHARE_CONTACT_URL ? Share2 : MessageCircle;
-  return <Icon className="h-5 w-5 shrink-0" aria-hidden="true" />;
-}
+import { StartFreeButton } from "@/components/web/start-free";
+import { FREE_LIFETIME_TASKS } from "@/lib/plans";
 
 export type { ChatMessage };
 
@@ -22,11 +17,8 @@ type CampaignLandingProps = {
   chat: ChatMessage[];
   footerHref: string;
   footerLabel: string;
-  ctaHref?: string;
   ctaLabel?: string;
   ctaNote?: string;
-  secondaryHref?: string;
-  secondaryLabel?: string;
   compact?: boolean;
 };
 
@@ -36,11 +28,8 @@ export function CampaignLanding({
   chat,
   footerHref,
   footerLabel,
-  ctaHref,
-  ctaLabel = "Chatear / Guardar en este celular",
-  ctaNote = "Sin tarjeta • Acceso inmediato",
-  secondaryHref,
-  secondaryLabel,
+  ctaLabel = "Empezar gratis",
+  ctaNote = `Solo nombre y apellido • Sin tarjeta ni teléfono • ${FREE_LIFETIME_TASKS} tareas gratis de por vida`,
   compact = false,
 }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith("#");
@@ -76,22 +65,13 @@ export function CampaignLanding({
         <AnimatedChat messages={chat} fitViewport={compact} />
 
         <div className="flex w-full max-w-md flex-col items-center gap-2.5">
-          <WhatsappCta
-            href={ctaHref}
-            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-[#25D366] bg-[#25D366] px-5 py-2.5 text-[15px] leading-snug font-semibold text-balance text-white shadow-md shadow-emerald-600/20 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
+          <StartFreeButton>{ctaLabel}</StartFreeButton>
+          <a
+            href="#planes"
+            className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-[#25D366] bg-emerald-50/60 px-5 py-2.5 text-[15px] leading-snug font-semibold text-balance text-[#128C7E] transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
           >
-            <CtaIcon href={ctaHref} />
-            {ctaLabel}
-          </WhatsappCta>
-          {secondaryHref && secondaryLabel ? (
-            <WhatsappCta
-              href={secondaryHref}
-              className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full border-2 border-[#25D366] bg-emerald-50/60 px-5 py-2.5 text-[15px] leading-snug font-semibold text-balance text-[#128C7E] transition-colors hover:bg-emerald-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E] active:scale-[0.99]"
-            >
-              <CtaIcon href={secondaryHref} />
-              {secondaryLabel}
-            </WhatsappCta>
-          ) : null}
+            Ver planes
+          </a>
           <p className="text-sm font-medium text-pretty text-slate-500">
             {ctaNote}
           </p>
