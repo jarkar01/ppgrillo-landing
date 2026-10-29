@@ -90,9 +90,15 @@ export default function PrivacidadPage() {
         <div className="mt-8 space-y-5">
           <Section icon={Database} title="1. Datos que recabamos">
             <p>
-              <strong className="text-slate-800">Datos del padre, madre o tutor:</strong> Nombre,
-              correo electrónico y número de teléfono (para facturación y envío del reporte
-              dominical de avance).
+              <strong className="text-slate-800">Registro gratuito:</strong> Únicamente nombre y
+              apellido, para activar las 3 tareas de cortesía. No pedimos teléfono ni ningún otro
+              dato en este paso.
+            </p>
+            <p>
+              <strong className="text-slate-800">Contratación de un plan de pago:</strong> Número
+              de teléfono o WhatsApp, solicitado exclusivamente en el checkout para asociar la
+              suscripción y enviar los reportes de avance a solicitud. El pago se procesa en Mercado
+              Pago; no almacenamos datos de tarjetas.
             </p>
             <p>
               <strong className="text-slate-800">Datos del estudiante:</strong> Nombre o apodo,

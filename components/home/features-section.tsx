@@ -35,8 +35,8 @@ const features = [
   {
     icon: BarChart3,
     color: '#34A853',
-    title: 'Reporte semanal para padres',
-    body: 'Cada domingo, las tareas y temas de la semana directo a tu WhatsApp. Incluido en el Plan Estándar.',
+    title: 'Reportes de avance para padres',
+    body: 'Pide un reporte de las tareas y temas trabajados cuando lo necesites. Disponible en los planes de pago.',
   },
 ]
 

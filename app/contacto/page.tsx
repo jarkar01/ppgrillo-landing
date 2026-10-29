@@ -68,6 +68,8 @@ export default function ContactoPage() {
             </p>
             <a
               href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 font-semibold text-primary transition-colors hover:bg-primary/10"
             >
               <Mail className="h-4 w-4" />
@@ -77,7 +79,7 @@ export default function ContactoPage() {
 
           <Card icon={HelpCircle} title="Dudas y soporte">
             <p>
-              Atendemos dudas pedagógicas sobre el tutor socrático, gestión de suscripciones y el
+              Atendemos dudas pedagógicas sobre el tutor socrático, gestión de suscripciones y
               las 3 tareas de cortesía, métodos de pago (Mercado Pago) y solicitudes de derechos
               ARCO y privacidad de menores. Incluye el mayor detalle posible para ayudarte mejor.
             </p>
@@ -93,6 +95,8 @@ export default function ContactoPage() {
               Para ejercerlos, envía tu solicitud a{' '}
               <a
                 href="mailto:jfalomir@arkaedu.com?subject=Contacto%20PpGrillo"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="font-semibold text-primary hover:underline"
               >
                 jfalomir@arkaedu.com
