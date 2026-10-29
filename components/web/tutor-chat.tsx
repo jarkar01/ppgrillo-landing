@@ -7,8 +7,9 @@ import { Camera, Loader2, SendHorizontal, X } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
 import { PlanCards } from '@/components/campaign/campaign-plans'
 import { compressImage } from '@/components/app/compress-image'
+import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
 import { FREE_LIFETIME_TASKS } from '@/lib/plans'
-import type { TutorMessage } from '@/lib/tutor-types'
+import type { TutorMessage, TutorStudentState } from '@/lib/tutor-types'
 
 function TaskMeter({ used }: { used: number }) {
   const left = Math.max(0, FREE_LIFETIME_TASKS - used)
@@ -31,8 +32,28 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
   const [image, setImage] = useState<FileUIPart | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [transport] = useState(
+    () =>
+      new DefaultChatTransport<TutorMessage>({
+        api: '/api/tutor',
+        prepareSendMessagesRequest: ({ messages, body }) => {
+          const stored = readLocalStudent()
+          const student: TutorStudentState = stored ?? { name, tasksUsed: initialTasksUsed }
+          return { body: { ...body, messages, student } }
+        },
+      }),
+  )
   const { messages, sendMessage, status, error } = useChat<TutorMessage>({
-    transport: new DefaultChatTransport({ api: '/api/tutor' }),
+    transport,
+    onFinish: ({ message }) => {
+      const meta = message.metadata
+      if (!meta || meta.limitReached) return
+      updateLocalStudent({
+        tasksUsed: meta.tasksUsed,
+        currentTask: meta.currentTask,
+        lastActivityAt: meta.lastActivityAt,
+      })
+    },
   })
 
   const lastMeta = [...messages].reverse().find((m) => m.role === 'assistant' && m.metadata)?.metadata

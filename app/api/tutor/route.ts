@@ -7,12 +7,10 @@ import {
   type UIMessage,
 } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
-import { cookies } from 'next/headers'
 import { lightenHistory } from '@/components/app/compress-image'
 import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
 import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
-import type { TutorMetadata } from '@/lib/tutor-types'
-import { WEB_USER_COOKIE, getWebUser, saveTaskProgress } from '@/lib/web-users'
+import type { TutorMetadata, TutorStudentState } from '@/lib/tutor-types'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -20,8 +18,9 @@ export const maxDuration = 30
 const MAX_EXERCISE_CHARS = 600
 
 type TutorBody = {
-  messages: UIMessage[]
+  messages?: UIMessage[]
   grade?: string
+  student?: Partial<TutorStudentState>
 }
 
 function buildSystemPrompt(student: string, level: string) {
@@ -118,41 +117,43 @@ function limitReachedReply(name: string) {
 }
 
 export async function POST(req: Request) {
-  const { messages, grade }: TutorBody = await req.json()
+  const { messages = [], grade, student: state }: TutorBody = await req.json().catch(() => ({}))
 
-  const user = await getWebUser((await cookies()).get(WEB_USER_COOKIE)?.value)
-  if (!user) {
-    return Response.json({ error: 'registro_requerido' }, { status: 401 })
-  }
+  const name = typeof state?.name === 'string' ? state.name.trim().slice(0, 60) : ''
+  let tasksUsed = Number.isFinite(state?.tasksUsed) ? Math.max(0, Math.floor(Number(state?.tasksUsed))) : 0
+  const lastActivityAt = typeof state?.lastActivityAt === 'number' ? state.lastActivityAt : undefined
+  const storedTask = typeof state?.currentTask === 'string' ? state.currentTask.slice(0, MAX_EXERCISE_CHARS) : undefined
 
-  const now = new Date()
+  const now = Date.now()
   const userText = latestUserText(messages)
   const hasImage = latestUserHasImage(messages)
-  const idle =
-    user.lastTaskActivityAt &&
-    now.getTime() - user.lastTaskActivityAt.getTime() > TASK_IDLE_RESET_HOURS * 3_600_000
-  const currentExercise = idle ? undefined : user.currentTaskText
+  const idle = lastActivityAt !== undefined && now - lastActivityAt > TASK_IDLE_RESET_HOURS * 3_600_000
+  const currentExercise = idle ? undefined : storedTask
   const classifierInput = userText || (hasImage ? '[Foto de un ejercicio de la libreta]' : '')
-  const kind: MessageKind =
-    hasImage && !currentExercise ? 'new' : await classifyMessage(currentExercise, classifierInput)
-
-  if (kind === 'new' && user.taskCount >= FREE_LIFETIME_TASKS) {
-    return streamStatic(limitReachedReply(user.name), {
-      tasksUsed: user.taskCount,
-      limitReached: true,
-    })
+  let kind: MessageKind = 'new'
+  try {
+    kind = hasImage && !currentExercise ? 'new' : await classifyMessage(currentExercise, classifierInput)
+  } catch {
+    kind = currentExercise ? 'continuation' : 'new'
   }
 
-  if (kind !== 'other') {
-    const taskCount = kind === 'new' ? user.taskCount + 1 : user.taskCount
-    const currentTaskText =
-      kind === 'new' ? classifierInput.slice(0, MAX_EXERCISE_CHARS) : currentExercise
-    await saveTaskProgress(user, { taskCount, currentTaskText, activityAt: now })
-    user.taskCount = taskCount
+  if (kind === 'new' && tasksUsed >= FREE_LIFETIME_TASKS) {
+    return streamStatic(limitReachedReply(name || 'amigo'), { tasksUsed, limitReached: true })
   }
 
-  const metadata: TutorMetadata = { tasksUsed: user.taskCount, limitReached: false }
-  const student = user.name || 'el alumno'
+  let currentTask = currentExercise
+  if (kind === 'new') {
+    tasksUsed += 1
+    currentTask = classifierInput.slice(0, MAX_EXERCISE_CHARS)
+  }
+
+  const metadata: TutorMetadata = {
+    tasksUsed,
+    limitReached: false,
+    currentTask,
+    lastActivityAt: kind === 'other' ? lastActivityAt : now,
+  }
+  const student = name || 'el alumno'
   const level = grade?.trim() || 'K-12 (pregúntale su grado si no lo sabes)'
   const system = buildSystemPrompt(student, level)
 
