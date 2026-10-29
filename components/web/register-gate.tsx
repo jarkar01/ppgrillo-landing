@@ -1,12 +1,13 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
 import { StartFreeForm } from '@/components/web/start-free'
+import { TutorChat } from '@/components/web/tutor-chat'
+import { useLocalStudent } from '@/lib/local-student'
 import { FREE_LIFETIME_TASKS } from '@/lib/plans'
 
 export function RegisterGate() {
-  const router = useRouter()
   return (
     <div className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-center gap-6 px-4 py-10">
       <BrandIdentity />
@@ -19,8 +20,23 @@ export function RegisterGate() {
             Solo necesitamos tu nombre para desbloquear tus tareas de cortesía de por vida.
           </p>
         </div>
-        <StartFreeForm onSuccess={() => router.refresh()} />
+        <StartFreeForm onSuccess={() => {}} />
       </div>
     </div>
   )
+}
+
+export function WebApp() {
+  const student = useLocalStudent()
+
+  if (student === undefined) {
+    return (
+      <div className="flex min-h-svh items-center justify-center" role="status">
+        <Loader2 className="h-6 w-6 animate-spin text-[#128C7E]" aria-hidden="true" />
+        <span className="sr-only">Cargando…</span>
+      </div>
+    )
+  }
+
+  return student ? <TutorChat name={student.name} initialTasksUsed={student.tasksUsed} /> : <RegisterGate />
 }

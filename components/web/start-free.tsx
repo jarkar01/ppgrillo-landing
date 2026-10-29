@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useId, useState, type FormEvent, type ReactNode } from 'react'
 import { ArrowRight, Loader2, Sparkles } from 'lucide-react'
 import { Modal } from '@/components/web/modal'
+import { readLocalStudent, saveLocalStudent } from '@/lib/local-student'
 import { FREE_LIFETIME_TASKS } from '@/lib/plans'
 
 export const PRIMARY_BUTTON =
@@ -30,19 +31,14 @@ export function StartFreeForm({ onSuccess }: { onSuccess: () => void }) {
     }
     setPending(true)
     setError(null)
-    try {
-      const res = await fetch('/api/web/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: clean }),
-      })
-      const data = (await res.json().catch(() => ({}))) as { error?: string }
-      if (!res.ok) throw new Error(data.error ?? 'No pudimos crear tu acceso.')
-      onSuccess()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'No pudimos crear tu acceso.')
-      setPending(false)
-    }
+    const existing = readLocalStudent()
+    saveLocalStudent({
+      name: clean,
+      tasksUsed: existing?.tasksUsed ?? 0,
+      currentTask: existing?.currentTask,
+      lastActivityAt: existing?.lastActivityAt,
+    })
+    onSuccess()
   }
 
   return (
@@ -116,10 +112,7 @@ export function StartFreeButton({
       >
         {open ? (
           <StartFreeForm
-            onSuccess={() => {
-              router.push('/app')
-              router.refresh()
-            }}
+            onSuccess={() => router.push('/app')}
           />
         ) : null}
       </Modal>
