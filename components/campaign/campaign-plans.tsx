@@ -28,7 +28,7 @@ const PLANS: Plan[] = [
     period: 'MXN',
     features: [
       `${FREE_LIFETIME_TASKS} tareas de cortesía de por vida`,
-      'Solo tu nombre: sin tarjeta ni teléfono',
+      'Solo nombre y apellido: sin tarjeta ni teléfono',
       'Tutor socrático completo aquí en la web',
     ],
     cta: 'Empezar gratis',
@@ -53,8 +53,8 @@ const PLANS: Plan[] = [
     period: 'MXN / mes',
     features: [
       'Consultas ilimitadas',
-      `Hasta ${FAMILY_MAX_USERS} usuarios en la misma línea de WhatsApp`,
-      'Reporte semanal de avance para padres',
+      `Hasta ${FAMILY_MAX_USERS} usuarios en una misma cuenta familiar`,
+      'Reportes diarios de avance a solicitud',
     ],
     cta: 'Contratar Familiar',
   },
@@ -128,9 +128,15 @@ export function CampaignPlans() {
 
       <PlanCards />
 
-      <p className="text-xs text-slate-500">
-        Pago seguro con Mercado Pago • Cobro mensual • Cancela cuando quieras
-      </p>
+      <div className="flex flex-col items-center gap-1.5">
+        <p className="text-pretty text-sm leading-relaxed text-slate-600">
+          El acceso gratuito solo pide tu nombre y apellido. Tu número de WhatsApp se solicita
+          únicamente al contratar un plan de pago.
+        </p>
+        <p className="text-xs text-slate-500">
+          Pago seguro con Mercado Pago • Cobro mensual • Cancela cuando quieras
+        </p>
+      </div>
     </section>
   )
 }

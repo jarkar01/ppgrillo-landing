@@ -1,7 +1,7 @@
 'use client'
 
 import Image from 'next/image'
-import { RotateCcw } from 'lucide-react'
+import { ArrowUp, Lock, Paperclip, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 export type ChatMessage = {
@@ -47,26 +47,34 @@ function TypingDots() {
 function ChatBubble({ from, text, withPhoto }: ChatMessage) {
   if (from === 'student') {
     return (
-      <div className="ml-auto flex max-w-[78%] flex-col gap-1 rounded-xl rounded-tr-sm bg-[#d9fdd3] p-1.5 shadow-sm">
+      <div className="ml-auto flex max-w-[78%] flex-col gap-1 rounded-2xl rounded-br-md bg-[#128C7E] p-1.5">
         {withPhoto ? (
           <Image
             src="/notebook-equation.png"
             alt="Foto del cuaderno escolar con un ejercicio de suma de fracciones"
             width={220}
             height={110}
-            className="h-32 w-full rounded-lg object-cover sm:h-36"
+            className="h-32 w-full rounded-xl object-cover sm:h-36"
             priority
           />
         ) : null}
-        <p className="px-1 text-left text-sm leading-snug text-slate-800">{text}</p>
+        <p className="px-1.5 pb-0.5 text-left text-sm leading-snug text-white">{text}</p>
       </div>
     )
   }
 
   return (
-    <p className="mr-auto max-w-[85%] rounded-xl rounded-tl-sm bg-card px-3 py-2 text-left text-sm leading-snug text-slate-800 shadow-sm">
-      {text}
-    </p>
+    <div className="mr-auto flex max-w-[85%] items-end gap-2">
+      <span
+        className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-[10px] font-extrabold text-[#128C7E]"
+        aria-hidden="true"
+      >
+        Pp
+      </span>
+      <p className="rounded-2xl rounded-bl-md border border-slate-200 bg-card px-3 py-2 text-left text-sm leading-snug text-slate-800">
+        {text}
+      </p>
+    </div>
   )
 }
 
@@ -126,18 +134,36 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
     <div className="flex w-full max-w-md flex-col items-center gap-1">
     <figure
       className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-card shadow-xl shadow-slate-900/10"
-      aria-label="Ejemplo de conversación con PpGrillo en WhatsApp"
+      aria-label="Ejemplo de conversación con PpGrillo en el chat web"
     >
-      <div className="flex items-center gap-2 bg-[#128C7E] px-3 py-2">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-card text-xs font-extrabold text-[#128C7E]">
-          Pp
+      <div className="flex items-center gap-3 border-b border-slate-200 bg-slate-100 px-3 py-2" aria-hidden="true">
+        <span className="flex gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
         </span>
-        <div className="flex flex-col text-left leading-tight">
-          <span className="text-sm font-semibold text-white">PpGrillo</span>
-          <span className="text-[11px] text-white/80" aria-hidden="true">
-            {tutorIsTyping ? 'escribiendo...' : 'en línea'}
+        <span className="flex flex-1 items-center justify-center gap-1.5 rounded-md bg-card px-3 py-1 text-[11px] font-medium text-slate-500">
+          <Lock className="h-3 w-3 shrink-0" />
+          ppgrillo.com/app
+        </span>
+        <span className="w-[42px]" />
+      </div>
+
+      <div className="flex items-center justify-between gap-2 border-b border-slate-200 bg-card px-3.5 py-2.5">
+        <div className="flex items-center gap-2">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#128C7E] text-xs font-extrabold text-white">
+            Pp
           </span>
+          <div className="flex flex-col text-left leading-tight">
+            <span className="text-sm font-semibold text-slate-900">Tutor PpGrillo</span>
+            <span className="text-[11px] text-slate-500" aria-hidden="true">
+              {tutorIsTyping ? 'pensando una pista...' : 'Matemáticas · Secundaria'}
+            </span>
+          </div>
         </div>
+        <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-[#128C7E]" aria-hidden="true">
+          3 tareas gratis
+        </span>
       </div>
 
       <ol className="sr-only">
@@ -154,7 +180,7 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
           fitViewport
             ? 'h-[clamp(17rem,calc(100svh-27rem),26rem)] max-h-[26rem] md:h-[clamp(14rem,calc(100svh-33rem),26rem)]'
             : 'h-[clamp(20rem,55svh,28rem)] max-h-[28rem]'
-        } flex-col gap-2 overflow-y-auto overscroll-auto scroll-smooth bg-[#efeae2] p-3.5 [scrollbar-width:thin] pointer-coarse:overflow-hidden pointer-coarse:data-[touch-scroll=true]:overflow-y-auto pointer-coarse:data-[touch-scroll=true]:overscroll-contain`}
+        } flex-col gap-2.5 overflow-y-auto overscroll-auto scroll-smooth bg-slate-50 p-3.5 [scrollbar-width:thin] pointer-coarse:overflow-hidden pointer-coarse:data-[touch-scroll=true]:overflow-y-auto pointer-coarse:data-[touch-scroll=true]:overscroll-contain`}
         data-touch-scroll={touchScrollActive}
         onPointerDown={(event) => {
           if (event.pointerType === 'touch') setTouchScrollActive(true)
@@ -172,10 +198,10 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
         {typingIndex >= 0 ? (
           <li className="flex shrink-0 animate-in fade-in duration-200">
             <span
-              className={`flex h-7 items-center rounded-xl px-3 shadow-sm ${
+              className={`flex h-7 items-center rounded-2xl px-3 ${
                 messages[typingIndex].from === 'student'
-                  ? 'ml-auto rounded-tr-sm bg-[#d9fdd3]'
-                  : 'mr-auto rounded-tl-sm bg-card'
+                  ? 'ml-auto rounded-br-md bg-emerald-50'
+                  : 'mr-auto ml-8 rounded-bl-md border border-slate-200 bg-card'
               }`}
             >
               <TypingDots />
@@ -183,6 +209,18 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
           </li>
         ) : null}
       </ol>
+
+      <div className="flex items-center gap-2 border-t border-slate-200 bg-card px-3 py-2.5" aria-hidden="true">
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-400">
+          <Paperclip className="h-4 w-4" />
+        </span>
+        <span className="flex-1 truncate rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-left text-[13px] text-slate-400">
+          Escribe tu duda o sube una foto...
+        </span>
+        <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#128C7E] text-white">
+          <ArrowUp className="h-4 w-4" />
+        </span>
+      </div>
     </figure>
     {reducedMotion ? null : (
       <button

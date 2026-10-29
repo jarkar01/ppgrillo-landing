@@ -29,7 +29,7 @@ export function CampaignLanding({
   footerHref,
   footerLabel,
   ctaLabel = "Empezar gratis",
-  ctaNote = `Solo tu nombre • Sin tarjeta • ${FREE_LIFETIME_TASKS} tareas gratis de por vida`,
+  ctaNote = `Solo nombre y apellido • Sin tarjeta ni teléfono • ${FREE_LIFETIME_TASKS} tareas gratis de por vida`,
   compact = false,
 }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith("#");

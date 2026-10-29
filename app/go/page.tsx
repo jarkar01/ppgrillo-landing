@@ -15,7 +15,7 @@ export default function GoPage() {
       <main className="min-h-svh bg-background">
         <CampaignLanding
           headline="Deja de pelear por la tarea. Recupera la paz de tus tardes."
-          subhead="Tu hijo aprende a razonar paso a paso, aquí mismo en la web. Sin descargar apps ni dar tu teléfono."
+          subhead="Tu hijo aprende a razonar paso a paso en nuestro chat web, directo en el navegador. Sin descargar apps ni dar tu teléfono."
           chat={PARENT_SOCRATIC_DIALOGUE}
           footerHref="/metodo"
           footerLabel="Conoce la metodología y el servicio"

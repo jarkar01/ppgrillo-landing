@@ -24,7 +24,7 @@ import { FeaturesSection } from '@/components/home/features-section'
 import { CampaignPlans } from '@/components/campaign/campaign-plans'
 
 export const metadata: Metadata = {
-  title: 'Metodología PpGrillo · Tutor socrático por WhatsApp',
+  title: 'Metodología PpGrillo · Tutor socrático en la web',
   description:
     'Conoce a fondo cómo PpGrillo guía a tu hijo paso a paso con preguntas, sin darle respuestas, y lo que obtiene tu familia.',
 }
