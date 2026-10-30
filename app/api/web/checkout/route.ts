@@ -1,16 +1,21 @@
 import { cookies } from 'next/headers'
 import { z } from 'zod'
-import { MERCADOPAGO_FAMILY_URL, MERCADOPAGO_STANDARD_URL } from '@/lib/plans'
+import {
+  MERCADOPAGO_FAMILY_URL,
+  MERCADOPAGO_STANDARD_QUARTERLY_URL,
+  MERCADOPAGO_STANDARD_URL,
+} from '@/lib/plans'
 import { WEB_USER_COOKIE, getWebUser, saveCheckoutIntent } from '@/lib/web-users'
 
 const bodySchema = z.object({
   plan: z.enum(['standard', 'family']),
+  period: z.enum(['monthly', 'quarterly']).default('monthly'),
   parentEmail: z.string().trim().toLowerCase().max(254).email(),
 })
 
 const CHECKOUT_URLS = {
-  standard: MERCADOPAGO_STANDARD_URL,
-  family: MERCADOPAGO_FAMILY_URL,
+  standard: { monthly: MERCADOPAGO_STANDARD_URL, quarterly: MERCADOPAGO_STANDARD_QUARTERLY_URL },
+  family: { monthly: MERCADOPAGO_FAMILY_URL, quarterly: '' },
 } as const
 
 export async function POST(req: Request) {
@@ -18,6 +23,14 @@ export async function POST(req: Request) {
   if (!parsed.success) {
     return Response.json(
       { error: 'Escribe un correo electrónico válido del padre o tutor.' },
+      { status: 400 },
+    )
+  }
+
+  const checkoutUrl = CHECKOUT_URLS[parsed.data.plan][parsed.data.period]
+  if (!checkoutUrl) {
+    return Response.json(
+      { error: 'Esta opción de pago aún no está disponible. Elige otra opción.' },
       { status: 400 },
     )
   }
@@ -35,5 +48,5 @@ export async function POST(req: Request) {
     )
   }
 
-  return Response.json({ url: CHECKOUT_URLS[parsed.data.plan] })
+  return Response.json({ url: checkoutUrl })
 }

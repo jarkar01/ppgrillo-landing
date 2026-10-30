@@ -1,14 +1,19 @@
 'use client'
 
 import { useId, useState, type FormEvent } from 'react'
-import { CreditCard, ExternalLink, Loader2, Lock } from 'lucide-react'
+import { ArrowLeft, CalendarDays, CalendarRange, CreditCard, ExternalLink, Loader2, Lock } from 'lucide-react'
 import { Modal } from '@/components/web/modal'
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/web/start-free'
-import type { PaidPlanId } from '@/lib/plans'
+import type { BillingPeriod, PaidPlanId } from '@/lib/plans'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
-function CheckoutForm({ plan }: { plan: PaidPlanId }) {
+const PERIOD_LABELS: Record<BillingPeriod, string> = {
+  monthly: 'Pago Mensual',
+  quarterly: 'Pago Trimestral',
+}
+
+function CheckoutForm({ plan, period }: { plan: PaidPlanId; period: BillingPeriod }) {
   const inputId = useId()
   const errorId = useId()
   const [parentEmail, setParentEmail] = useState('')
@@ -29,7 +34,7 @@ function CheckoutForm({ plan }: { plan: PaidPlanId }) {
       const res = await fetch('/api/web/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, parentEmail: email }),
+        body: JSON.stringify({ plan, period, parentEmail: email }),
       })
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string }
       if (!res.ok || !data.url) throw new Error(data.error ?? 'No pudimos continuar al pago.')
@@ -111,32 +116,70 @@ export function CheckoutButton({
   price,
   label,
   featured = false,
+  billingOptions = false,
 }: {
   plan: PaidPlanId
   planName: string
   price: string
   label: string
   featured?: boolean
+  billingOptions?: boolean
 }) {
   const [open, setOpen] = useState(false)
+  const [choosingPeriod, setChoosingPeriod] = useState(false)
+  const [period, setPeriod] = useState<BillingPeriod>('monthly')
+  const optionsId = useId()
+
+  function openCheckout(selected: BillingPeriod) {
+    setPeriod(selected)
+    setOpen(true)
+  }
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className={featured ? PRIMARY_BUTTON : SECONDARY_BUTTON}
-      >
-        <CreditCard className="h-5 w-5 shrink-0" aria-hidden="true" />
-        {label}
-      </button>
+      {choosingPeriod ? (
+        <div
+          id={optionsId}
+          role="group"
+          aria-label={`Opciones de pago del ${planName}`}
+          className="flex flex-col gap-2"
+        >
+          <button type="button" onClick={() => openCheckout('monthly')} className={PRIMARY_BUTTON} autoFocus>
+            <CalendarDays className="h-5 w-5 shrink-0" aria-hidden="true" />
+            {PERIOD_LABELS.monthly}
+          </button>
+          <button type="button" onClick={() => openCheckout('quarterly')} className={SECONDARY_BUTTON}>
+            <CalendarRange className="h-5 w-5 shrink-0" aria-hidden="true" />
+            {PERIOD_LABELS.quarterly}
+          </button>
+          <button
+            type="button"
+            onClick={() => setChoosingPeriod(false)}
+            className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-2xl text-sm font-semibold text-slate-600 transition-colors hover:text-slate-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]"
+          >
+            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden="true" />
+            Regresar
+          </button>
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => (billingOptions ? setChoosingPeriod(true) : openCheckout('monthly'))}
+          aria-expanded={billingOptions ? false : undefined}
+          aria-controls={billingOptions ? optionsId : undefined}
+          className={featured ? PRIMARY_BUTTON : SECONDARY_BUTTON}
+        >
+          <CreditCard className="h-5 w-5 shrink-0" aria-hidden="true" />
+          {label}
+        </button>
+      )}
       <Modal
         open={open}
         onClose={() => setOpen(false)}
-        title={`${planName} · ${price}`}
+        title={billingOptions ? `${planName} · ${PERIOD_LABELS[period]}` : `${planName} · ${price}`}
         description="Para activar tu plan necesitamos el correo electrónico del padre o tutor."
       >
-        {open ? <CheckoutForm plan={plan} /> : null}
+        {open ? <CheckoutForm plan={plan} period={period} /> : null}
       </Modal>
     </>
   )
