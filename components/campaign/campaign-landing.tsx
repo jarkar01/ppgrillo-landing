@@ -6,6 +6,7 @@ import {
   type ChatMessage,
 } from "@/components/campaign/animated-chat";
 import { CampaignPlans } from "@/components/campaign/campaign-plans";
+import { QuickContactActions } from "@/components/campaign/quick-contact-actions";
 import { StartFreeButton } from "@/components/web/start-free";
 import { FREE_LIFETIME_TASKS } from "@/lib/plans";
 
@@ -97,6 +98,7 @@ export function CampaignLanding({
           </Link>
         )}
       </section>
+      <QuickContactActions />
       <CampaignPlans />
     </>
   );
