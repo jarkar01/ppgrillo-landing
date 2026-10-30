@@ -5,7 +5,7 @@ import { Check, Share2 } from "lucide-react";
 
 const SHARE_DATA = {
   title: "PpGrillo",
-  text: "Resuelve tus tareas paso a paso con PpGrillo, tu tutor en la web.",
+  text: "Conoce PpGrillo: tu tutor que te ayuda a resolver tus tareas paso a paso.",
   url: "https://ppgrillo.io",
 };
 
@@ -75,7 +75,7 @@ export function QuickContactActions() {
         <p className="text-sm text-pretty text-slate-500" aria-live="polite">
           {copied
             ? "Pega el enlace en WhatsApp o en cualquier red para compartirlo."
-            : "Compártelo por WhatsApp o cualquier red. La tarjeta de contacto funciona en iPhone, Android y computadora."}
+            : "Al tocar el enlace del contacto guardado se abre la app de PpGrillo para seguir con tus tareas y tu historial."}
         </p>
       </div>
     </section>
