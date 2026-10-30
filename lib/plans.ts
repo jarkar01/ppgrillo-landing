@@ -15,6 +15,10 @@ export const FAMILY_MAX_USERS = 3
 
 export const MERCADOPAGO_STANDARD_URL = 'https://mpago.la/22zK26j'
 export const MERCADOPAGO_FAMILY_URL = 'https://mpago.la/1H2S9ET'
+// Pending: Mercado Pago link for the quarterly Standard plan. Empty disables that option server-side.
+export const MERCADOPAGO_STANDARD_QUARTERLY_URL = ''
+
+export type BillingPeriod = 'monthly' | 'quarterly'
 
 export type PaidPlanId = 'standard' | 'family'
 export type PlanId = 'free' | PaidPlanId

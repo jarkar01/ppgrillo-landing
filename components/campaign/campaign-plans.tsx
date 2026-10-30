@@ -103,6 +103,7 @@ export function PlanCards({ includeFree = true }: { includeFree?: boolean }) {
               price={`${plan.price} ${plan.period}`}
               label={plan.cta}
               featured={plan.featured}
+              billingOptions={plan.id === 'standard'}
             />
           )}
         </li>
