@@ -165,15 +165,13 @@ export async function saveTaskProgress(
 
 export async function saveCheckoutIntent(intent: {
   webUser: WebUser | null
-  phone: string
-  phoneE164: string
+  parentEmail: string
   plan: PaidPlanId
 }): Promise<boolean> {
   const now = new Date().toISOString()
   try {
     const saved = await patchDocument(`${CHECKOUT_INTENTS}/${randomUUID()}`, {
-      phone: { stringValue: intent.phone },
-      phone_e164: { stringValue: intent.phoneE164 },
+      parent_email: { stringValue: intent.parentEmail },
       plan: { stringValue: intent.plan },
       name: intent.webUser?.name ? { stringValue: intent.webUser.name } : { nullValue: null },
       web_user_id: intent.webUser ? { stringValue: intent.webUser.id } : { nullValue: null },
@@ -182,8 +180,7 @@ export async function saveCheckoutIntent(intent: {
     })
     if (intent.webUser) {
       await patchDocument(`${WEB_USERS}/${intent.webUser.id}`, {
-        phone: { stringValue: intent.phone },
-        phone_e164: { stringValue: intent.phoneE164 },
+        parent_email: { stringValue: intent.parentEmail },
         checkout_plan: { stringValue: intent.plan },
         checkout_requested_at: { timestampValue: now },
       })
