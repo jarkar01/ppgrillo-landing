@@ -134,7 +134,7 @@ export async function POST(req: Request) {
   try {
     kind = hasImage && !currentExercise ? 'new' : await classifyMessage(currentExercise, classifierInput)
   } catch {
-    kind = currentExercise ? 'continuation' : 'new'
+    kind = currentExercise ? 'same' : 'new'
   }
 
   if (kind === 'new' && tasksUsed >= FREE_LIFETIME_TASKS) {
