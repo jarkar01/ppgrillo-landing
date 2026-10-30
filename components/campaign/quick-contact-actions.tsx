@@ -1,17 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Check, Download, MoreVertical, Share, Share2, Smartphone } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Check, Download, Share2 } from "lucide-react";
+import { InstallGuideDialog, type InstallPlatform, type InstallPromptEvent } from "./install-guide-dialog";
 
 const SHARE_DATA = {
   title: "PpGrillo",
   text: "Conoce PpGrillo: tu tutor que te ayuda a resolver tus tareas paso a paso.",
   url: "https://ppgrillo.io",
-};
-
-type InstallPromptEvent = Event & {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 };
 
 function isStandalone() {
@@ -21,11 +17,20 @@ function isStandalone() {
   );
 }
 
+function detectPlatform(): InstallPlatform {
+  const ua = navigator.userAgent;
+  const isIPadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
+  if (/iPhone|iPad|iPod/i.test(ua) || isIPadOS) return "ios";
+  if (/Android/i.test(ua)) return "android";
+  return "desktop";
+}
+
 export function QuickContactActions() {
   const [copied, setCopied] = useState(false);
   const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
   const [installed, setInstalled] = useState(false);
-  const [showSteps, setShowSteps] = useState(false);
+  const [platform, setPlatform] = useState<InstallPlatform>("desktop");
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEffect(() => {
     setInstalled(isStandalone());
@@ -41,6 +46,7 @@ export function QuickContactActions() {
     function onInstalled() {
       setInstalled(true);
       setInstallEvent(null);
+      dialogRef.current?.close();
     }
     window.addEventListener("beforeinstallprompt", onBeforeInstall);
     window.addEventListener("appinstalled", onInstalled);
@@ -69,15 +75,20 @@ export function QuickContactActions() {
     }
   }
 
-  async function handleInstall() {
-    if (installEvent) {
-      await installEvent.prompt();
-      const { outcome } = await installEvent.userChoice;
-      if (outcome === "accepted") setInstalled(true);
-      setInstallEvent(null);
-      return;
+  function openGuide() {
+    setPlatform(detectPlatform());
+    dialogRef.current?.showModal();
+  }
+
+  async function handleNativeInstall() {
+    if (!installEvent) return;
+    await installEvent.prompt();
+    const { outcome } = await installEvent.userChoice;
+    setInstallEvent(null);
+    if (outcome === "accepted") {
+      setInstalled(true);
+      dialogRef.current?.close();
     }
-    setShowSteps((open) => !open);
   }
 
   return (
@@ -101,10 +112,9 @@ export function QuickContactActions() {
         <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             type="button"
-            onClick={handleInstall}
+            onClick={openGuide}
             disabled={installed}
-            aria-expanded={installEvent || installed ? undefined : showSteps}
-            aria-controls={installEvent || installed ? undefined : "install-steps"}
+            aria-haspopup="dialog"
             className="flex min-h-12 flex-1 items-center justify-center gap-2.5 rounded-full bg-emerald-600 px-6 py-3 text-base font-semibold text-white shadow-md shadow-emerald-600/20 transition-colors hover:bg-emerald-700 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700 active:scale-[0.99] disabled:cursor-default disabled:bg-emerald-700/80"
           >
             {installed ? (
@@ -131,38 +141,14 @@ export function QuickContactActions() {
         <p className="sr-only" aria-live="polite">
           {copied ? "Enlace de PpGrillo copiado al portapapeles." : ""}
         </p>
-
-        {!installed && (
-          <div
-            id="install-steps"
-            className={`w-full flex-col gap-3 rounded-2xl border border-emerald-100 bg-white p-5 text-left ${
-              showSteps || !installEvent ? "flex" : "hidden"
-            }`}
-          >
-            <p className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-              <Smartphone className="h-4 w-4 text-emerald-600" aria-hidden="true" />
-              También puedes hacerlo desde el menú de tu navegador:
-            </p>
-            <ul className="flex flex-col gap-3 text-sm leading-relaxed text-slate-600">
-              <li className="flex gap-3">
-                <Share className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-                <span>
-                  <strong className="font-semibold text-slate-800">iPhone (Safari):</strong> toca el botón Compartir y elige{" "}
-                  <strong className="font-semibold text-slate-800">“Agregar a la pantalla de inicio”</strong>.
-                </span>
-              </li>
-              <li className="flex gap-3">
-                <MoreVertical className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
-                <span>
-                  <strong className="font-semibold text-slate-800">Android o computadora (Chrome):</strong> abre el menú y elige{" "}
-                  <strong className="font-semibold text-slate-800">“Instalar aplicación”</strong> o{" "}
-                  <strong className="font-semibold text-slate-800">“Agregar a la pantalla de inicio”</strong>.
-                </span>
-              </li>
-            </ul>
-          </div>
-        )}
       </div>
+
+      <InstallGuideDialog
+        ref={dialogRef}
+        platform={platform}
+        canPromptInstall={installEvent !== null}
+        onNativeInstall={handleNativeInstall}
+      />
     </section>
   );
 }
