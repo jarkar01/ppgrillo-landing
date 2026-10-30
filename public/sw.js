@@ -1,5 +1,5 @@
-// Retired: PpGrillo no longer ships as a PWA. Devices that registered the
-// previous worker fetch this file on update, clear caches, and unregister.
+// Network-only worker: enables "install app" without caching pages, so users
+// always get the latest version. Also clears caches left by older workers.
 self.addEventListener('install', () => self.skipWaiting())
 
 self.addEventListener('activate', (event) => {
@@ -7,9 +7,11 @@ self.addEventListener('activate', (event) => {
     (async () => {
       const keys = await caches.keys()
       await Promise.all(keys.map((key) => caches.delete(key)))
-      await self.registration.unregister()
-      const clients = await self.clients.matchAll({ type: 'window' })
-      clients.forEach((client) => client.navigate(client.url))
+      await self.clients.claim()
     })(),
   )
+})
+
+self.addEventListener('fetch', () => {
+  // Intentionally empty: requests go straight to the network.
 })
