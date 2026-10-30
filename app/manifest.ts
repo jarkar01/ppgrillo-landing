@@ -3,9 +3,9 @@ import type { MetadataRoute } from 'next'
 export default function manifest(): MetadataRoute.Manifest {
   return {
     id: '/app',
-    name: 'PpGrillo · Tutor de tareas',
+    name: 'PpGrillo',
     short_name: 'PpGrillo',
-    description: 'Tu tutor socrático para resolver tareas paso a paso.',
+    description: 'Tutor socrático de tareas',
     start_url: '/app',
     scope: '/',
     display: 'standalone',

@@ -2,11 +2,10 @@ import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { MERCADOPAGO_FAMILY_URL, MERCADOPAGO_STANDARD_URL } from '@/lib/plans'
 import { WEB_USER_COOKIE, getWebUser, saveCheckoutIntent } from '@/lib/web-users'
-import { normalizePhone, phoneE164 } from '@/lib/whatsapp-users'
 
 const bodySchema = z.object({
   plan: z.enum(['standard', 'family']),
-  phone: z.string().trim().min(10).max(20),
+  parentEmail: z.string().trim().toLowerCase().max(254).email(),
 })
 
 const CHECKOUT_URLS = {
@@ -17,25 +16,21 @@ const CHECKOUT_URLS = {
 export async function POST(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
   if (!parsed.success) {
-    return Response.json({ error: 'Escribe tu número de WhatsApp a 10 dígitos.' }, { status: 400 })
-  }
-
-  const digits = parsed.data.phone.replace(/\D/g, '')
-  const phone = normalizePhone(parsed.data.phone)
-  if (digits.length < 10 || !/^\d{10}$/.test(phone)) {
-    return Response.json({ error: 'Escribe tu número de WhatsApp a 10 dígitos.' }, { status: 400 })
+    return Response.json(
+      { error: 'Escribe un correo electrónico válido del padre o tutor.' },
+      { status: 400 },
+    )
   }
 
   const webUser = await getWebUser((await cookies()).get(WEB_USER_COOKIE)?.value)
   const saved = await saveCheckoutIntent({
     webUser,
-    phone,
-    phoneE164: phoneE164(parsed.data.phone),
+    parentEmail: parsed.data.parentEmail,
     plan: parsed.data.plan,
   })
   if (!saved) {
     return Response.json(
-      { error: 'No pudimos registrar tu número. Intenta de nuevo en un momento.' },
+      { error: 'No pudimos registrar el correo. Intenta de nuevo en un momento.' },
       { status: 503 },
     )
   }

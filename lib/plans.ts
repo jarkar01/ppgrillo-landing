@@ -52,11 +52,11 @@ export const LAST_FREE_TASK_NOTICE =
 function plansBreakdown() {
   return [
     `*Plan Estándar — $${STANDARD_PRICE_MXN} MXN/mes*`,
-    `Tareas semanales del ciclo escolar (hasta ${STANDARD_MONTHLY_TASKS} al mes) + reporte semanal de avance para papás en WhatsApp.`,
+    `Tareas semanales del ciclo escolar (hasta ${STANDARD_MONTHLY_TASKS} al mes) + reporte semanal de avance para papás por correo electrónico.`,
     MERCADOPAGO_STANDARD_URL,
     '',
     `*Plan Familiar / Ilimitado — $${FAMILY_PRICE_MXN} MXN/mes*`,
-    `Consultas ilimitadas para hasta ${FAMILY_MAX_USERS} usuarios en esta misma línea, con reporte semanal para papás.`,
+    `Consultas ilimitadas para hasta ${FAMILY_MAX_USERS} usuarios en esta misma línea, con reporte semanal para papás por correo electrónico.`,
     MERCADOPAGO_FAMILY_URL,
   ].join('\n')
 }

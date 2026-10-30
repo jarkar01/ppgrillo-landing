@@ -28,7 +28,7 @@ const PLANS: Plan[] = [
     period: 'MXN',
     features: [
       `${FREE_LIFETIME_TASKS} tareas de cortesía de por vida`,
-      'Solo nombre y apellido: sin tarjeta ni teléfono',
+      'Solo nombre y apellido, sin tarjeta',
       'Tutor socrático completo aquí en la web',
     ],
     cta: 'Empezar gratis',
@@ -41,7 +41,7 @@ const PLANS: Plan[] = [
     featured: true,
     features: [
       `Tareas semanales del ciclo escolar (hasta ${STANDARD_MONTHLY_TASKS} al mes)`,
-      'Reporte semanal de avance para padres en WhatsApp',
+      'Reportes semanales de avance para padres, enviados por correo electrónico',
       'Fotos y notas de voz de la libreta',
     ],
     cta: 'Contratar Estándar',
@@ -54,6 +54,7 @@ const PLANS: Plan[] = [
     features: [
       'Consultas ilimitadas',
       `Hasta ${FAMILY_MAX_USERS} usuarios en una misma cuenta familiar`,
+      'Reportes semanales de avance para padres, enviados por correo electrónico',
       'Reportes diarios de avance a solicitud',
     ],
     cta: 'Contratar Familiar',
@@ -130,8 +131,9 @@ export function CampaignPlans() {
 
       <div className="flex flex-col items-center gap-1.5">
         <p className="text-pretty text-sm leading-relaxed text-slate-600">
-          El acceso gratuito solo pide tu nombre y apellido. Tu número de WhatsApp se solicita
-          únicamente al contratar un plan de pago.
+          Para la versión gratuita solo necesitas tu nombre y apellido. Al contratar un plan de
+          pago, se solicita el correo electrónico del padre o tutor para el envío de los reportes
+          semanales de avance.
         </p>
         <p className="text-xs text-slate-500">
           Pago seguro con Mercado Pago • Cobro mensual • Cancela cuando quieras
