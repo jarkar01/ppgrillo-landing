@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   generator: 'v0.app',
   applicationName: 'PpGrillo',
   formatDetection: { telephone: false },
+  appleWebApp: { capable: true, title: 'PpGrillo', statusBarStyle: 'default' },
   icons: {
     icon: [
       { url: '/icons/icon-192.png', sizes: '192x192', type: 'image/png' },
