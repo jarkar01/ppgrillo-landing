@@ -1,3 +1,4 @@
+import { sendGmail, type EmailSendResult, type OutgoingEmail } from '@/lib/gmail'
 import { firestoreContext, patchDocument, type FirestoreFields } from '@/lib/web-users'
 
 const USERS = 'users'
@@ -14,16 +15,13 @@ export type EmailReportRecipient = {
   currentTask?: string
 }
 
-export type ReportEmail = { subject: string; text: string; html: string }
+export type ReportEmail = OutgoingEmail
 
-export type EmailSendResult = { ok: true } | { ok: false; reason: string }
+export type { EmailSendResult }
 
-/**
- * Delivery adapter for weekly reports. No email provider is connected yet, so it reports
- * `not_configured` and the cron leaves the week unmarked to retry once a sender is wired in.
- */
-export async function sendReportEmail(_to: string, _email: ReportEmail): Promise<EmailSendResult> {
-  return { ok: false, reason: 'email_sender_not_configured' }
+/** Delivery adapter for weekly reports; unsent weeks stay unmarked so the next run retries. */
+export async function sendReportEmail(to: string, email: ReportEmail): Promise<EmailSendResult> {
+  return sendGmail(to, email)
 }
 
 function str(fields: FirestoreFields, key: string): string | undefined {
@@ -149,6 +147,6 @@ export async function sendWeeklyEmailReports(week: string, now: Date) {
     }
   }
 
-  if (skipped > 0) console.log(`[email-report] Week ${week}: ${skipped} not sent (sender not configured)`)
+  if (skipped > 0) console.log(`[email-report] Week ${week}: ${skipped} not sent; retrying next run`)
   return { total: recipients.length, sent, skipped }
 }
