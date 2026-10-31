@@ -813,6 +813,7 @@ export async function listReportRecipients(
     if (!row.document) continue
     const fields = row.document.fields ?? {}
     const docId = row.document.name.split('/').pop() ?? ''
+    if (readString(fields, ['report_channel']) === 'email') continue
     const usage = buildUsage(fields)
     const plan = effectivePlan(usage, now)
     if (plan === 'free') continue

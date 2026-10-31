@@ -40,6 +40,7 @@ export async function POST(req: Request) {
     webUser,
     parentEmail: parsed.data.parentEmail,
     plan: parsed.data.plan,
+    period: parsed.data.period,
   })
   if (!saved) {
     return Response.json(
