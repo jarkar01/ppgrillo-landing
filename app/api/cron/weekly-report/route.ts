@@ -1,3 +1,4 @@
+import { sendWeeklyEmailReports } from '@/lib/email-reports'
 import { getGoogleAuth } from '@/lib/google-auth'
 import { buildParentReportTemplateParams, buildParentReportText } from '@/lib/parent-report'
 import { sendWhatsAppTemplate, sendWhatsAppText } from '@/lib/whatsapp-cloud'
@@ -61,5 +62,6 @@ export async function GET(request: Request) {
   }
 
   console.log(`[report] Week ${week}: ${sent} sent, ${failed} failed of ${recipients.length}`)
-  return Response.json({ week, total: recipients.length, sent, failed })
+  const email = await sendWeeklyEmailReports(week, now)
+  return Response.json({ week, total: recipients.length, sent, failed, email })
 }

@@ -1,10 +1,11 @@
-import { randomUUID } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import { getGoogleAuth } from '@/lib/google-auth'
 import type { PaidPlanId } from '@/lib/plans'
 
 export const WEB_USER_COOKIE = 'ppg_web_uid'
 export const WEB_USER_COOKIE_MAX_AGE = 60 * 60 * 24 * 365 * 2
 
+const USERS = 'users'
 const WEB_USERS = 'web_users'
 const CHECKOUT_INTENTS = 'checkout_intents'
 const REQUEST_TIMEOUT_MS = 5_000
@@ -23,11 +24,11 @@ type FirestoreValue =
   | { integerValue: string }
   | { timestampValue: string }
   | { nullValue: null }
-type FirestoreFields = Record<string, FirestoreValue>
+export type FirestoreFields = Record<string, FirestoreValue>
 
 type FirestoreContext = { base: string; headers: Record<string, string> }
 
-async function firestoreContext(): Promise<FirestoreContext | null> {
+export async function firestoreContext(): Promise<FirestoreContext | null> {
   const auth = getGoogleAuth()
   if (!auth) return null
   const projectId = await auth
@@ -129,7 +130,7 @@ export async function createWebUser(name: string): Promise<WebUser | null> {
   }
 }
 
-async function patchDocument(path: string, fields: FirestoreFields): Promise<boolean> {
+export async function patchDocument(path: string, fields: FirestoreFields): Promise<boolean> {
   const ctx = await firestoreContext()
   if (!ctx) return false
   const mask = Object.keys(fields)
@@ -163,29 +164,68 @@ export async function saveTaskProgress(
   }
 }
 
+export type BillingPeriod = 'monthly' | 'quarterly'
+
+/** Stable document id in `users` for a parent email; keeps the address out of the document path. */
+export function emailUserDocId(email: string): string {
+  return `email_${createHash('sha256').update(email.trim().toLowerCase()).digest('hex')}`
+}
+
+/**
+ * Parent email records live in the shared `users` collection next to WhatsApp users. They never
+ * set `plan`, so the WhatsApp weekly report query cannot select them; `plan_status` moves to
+ * 'active' once the payment is confirmed.
+ */
+async function upsertEmailUser(intent: {
+  webUser: WebUser | null
+  parentEmail: string
+  plan: PaidPlanId
+  period: BillingPeriod
+  now: string
+}): Promise<boolean> {
+  return patchDocument(`${USERS}/${emailUserDocId(intent.parentEmail)}`, {
+    email: { stringValue: intent.parentEmail },
+    report_channel: { stringValue: 'email' },
+    source: { stringValue: 'web_checkout' },
+    checkout_plan: { stringValue: intent.plan },
+    checkout_period: { stringValue: intent.period },
+    plan_status: { stringValue: 'pending_payment' },
+    student_name: intent.webUser?.name ? { stringValue: intent.webUser.name } : { nullValue: null },
+    web_user_id: intent.webUser ? { stringValue: intent.webUser.id } : { nullValue: null },
+    checkout_requested_at: { timestampValue: intent.now },
+    updated_at: { timestampValue: intent.now },
+  })
+}
+
 export async function saveCheckoutIntent(intent: {
   webUser: WebUser | null
   parentEmail: string
   plan: PaidPlanId
+  period: BillingPeriod
 }): Promise<boolean> {
   const now = new Date().toISOString()
   try {
-    const saved = await patchDocument(`${CHECKOUT_INTENTS}/${randomUUID()}`, {
-      parent_email: { stringValue: intent.parentEmail },
-      plan: { stringValue: intent.plan },
-      name: intent.webUser?.name ? { stringValue: intent.webUser.name } : { nullValue: null },
-      web_user_id: intent.webUser ? { stringValue: intent.webUser.id } : { nullValue: null },
-      status: { stringValue: 'pending_payment' },
-      created_at: { timestampValue: now },
-    })
+    const [userSaved, intentSaved] = await Promise.all([
+      upsertEmailUser({ ...intent, now }),
+      patchDocument(`${CHECKOUT_INTENTS}/${randomUUID()}`, {
+        parent_email: { stringValue: intent.parentEmail },
+        plan: { stringValue: intent.plan },
+        period: { stringValue: intent.period },
+        name: intent.webUser?.name ? { stringValue: intent.webUser.name } : { nullValue: null },
+        web_user_id: intent.webUser ? { stringValue: intent.webUser.id } : { nullValue: null },
+        status: { stringValue: 'pending_payment' },
+        created_at: { timestampValue: now },
+      }),
+    ])
     if (intent.webUser) {
       await patchDocument(`${WEB_USERS}/${intent.webUser.id}`, {
         parent_email: { stringValue: intent.parentEmail },
         checkout_plan: { stringValue: intent.plan },
+        checkout_period: { stringValue: intent.period },
         checkout_requested_at: { timestampValue: now },
       })
     }
-    return saved
+    return userSaved && intentSaved
   } catch (error) {
     console.error('[web-users] Checkout intent error:', error)
     return false
