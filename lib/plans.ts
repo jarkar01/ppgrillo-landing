@@ -9,6 +9,7 @@ export const STANDARD_MONTHLY_TASKS = 20
 export const TASK_IDLE_RESET_HOURS = 24
 
 export const STANDARD_PRICE_MXN = 39
+export const STANDARD_QUARTERLY_PRICE_MXN = 100
 export const FAMILY_PRICE_MXN = 149
 
 export const FAMILY_MAX_USERS = 3

@@ -117,6 +117,7 @@ export function CheckoutButton({
   label,
   featured = false,
   billingOptions = false,
+  defaultPeriod = 'monthly',
 }: {
   plan: PaidPlanId
   planName: string
@@ -124,6 +125,7 @@ export function CheckoutButton({
   label: string
   featured?: boolean
   billingOptions?: boolean
+  defaultPeriod?: BillingPeriod
 }) {
   const [open, setOpen] = useState(false)
   const [choosingPeriod, setChoosingPeriod] = useState(false)
@@ -164,7 +166,7 @@ export function CheckoutButton({
       ) : (
         <button
           type="button"
-          onClick={() => (billingOptions ? setChoosingPeriod(true) : openCheckout('monthly'))}
+          onClick={() => (billingOptions ? setChoosingPeriod(true) : openCheckout(defaultPeriod))}
           aria-expanded={billingOptions ? false : undefined}
           aria-controls={billingOptions ? optionsId : undefined}
           className={featured ? PRIMARY_BUTTON : SECONDARY_BUTTON}

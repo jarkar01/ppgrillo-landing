@@ -7,6 +7,7 @@ export type LocalStudent = {
   tasksUsed: number
   currentTask?: string
   lastActivityAt?: number
+  exhausted?: boolean
 }
 
 const STORAGE_KEY = 'ppgrillo:student'
@@ -25,6 +26,7 @@ function parse(raw: string | null): LocalStudent | null {
       tasksUsed: Number.isFinite(data.tasksUsed) ? Math.max(0, Number(data.tasksUsed)) : 0,
       currentTask: typeof data.currentTask === 'string' ? data.currentTask : undefined,
       lastActivityAt: typeof data.lastActivityAt === 'number' ? data.lastActivityAt : undefined,
+      exhausted: data.exhausted === true,
     }
   } catch {
     return null
