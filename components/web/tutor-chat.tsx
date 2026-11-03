@@ -7,8 +7,8 @@ import { Camera, Loader2, SendHorizontal, X } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
 import { ChatPaywall } from '@/components/web/chat-paywall'
 import { compressImage } from '@/components/app/compress-image'
-import { readLocalStudent, updateLocalStudent, useLocalStudent } from '@/lib/local-student'
-import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
+import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
+import { FREE_LIFETIME_TASKS } from '@/lib/plans'
 import type { TutorMessage, TutorStudentState } from '@/lib/tutor-types'
 
 function TaskMeter({ used }: { used: number }) {
@@ -32,7 +32,6 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
   const [image, setImage] = useState<FileUIPart | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
-  const localStudent = useLocalStudent()
   const [transport] = useState(
     () =>
       new DefaultChatTransport<TutorMessage>({
@@ -63,14 +62,7 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
   const busy = status === 'submitted' || status === 'streaming'
   const firstName = name.split(' ')[0]
 
-  const currentTask = lastMeta ? lastMeta.currentTask : localStudent?.currentTask
-  const lastActivityAt = lastMeta ? lastMeta.lastActivityAt : localStudent?.lastActivityAt
-  const taskInProgress =
-    Boolean(currentTask) &&
-    typeof lastActivityAt === 'number' &&
-    Date.now() - lastActivityAt < TASK_IDLE_RESET_HOURS * 60 * 60 * 1000
-  // The counter hits 0 when the last free task starts; keep the chat open until that exercise is finished.
-  const locked = limitReached || (tasksUsed >= FREE_LIFETIME_TASKS && !taskInProgress && !busy)
+  const locked = limitReached || tasksUsed >= FREE_LIFETIME_TASKS
 
   function submit() {
     const text = input.trim()

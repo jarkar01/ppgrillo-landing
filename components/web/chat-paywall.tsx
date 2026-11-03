@@ -8,6 +8,7 @@ import {
   FREE_LIFETIME_TASKS,
   STANDARD_MONTHLY_TASKS,
   STANDARD_PRICE_MXN,
+  STANDARD_QUARTERLY_PRICE_MXN,
   type BillingPeriod,
   type PaidPlanId,
 } from '@/lib/plans'
@@ -34,7 +35,7 @@ const OPTIONS: PaywallOption[] = [
     plan: 'standard',
     period: 'quarterly',
     name: 'Plan Estándar Trimestral',
-    price: 'Pago cada 3 meses',
+    price: `$${STANDARD_QUARTERLY_PRICE_MXN} MXN/trimestre`,
     detail: `Los mismos beneficios del Plan Estándar, cubiertos por tres meses en un solo pago.`,
   },
   {

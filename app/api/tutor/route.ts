@@ -137,7 +137,7 @@ export async function POST(req: Request) {
     kind = currentExercise ? 'same' : 'new'
   }
 
-  if (kind === 'new' && tasksUsed >= FREE_LIFETIME_TASKS) {
+  if (tasksUsed >= FREE_LIFETIME_TASKS) {
     return streamStatic(limitReachedReply(name || 'amigo'), { tasksUsed, limitReached: true })
   }
 
