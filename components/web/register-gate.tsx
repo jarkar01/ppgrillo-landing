@@ -38,5 +38,5 @@ export function WebApp() {
     )
   }
 
-  return student ? <TutorChat name={student.name} initialTasksUsed={student.tasksUsed} /> : <RegisterGate />
+  return student ? <TutorChat name={student.name} initialTasksUsed={student.tasksUsed} initialExhausted={student.exhausted === true} /> : <RegisterGate />
 }

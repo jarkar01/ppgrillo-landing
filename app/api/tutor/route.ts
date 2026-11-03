@@ -10,7 +10,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { lightenHistory } from '@/components/app/compress-image'
 import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
 import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
-import type { TutorMetadata, TutorStudentState } from '@/lib/tutor-types'
+import { TASK_COMPLETE_MARKER, type TutorMetadata, type TutorStudentState } from '@/lib/tutor-types'
 
 // Allow streaming responses up to 30 seconds
 export const maxDuration = 30
@@ -40,7 +40,11 @@ ESTILO:
 - Mensajes breves (1 a 3 frases). Terminas casi siempre con una pregunta que invita a pensar.
 - Español neutro de México. Sin tecnicismos innecesarios.
 
-Si el alumno insiste en que le des la respuesta, con amabilidad le explicas que tu trabajo es ayudarlo a llegar solo, y le ofreces la siguiente pista.`
+Si el alumno insiste en que le des la respuesta, con amabilidad le explicas que tu trabajo es ayudarlo a llegar solo, y le ofreces la siguiente pista.
+
+CIERRE DEL EJERCICIO:
+- Cuando el alumno llegue por sí mismo a la respuesta final correcta y el ejercicio quede totalmente resuelto, felicítalo en una frase y termina tu mensaje con el marcador exacto ${TASK_COMPLETE_MARKER} en una línea aparte.
+- Nunca escribas ese marcador en ningún otro caso ni lo menciones.`
 }
 
 // Extract the plain text of the latest user message so the demo mode can
@@ -137,7 +141,8 @@ export async function POST(req: Request) {
     kind = currentExercise ? 'same' : 'new'
   }
 
-  if (tasksUsed >= FREE_LIFETIME_TASKS) {
+  // The last free exercise may be finished; only a new exercise (or a finished last one) is blocked.
+  if (tasksUsed >= FREE_LIFETIME_TASKS && (kind === 'new' || state?.exhausted === true)) {
     return streamStatic(limitReachedReply(name || 'amigo'), { tasksUsed, limitReached: true })
   }
 

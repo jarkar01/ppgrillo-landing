@@ -9,7 +9,12 @@ import { ChatPaywall } from '@/components/web/chat-paywall'
 import { compressImage } from '@/components/app/compress-image'
 import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
 import { FREE_LIFETIME_TASKS } from '@/lib/plans'
-import type { TutorMessage, TutorStudentState } from '@/lib/tutor-types'
+import {
+  TASK_COMPLETE_MARKER,
+  stripTaskMarker,
+  type TutorMessage,
+  type TutorStudentState,
+} from '@/lib/tutor-types'
 
 function TaskMeter({ used }: { used: number }) {
   const left = Math.max(0, FREE_LIFETIME_TASKS - used)
@@ -27,7 +32,22 @@ function TaskMeter({ used }: { used: number }) {
   )
 }
 
-export function TutorChat({ name, initialTasksUsed }: { name: string; initialTasksUsed: number }) {
+function messageText(message: TutorMessage): string {
+  return message.parts
+    .filter((p): p is { type: 'text'; text: string } => p.type === 'text')
+    .map((p) => p.text)
+    .join(' ')
+}
+
+export function TutorChat({
+  name,
+  initialTasksUsed,
+  initialExhausted = false,
+}: {
+  name: string
+  initialTasksUsed: number
+  initialExhausted?: boolean
+}) {
   const [input, setInput] = useState('')
   const [image, setImage] = useState<FileUIPart | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
@@ -47,22 +67,35 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
     transport,
     onFinish: ({ message }) => {
       const meta = message.metadata
-      if (!meta || meta.limitReached) return
+      if (!meta) return
+      if (meta.limitReached) {
+        updateLocalStudent({ exhausted: true })
+        return
+      }
+      const finishedLastFree =
+        meta.tasksUsed >= FREE_LIFETIME_TASKS && messageText(message).includes(TASK_COMPLETE_MARKER)
       updateLocalStudent({
         tasksUsed: meta.tasksUsed,
         currentTask: meta.currentTask,
         lastActivityAt: meta.lastActivityAt,
+        exhausted: finishedLastFree || undefined,
       })
     },
   })
 
-  const lastMeta = [...messages].reverse().find((m) => m.role === 'assistant' && m.metadata)?.metadata
+  const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant' && m.metadata)
+  const lastMeta = lastAssistant?.metadata
   const tasksUsed = lastMeta?.tasksUsed ?? initialTasksUsed
   const limitReached = lastMeta?.limitReached ?? false
   const busy = status === 'submitted' || status === 'streaming'
   const firstName = name.split(' ')[0]
 
-  const locked = limitReached || tasksUsed >= FREE_LIFETIME_TASKS
+  const finishedLastFree =
+    !busy &&
+    tasksUsed >= FREE_LIFETIME_TASKS &&
+    lastAssistant !== undefined &&
+    messageText(lastAssistant).includes(TASK_COMPLETE_MARKER)
+  const locked = initialExhausted || limitReached || finishedLastFree
 
   function submit() {
     const text = input.trim()
@@ -127,7 +160,12 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
             }`}
           >
             {message.parts.map((part, i) => {
-              if (part.type === 'text') return <p key={i} className="whitespace-pre-wrap text-pretty">{part.text}</p>
+              if (part.type === 'text')
+                return (
+                  <p key={i} className="whitespace-pre-wrap text-pretty">
+                    {message.role === 'assistant' ? stripTaskMarker(part.text) : part.text}
+                  </p>
+                )
               if (part.type === 'file' && part.mediaType.startsWith('image/'))
                 return (
                   // eslint-disable-next-line @next/next/no-img-element
