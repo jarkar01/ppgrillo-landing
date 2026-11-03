@@ -23,6 +23,7 @@ type FirestoreValue =
   | { stringValue: string }
   | { integerValue: string }
   | { timestampValue: string }
+  | { doubleValue: number }
   | { nullValue: null }
 export type FirestoreFields = Record<string, FirestoreValue>
 
