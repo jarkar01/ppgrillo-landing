@@ -2,6 +2,7 @@
 
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type FileUIPart } from 'ai'
+import Link from 'next/link'
 import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Camera, Loader2, SendHorizontal, X } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
@@ -90,12 +91,14 @@ export function TutorChat({
   const busy = status === 'submitted' || status === 'streaming'
   const firstName = name.split(' ')[0]
 
-  const finishedLastFree =
-    !busy &&
-    tasksUsed >= FREE_LIFETIME_TASKS &&
-    lastAssistant !== undefined &&
-    messageText(lastAssistant).includes(TASK_COMPLETE_MARKER)
-  const locked = initialExhausted || limitReached || finishedLastFree
+  const lastHasMarker = lastAssistant !== undefined && messageText(lastAssistant).includes(TASK_COMPLETE_MARKER)
+  const finishedLastFree = tasksUsed >= FREE_LIFETIME_TASKS && lastHasMarker
+  const exhaustedOnLoad = initialExhausted || (messages.length === 0 && initialTasksUsed >= FREE_LIFETIME_TASKS)
+  const locked = exhaustedOnLoad || limitReached || finishedLastFree
+  // The server counts a task when it starts; the meter counts it once it is finished,
+  // so it reaches 0 at the exact moment the chat locks.
+  const taskInProgress = !locked && Boolean(lastMeta?.currentTask) && !lastHasMarker
+  const tasksCompleted = locked ? FREE_LIFETIME_TASKS : Math.max(0, tasksUsed - (taskInProgress ? 1 : 0))
 
   function submit() {
     const text = input.trim()
@@ -132,15 +135,21 @@ export function TutorChat({
   return (
     <div className="mx-auto flex h-svh w-full max-w-2xl flex-col">
       <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
-        <BrandIdentity />
-        <TaskMeter used={tasksUsed} />
+        <Link
+          href="/"
+          aria-label="PpGrillo: ir a la página principal"
+          className="rounded-xl transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25D366]"
+        >
+          <BrandIdentity />
+        </Link>
+        <TaskMeter used={tasksCompleted} />
       </header>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-5" aria-live="polite">
         {messages.length === 0 && !locked ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">
-              ¡Hola, {firstName}! Tienes {Math.max(0, FREE_LIFETIME_TASKS - tasksUsed)} tareas de cortesía.
+              ¡Hola, {firstName}! Tienes {Math.max(0, FREE_LIFETIME_TASKS - tasksCompleted)} tareas de cortesía.
             </p>
             <p className="text-sm leading-relaxed text-pretty text-slate-700">
               Escribe tu ejercicio o súbele una foto de la libreta. Te guío con preguntas paso a paso para que
