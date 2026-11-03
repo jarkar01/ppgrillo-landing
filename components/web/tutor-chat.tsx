@@ -5,10 +5,10 @@ import { DefaultChatTransport, type FileUIPart } from 'ai'
 import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Camera, Loader2, SendHorizontal, X } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
-import { PlanCards } from '@/components/campaign/campaign-plans'
+import { ChatPaywall } from '@/components/web/chat-paywall'
 import { compressImage } from '@/components/app/compress-image'
-import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
-import { FREE_LIFETIME_TASKS } from '@/lib/plans'
+import { readLocalStudent, updateLocalStudent, useLocalStudent } from '@/lib/local-student'
+import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
 import type { TutorMessage, TutorStudentState } from '@/lib/tutor-types'
 
 function TaskMeter({ used }: { used: number }) {
@@ -32,6 +32,7 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
   const [image, setImage] = useState<FileUIPart | null>(null)
   const [imageError, setImageError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const localStudent = useLocalStudent()
   const [transport] = useState(
     () =>
       new DefaultChatTransport<TutorMessage>({
@@ -62,9 +63,18 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
   const busy = status === 'submitted' || status === 'streaming'
   const firstName = name.split(' ')[0]
 
+  const currentTask = lastMeta ? lastMeta.currentTask : localStudent?.currentTask
+  const lastActivityAt = lastMeta ? lastMeta.lastActivityAt : localStudent?.lastActivityAt
+  const taskInProgress =
+    Boolean(currentTask) &&
+    typeof lastActivityAt === 'number' &&
+    Date.now() - lastActivityAt < TASK_IDLE_RESET_HOURS * 60 * 60 * 1000
+  // The counter hits 0 when the last free task starts; keep the chat open until that exercise is finished.
+  const locked = limitReached || (tasksUsed >= FREE_LIFETIME_TASKS && !taskInProgress && !busy)
+
   function submit() {
     const text = input.trim()
-    if ((!text && !image) || busy) return
+    if ((!text && !image) || busy || locked) return
     sendMessage({ text: text || 'Te mando la foto de mi ejercicio.', files: image ? [image] : undefined })
     setInput('')
     setImage(null)
@@ -102,7 +112,7 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
       </header>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-5" aria-live="polite">
-        {messages.length === 0 ? (
+        {messages.length === 0 && !locked ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">
               ¡Hola, {firstName}! Tienes {Math.max(0, FREE_LIFETIME_TASKS - tasksUsed)} tareas de cortesía.
@@ -149,14 +159,7 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
           </p>
         ) : null}
 
-        {limitReached ? (
-          <section aria-labelledby="upgrade-title" className="flex flex-col gap-4 pt-2">
-            <h2 id="upgrade-title" className="font-display text-lg font-bold text-balance text-slate-900">
-              Sigue aprendiendo con un plan
-            </h2>
-            <PlanCards includeFree={false} />
-          </section>
-        ) : null}
+        {locked ? <ChatPaywall firstName={firstName} /> : null}
       </div>
 
       <form
@@ -185,11 +188,13 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
             accept="image/*"
             className="sr-only"
             id="tutor-photo"
+            disabled={locked}
             onChange={(event) => handleFile(event.target.files?.[0])}
           />
           <label
             htmlFor="tutor-photo"
-            className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-slate-200 text-slate-600 transition-colors hover:border-[#25D366] hover:text-[#128C7E]"
+            aria-disabled={locked}
+            className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-slate-200 text-slate-600 transition-colors hover:border-[#25D366] hover:text-[#128C7E] aria-disabled:pointer-events-none aria-disabled:opacity-50"
           >
             <Camera className="h-5 w-5" aria-hidden="true" />
             <span className="sr-only">Subir foto del ejercicio</span>
@@ -203,12 +208,13 @@ export function TutorChat({ name, initialTasksUsed }: { name: string; initialTas
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Escribe tu ejercicio o tu respuesta…"
-            className="max-h-32 min-h-12 flex-1 resize-none rounded-3xl border-2 border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#25D366]"
+            disabled={locked}
+            placeholder={locked ? 'Elige un plan para seguir con tus tareas' : 'Escribe tu ejercicio o tu respuesta…'}
+            className="max-h-32 min-h-12 flex-1 resize-none rounded-3xl border-2 border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#25D366] disabled:cursor-not-allowed disabled:bg-slate-100"
           />
           <button
             type="submit"
-            disabled={busy || (!input.trim() && !image)}
+            disabled={locked || busy || (!input.trim() && !image)}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white transition-colors hover:bg-[#20bd5a] disabled:opacity-50"
           >
             <SendHorizontal className="h-5 w-5" aria-hidden="true" />
