@@ -43,10 +43,12 @@ export async function POST(req: Request) {
     period: parsed.data.period,
   })
   if (!saved) {
-    return Response.json(
-      { error: 'No pudimos registrar el correo. Intenta de nuevo en un momento.' },
-      { status: 503 },
-    )
+    // Never block a sale on a storage outage: the Mercado Pago webhook still receives the
+    // payer email and the failure is logged for follow-up.
+    console.error('[checkout] Email could not be saved; continuing to Mercado Pago', {
+      plan: parsed.data.plan,
+      period: parsed.data.period,
+    })
   }
 
   return Response.json({ url: checkoutUrl })

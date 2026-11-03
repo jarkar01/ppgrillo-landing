@@ -143,7 +143,9 @@ export async function patchDocument(path: string, fields: FirestoreFields): Prom
     body: JSON.stringify({ fields }),
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   })
-  if (!res.ok) console.error('[web-users] Update failed:', path, res.status, await res.text())
+  if (!res.ok) {
+    console.error('[web-users] Update failed:', ctx.base.split('/')[6], path, res.status, await res.text())
+  }
   return res.ok
 }
 
