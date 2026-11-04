@@ -3,9 +3,11 @@
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type FileUIPart } from 'ai'
 import Link from 'next/link'
-import { useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { Camera, Loader2, SendHorizontal, X } from 'lucide-react'
+import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { Camera, Info, Loader2, SendHorizontal, X } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
+
+const GUIDE_PATH = '/app/como-funciona'
 import { ChatPaywall } from '@/components/web/chat-paywall'
 import { compressImage } from '@/components/app/compress-image'
 import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
@@ -134,15 +136,28 @@ export function TutorChat({
 
   return (
     <div className="mx-auto flex h-svh w-full max-w-2xl flex-col">
-      <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3">
+      <header className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-slate-200 px-4 py-3">
         <Link
-          href="/"
-          aria-label="PpGrillo: ir a la página principal"
-          className="rounded-xl transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25D366]"
+          href={GUIDE_PATH}
+          aria-label="PpGrillo: conoce cómo funciona"
+          className="shrink-0 rounded-xl transition-opacity hover:opacity-80 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#25D366]"
         >
           <BrandIdentity />
         </Link>
-        <TaskMeter used={tasksCompleted} />
+        <div className="order-last w-full sm:order-none sm:w-auto">
+          <TaskMeter used={tasksCompleted} />
+        </div>
+        <div className="flex items-center">
+          <Link
+            href={GUIDE_PATH}
+            className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border-2 border-slate-200 px-3 text-sm font-semibold text-slate-700 transition-colors hover:border-[#25D366] hover:text-[#128C7E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]"
+          >
+            <Info className="h-4 w-4" aria-hidden="true" />
+            <span className="hidden md:inline">Conoce cómo funciona PpGrillo</span>
+            <span className="md:hidden" aria-hidden="true">Info</span>
+            <span className="sr-only md:hidden">Conoce cómo funciona PpGrillo: información y planes</span>
+          </Link>
+        </div>
       </header>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-5" aria-live="polite">

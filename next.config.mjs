@@ -11,7 +11,7 @@ const nextConfig = {
       { source: "/prueba", destination: "/app", permanent: false },
       { source: "/dashboard", destination: "/app", permanent: false },
       { source: "/dashboard/:path*", destination: "/app", permanent: false },
-      { source: "/app/:path+", destination: "/app", permanent: false },
+      { source: "/app/:path((?!como-funciona$).+)", destination: "/app", permanent: false },
       { source: "/login/:path+", destination: "/app", permanent: false },
       { source: "/signup", destination: "/app", permanent: false },
       { source: "/registro", destination: "/app", permanent: false },
