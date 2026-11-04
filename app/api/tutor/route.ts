@@ -10,6 +10,7 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { lightenHistory } from '@/components/app/compress-image'
 import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
 import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
+import { getCurrentSubscription } from '@/lib/subscription'
 import { TASK_COMPLETE_MARKER, type TutorMetadata, type TutorStudentState } from '@/lib/tutor-types'
 
 // Allow streaming responses up to 30 seconds
@@ -141,8 +142,21 @@ export async function POST(req: Request) {
     kind = currentExercise ? 'same' : 'new'
   }
 
+  // Paid access is validated server-side against the parent record in Firestore (by parent_email).
+  let subscribed = false
+  if (tasksUsed >= FREE_LIFETIME_TASKS) {
+    const { parentEmail, subscription } = await getCurrentSubscription()
+    if (subscription === 'error') {
+      // Never lock out a family that already linked a parent email because Firestore is briefly down.
+      subscribed = Boolean(parentEmail)
+      console.error('[tutor] Subscription lookup failed; allowing linked parent email:', Boolean(parentEmail))
+    } else {
+      subscribed = subscription.status === 'active'
+    }
+  }
+
   // The last free exercise may be finished; only a new exercise (or a finished last one) is blocked.
-  if (tasksUsed >= FREE_LIFETIME_TASKS && (kind === 'new' || state?.exhausted === true)) {
+  if (!subscribed && tasksUsed >= FREE_LIFETIME_TASKS && (kind === 'new' || state?.exhausted === true)) {
     return streamStatic(limitReachedReply(name || 'amigo'), { tasksUsed, limitReached: true })
   }
 
@@ -155,6 +169,7 @@ export async function POST(req: Request) {
   const metadata: TutorMetadata = {
     tasksUsed,
     limitReached: false,
+    subscribed,
     currentTask,
     lastActivityAt: kind === 'other' ? lastActivityAt : now,
   }
