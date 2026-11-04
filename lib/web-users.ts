@@ -17,6 +17,7 @@ export type WebUser = {
   taskCount: number
   currentTaskText?: string
   lastTaskActivityAt?: Date
+  parentEmail?: string
 }
 
 type FirestoreValue =
@@ -74,6 +75,7 @@ function toWebUser(id: string, fields: FirestoreFields): WebUser {
     taskCount: readInt(fields, 'task_count'),
     currentTaskText: readString(fields, 'current_task_text'),
     lastTaskActivityAt: readDate(fields, 'last_task_activity_at'),
+    parentEmail: readString(fields, 'parent_email')?.trim().toLowerCase(),
   }
 }
 
