@@ -1,16 +1,16 @@
-import { cookies } from 'next/headers'
 import { z } from 'zod'
 import {
   MERCADOPAGO_FAMILY_URL,
   MERCADOPAGO_STANDARD_QUARTERLY_URL,
   MERCADOPAGO_STANDARD_URL,
 } from '@/lib/plans'
-import { WEB_USER_COOKIE, getWebUser, saveCheckoutIntent } from '@/lib/web-users'
+import { saveCheckoutIntent, toParentEmail } from '@/lib/parent-users'
 
 const bodySchema = z.object({
   plan: z.enum(['standard', 'family']),
   period: z.enum(['monthly', 'quarterly']).default('monthly'),
   parentEmail: z.string().trim().toLowerCase().max(254).email(),
+  studentName: z.string().trim().max(60).optional(),
 })
 
 const CHECKOUT_URLS = {
@@ -20,7 +20,8 @@ const CHECKOUT_URLS = {
 
 export async function POST(req: Request) {
   const parsed = bodySchema.safeParse(await req.json().catch(() => null))
-  if (!parsed.success) {
+  const parentEmail = parsed.success ? toParentEmail(parsed.data.parentEmail) : undefined
+  if (!parsed.success || !parentEmail) {
     return Response.json(
       { error: 'Escribe un correo electrónico válido del padre o tutor.' },
       { status: 400 },
@@ -35,12 +36,11 @@ export async function POST(req: Request) {
     )
   }
 
-  const webUser = await getWebUser((await cookies()).get(WEB_USER_COOKIE)?.value)
   const saved = await saveCheckoutIntent({
-    webUser,
-    parentEmail: parsed.data.parentEmail,
+    parentEmail,
     plan: parsed.data.plan,
     period: parsed.data.period,
+    studentName: parsed.data.studentName || undefined,
   })
   if (!saved) {
     // Never block a sale on a storage outage: the Mercado Pago webhook still receives the
@@ -50,6 +50,5 @@ export async function POST(req: Request) {
       period: parsed.data.period,
     })
   }
-
   return Response.json({ url: checkoutUrl })
 }
