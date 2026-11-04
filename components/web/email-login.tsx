@@ -5,6 +5,8 @@ import { useSWRConfig } from 'swr'
 import { ArrowLeft, Loader2, MailCheck } from 'lucide-react'
 import { PRIMARY_BUTTON } from '@/components/web/start-free'
 import { readLocalStudent, saveLocalStudent } from '@/lib/local-student'
+import { savePaidSession } from '@/lib/paid-session'
+import type { PaidPlanId } from '@/lib/plans'
 
 const INPUT =
   'min-h-12 w-full rounded-xl border-2 border-slate-200 bg-white px-4 text-base text-slate-900 placeholder:text-slate-400 focus:border-[#25D366] focus:outline-none'
@@ -15,15 +17,32 @@ async function post(body: Record<string, string | undefined>) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  const data = (await res.json().catch(() => ({}))) as { error?: string; name?: string }
-  return { ok: res.ok, error: data.error, name: data.name }
+  const data = (await res.json().catch(() => ({}))) as {
+    error?: string
+    name?: string
+    email?: string
+    plan?: PaidPlanId
+  }
+  return { ok: res.ok, error: data.error, name: data.name, email: data.email, plan: data.plan }
 }
 
-/** "¿Ya pagaste?" access: verifies the plan by email with a one-time code and links this device. */
-export function EmailLogin({ variant = 'card' }: { variant?: 'card' | 'inline' }) {
-  const [open, setOpen] = useState(false)
+/** "¿Ya pagaste?" access: verifies the plan by email with a one-time code and anchors this device to it. */
+export function EmailLogin({
+  variant = 'card',
+  defaultEmail = '',
+  startOpen = false,
+  title = '¿Ya pagaste? Entra con tu correo',
+  intro,
+}: {
+  variant?: 'card' | 'inline'
+  defaultEmail?: string
+  startOpen?: boolean
+  title?: string
+  intro?: string
+}) {
+  const [open, setOpen] = useState(startOpen)
   const [step, setStep] = useState<'email' | 'code'>('email')
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState(defaultEmail)
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -56,11 +75,9 @@ export function EmailLogin({ variant = 'card' }: { variant?: 'card' | 'inline' }
       setError(result.error ?? 'No pudimos verificar el código. Intenta de nuevo.')
       return
     }
-    saveLocalStudent({
-      ...(local ?? { tasksUsed: 0 }),
-      name: local?.name ?? result.name ?? 'Alumno PpGrillo',
-      exhausted: false,
-    })
+    const studentName = local?.name ?? result.name ?? 'Alumno PpGrillo'
+    savePaidSession({ email: result.email ?? email, plan: result.plan, name: studentName })
+    saveLocalStudent({ ...(local ?? { tasksUsed: 0 }), name: studentName, exhausted: false })
     await mutate((key) => typeof key === 'string' && key.startsWith('/api/web/subscription'))
     setBusy(false)
   }
@@ -86,12 +103,13 @@ export function EmailLogin({ variant = 'card' }: { variant?: 'card' | 'inline' }
       className="flex flex-col gap-3 rounded-2xl border-2 border-emerald-100 bg-emerald-50/60 p-4 text-left"
     >
       <div className="flex flex-col gap-1">
-        <h3 id={`${id}-title`} className="font-display text-base font-bold text-slate-900">
-          ¿Ya pagaste? Entra con tu correo
+        <h3 id={`${id}-title`} className="font-display text-base font-bold text-balance text-slate-900">
+          {title}
         </h3>
         <p className="text-sm leading-relaxed text-pretty text-slate-600">
           {step === 'email'
-            ? 'Escribe el correo que usaste al pagar en Mercado Pago. Te enviaremos un código de 6 dígitos para confirmar que es tuyo.'
+            ? (intro ??
+              'Escribe el correo que usaste al pagar en Mercado Pago. Te enviaremos un código de 6 dígitos para confirmar que es tuyo.')
             : `Enviamos un código a ${email}. Escríbelo aquí para abrir el chat en este dispositivo.`}
         </p>
       </div>

@@ -9,6 +9,7 @@ import { BrandIdentity } from '@/components/brand-identity'
 
 const GUIDE_PATH = '/app/como-funciona'
 import { ChatPaywall } from '@/components/web/chat-paywall'
+import { EmailLogin } from '@/components/web/email-login'
 import {
   ActivatedNotice,
   ActivationCard,
@@ -108,8 +109,11 @@ export function TutorChat({
   const subscription = useSubscription()
   const subscribed = subscription.active || lastMeta?.subscribed === true
   const plan = subscription.subscription?.plan
+  const paidDevice = subscription.paidDevice
   const locked = !subscribed && (exhaustedOnLoad || limitReached || finishedLastFree)
-  const showPaywall = locked && (!subscription.activating || subscription.delayed)
+  // A family that already paid never sees the plans again; only a lapsed plan (expired) offers renewal.
+  const showPaywall = locked && !paidDevice && (!subscription.activating || subscription.delayed)
+  const showFreeTrial = subscription.resolved && !paidDevice && !subscribed
   // The server counts a task when it starts; the meter counts it once it is finished,
   // so it reaches 0 at the exact moment the chat locks.
   const taskInProgress = !locked && Boolean(lastMeta?.currentTask) && !lastHasMarker
@@ -158,7 +162,11 @@ export function TutorChat({
           <BrandIdentity />
         </Link>
         <div className="order-last w-full sm:order-none sm:w-auto">
-          {subscribed ? <PlanBadge plan={plan} /> : <TaskMeter used={tasksCompleted} />}
+          {subscribed || paidDevice ? (
+            <PlanBadge plan={plan ?? subscription.paidPlan} />
+          ) : showFreeTrial ? (
+            <TaskMeter used={tasksCompleted} />
+          ) : null}
         </div>
         <div className="flex items-center">
           <Link
@@ -176,7 +184,16 @@ export function TutorChat({
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-5" aria-live="polite">
         {subscription.justActivated ? <ActivatedNotice firstName={firstName} plan={plan} /> : null}
 
-        {messages.length === 0 && subscribed && !subscription.justActivated ? (
+        {subscription.needsReverify ? (
+          <EmailLogin
+            startOpen
+            defaultEmail={subscription.paidEmail}
+            title={`${firstName}, confirma tu correo para seguir`}
+            intro="Este dispositivo ya está ligado a un plan pagado, pero perdimos la sesión segura (por ejemplo, al borrar datos del navegador). Te enviamos un código para confirmarlo; no tienes que pagar de nuevo."
+          />
+        ) : null}
+
+        {messages.length === 0 && (subscribed || paidDevice) && !subscription.justActivated ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">¡Hola, {firstName}! ¿Qué tarea vemos hoy?</p>
             <p className="text-sm leading-relaxed text-pretty text-slate-700">
@@ -185,7 +202,7 @@ export function TutorChat({
           </div>
         ) : null}
 
-        {messages.length === 0 && !locked && !subscribed ? (
+        {messages.length === 0 && !locked && showFreeTrial ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">
               ¡Hola, {firstName}! Tienes {Math.max(0, FREE_LIFETIME_TASKS - tasksCompleted)} tareas de cortesía.
@@ -237,8 +254,11 @@ export function TutorChat({
           </p>
         ) : null}
 
-        {subscription.activating ? (
-          <ActivationCard delayed={subscription.delayed} onCheck={subscription.checkNow} />
+        {subscription.activating || subscription.confirming ? (
+          <ActivationCard
+            delayed={subscription.delayed || subscription.confirming}
+            onCheck={subscription.checkNow}
+          />
         ) : null}
         {locked && subscription.paymentFailed ? <PaymentFailedNotice /> : null}
         {showPaywall ? <ChatPaywall firstName={firstName} /> : null}
@@ -293,9 +313,11 @@ export function TutorChat({
             disabled={locked}
             placeholder={
               locked
-                ? subscription.activating
+                ? subscription.activating || subscription.confirming
                   ? 'Activando tu cuenta…'
-                  : 'Elige un plan para seguir con tus tareas'
+                  : paidDevice
+                    ? 'Confirma tu correo para seguir'
+                    : 'Elige un plan para seguir con tus tareas'
                 : 'Escribe tu ejercicio o tu respuesta…'
             }
             className="max-h-32 min-h-12 flex-1 resize-none rounded-3xl border-2 border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#25D366] disabled:cursor-not-allowed disabled:bg-slate-100"

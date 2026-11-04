@@ -1,6 +1,8 @@
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { requestLoginCode, verifyLoginCode } from '@/lib/email-login'
+import { saveParentSession } from '@/lib/parent-session'
+import { getSubscriptionByEmail } from '@/lib/subscription'
 import {
   WEB_USER_COOKIE,
   WEB_USER_COOKIE_MAX_AGE,
@@ -92,5 +94,10 @@ export async function POST(req: Request) {
     path: '/',
     maxAge: WEB_USER_COOKIE_MAX_AGE,
   })
-  return Response.json({ ok: true, name: webUser.name })
+  if (!(await saveParentSession(body.email))) {
+    return Response.json({ error: VERIFY_ERRORS.unavailable.error }, { status: 503 })
+  }
+  const subscription = await getSubscriptionByEmail(body.email)
+  const plan = subscription !== 'error' ? subscription.plan : undefined
+  return Response.json({ ok: true, name: webUser.name, email: body.email, plan })
 }
