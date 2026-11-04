@@ -2,12 +2,17 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import useSWR from 'swr'
+import { readPaidSession, savePaidSession, usePaidSession } from '@/lib/paid-session'
 import type { PaidPlanId } from '@/lib/plans'
 
 export type ClientSubscription = {
   status: 'active' | 'pending_payment' | 'expired' | 'none' | 'unknown'
   plan?: PaidPlanId
   expiresAt?: string
+  /** The server resolved a verified parent email for this device. */
+  linked?: boolean
+  email?: string
+  name?: string
 }
 
 const CHECKOUT_STARTED_KEY = 'ppgrillo:checkout-started'
@@ -78,7 +83,20 @@ async function fetchSubscription(url: string): Promise<ClientSubscription> {
 
 export type SubscriptionState = {
   subscription: ClientSubscription | undefined
+  /** Chat is unlocked: Firestore confirms the plan, or this is a paid device and the check is still pending. */
   active: boolean
+  /** This device belongs to a family that paid (verified email stored locally). Never shows plans. */
+  paidDevice: boolean
+  /** Paid device whose server session was lost (cookies cleared); the email must be confirmed again. */
+  needsReverify: boolean
+  /** Paid device linked to its email while Firestore does not show the plan as active yet. */
+  confirming: boolean
+  /** The plan linked to this device ended; renewal is the only case where plans are shown to a payer. */
+  expired: boolean
+  /** The first server answer arrived (or the device is already known to be paid). */
+  resolved: boolean
+  paidEmail?: string
+  paidPlan?: PaidPlanId
   /** True while we wait for Mercado Pago to confirm a payment the family just made. */
   activating: boolean
   /** Confirmation is taking longer than usual; polling continues in the background. */
@@ -105,6 +123,7 @@ export function useSubscription(): SubscriptionState {
     }
   }, [])
 
+  const paid = usePaidSession()
   const watching = watch !== null && !watch.failed
   const key = watch?.paymentId
     ? `/api/web/subscription?payment_id=${encodeURIComponent(watch.paymentId)}`
@@ -112,18 +131,30 @@ export function useSubscription(): SubscriptionState {
 
   const { data, mutate } = useSWR<ClientSubscription>(key, fetchSubscription, {
     refreshInterval: (latest) => {
-      if (!watching || latest?.status === 'active') return 0
-      return now - (watch?.since ?? now) < ACTIVATION_PATIENCE_MS ? FAST_POLL_MS : SLOW_POLL_MS
+      if (latest?.status === 'active') return 0
+      if (watching) return now - (watch?.since ?? now) < ACTIVATION_PATIENCE_MS ? FAST_POLL_MS : SLOW_POLL_MS
+      // A paying device keeps checking until Firestore confirms the plan again.
+      return readPaidSession() && latest?.status !== 'expired' ? SLOW_POLL_MS : 0
     },
     revalidateOnFocus: true,
     keepPreviousData: true,
   })
 
-  const active = data?.status === 'active'
+  const serverActive = data?.status === 'active'
+  const expired = data?.status === 'expired'
+  const pending = data === undefined || data.status === 'unknown'
+  const paidDevice = Boolean(paid) && !expired
+  const needsReverify = paidDevice && !pending && data?.linked !== true
+  const confirming = paidDevice && !pending && data?.linked === true && !serverActive
+  const active = serverActive || (paidDevice && pending)
+
+  useEffect(() => {
+    if (serverActive && data?.email) savePaidSession({ email: data.email, plan: data.plan, name: data.name })
+  }, [serverActive, data?.email, data?.plan, data?.name])
 
   useEffect(() => {
     if (!watching) return
-    if (active) {
+    if (serverActive) {
       clearCheckoutStarted()
       stripReturnParams()
       setJustActivated(true)
@@ -132,7 +163,7 @@ export function useSubscription(): SubscriptionState {
     }
     const timer = window.setInterval(() => setNow(Date.now()), 5_000)
     return () => window.clearInterval(timer)
-  }, [watching, active])
+  }, [watching, serverActive])
 
   const checkNow = useCallback(() => {
     void mutate()
@@ -141,9 +172,16 @@ export function useSubscription(): SubscriptionState {
   return {
     subscription: data,
     active,
-    activating: watching && !active,
-    delayed: watching && !active && now - (watch?.since ?? now) >= ACTIVATION_PATIENCE_MS,
-    paymentFailed: watch?.failed === true && !active,
+    paidDevice,
+    needsReverify,
+    confirming,
+    expired,
+    resolved: !pending || Boolean(paid),
+    paidEmail: data?.email ?? paid?.email,
+    paidPlan: paid?.plan,
+    activating: watching && !serverActive,
+    delayed: watching && !serverActive && now - (watch?.since ?? now) >= ACTIVATION_PATIENCE_MS,
+    paymentFailed: watch?.failed === true && !serverActive,
     justActivated,
     checkNow,
   }
