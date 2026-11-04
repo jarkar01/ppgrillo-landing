@@ -1,5 +1,5 @@
 import { buttonVariants } from '@/components/ui/button'
-import { WhatsappCta } from '@/components/whatsapp-cta'
+import { StartCta } from '@/components/start-cta'
 import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
@@ -18,7 +18,7 @@ const checkColors = ['#4285F4', '#34A853', '#FBBC05']
 const defaultBenefits = [
   'Tutor socrático 24/7 con paciencia infinita',
   'Lectura de fotos y audios de la libreta',
-  'Reporte semanal de avance para padres en WhatsApp',
+  'Reporte semanal de avance para padres por correo',
   'Campamento de verano incluido',
   'Pagos vía Mercado Pago o Stripe',
 ]
@@ -30,7 +30,7 @@ type PricingProps = {
 
 const ctaClass = cn(
   buttonVariants(),
-  'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-8 py-4 text-lg font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a]',
+  'relative mt-8 h-auto w-full gap-2 whitespace-nowrap rounded-full bg-primary px-8 py-4 text-lg font-bold text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90',
 )
 
 export function Pricing({
@@ -96,10 +96,10 @@ export function Pricing({
               ))}
             </ul>
 
-            <WhatsappCta className={ctaClass}>
+            <StartCta className={ctaClass}>
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
               Empezar con {FREE_LIFETIME_TASKS} tareas gratis
-            </WhatsappCta>
+            </StartCta>
 
             <div className="relative mt-6 flex flex-col items-center gap-3 border-t border-slate-200 pt-6">
               <p className="text-center text-[13px] text-slate-500">

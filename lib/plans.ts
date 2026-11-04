@@ -1,6 +1,6 @@
 export const FREE_LIFETIME_TASKS = 3
 
-// ~5 tareas por semana del ciclo escolar. Mantiene el costo operativo (WhatsApp + IA)
+// ~5 tareas por semana del ciclo escolar. Mantiene el costo operativo (IA)
 // por debajo de $20 MXN por alumno al mes.
 export const STANDARD_MONTHLY_TASKS = 20
 
@@ -22,22 +22,6 @@ export type BillingPeriod = 'monthly' | 'quarterly'
 
 export type PaidPlanId = 'standard' | 'family'
 export type PlanId = 'free' | PaidPlanId
-
-export const WELCOME_MESSAGE = [
-  '¡Hola! Soy PpGrillo, tu tutor socrático en WhatsApp.',
-  `Tienes *${FREE_LIFETIME_TASKS} tareas gratuitas de prueba* (${FREE_LIFETIME_TASKS} ejercicios), sin tarjeta. Cada tarea es un ejercicio completo, con todos los mensajes que necesitemos para resolverlo paso a paso.`,
-  'Para empezar, cuéntame: *¿cómo te llamas y en qué grado vas?* (por ejemplo: "Soy Ana y voy en 5º de primaria").',
-  'Después, envíame tu primera tarea o problema escolar y lo resolvemos juntos.',
-].join('\n\n')
-
-export const TRIAL_REPLY_FALLBACK = `Recuerda: tienes ${FREE_LIFETIME_TASKS} tareas gratuitas de prueba (${FREE_LIFETIME_TASKS} ejercicios), sin tarjeta. Envíame tu tarea o problema escolar y lo resolvemos paso a paso. Escribe "planes" para ver los planes de pago.`
-
-const DAY_BASED_TRIAL = /\b(14|catorce)\s*d[ií]as\b|prueba\s+de\s+\d+\s*d[ií]as/i
-
-// The Dialogflow agent may still carry legacy copy; the bot never promises a day-based trial.
-export function enforceTrialCopy(reply: string): string {
-  return DAY_BASED_TRIAL.test(reply) ? TRIAL_REPLY_FALLBACK : reply
-}
 
 export function profileSavedMessage(profile: { name?: string; grade?: string }) {
   const greeting = profile.name ? `¡Mucho gusto, ${profile.name}!` : '¡Perfecto!'

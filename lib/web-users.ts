@@ -174,11 +174,7 @@ export function emailUserDocId(email: string): string {
   return `email_${createHash('sha256').update(email.trim().toLowerCase()).digest('hex')}`
 }
 
-/**
- * Parent email records live in the shared `users` collection next to WhatsApp users. They never
- * set `plan`, so the WhatsApp weekly report query cannot select them; `plan_status` moves to
- * 'active' once the payment is confirmed.
- */
+/** Parent record in `users`; `plan_status` moves to 'active' once Mercado Pago confirms the payment. */
 async function upsertEmailUser(intent: {
   webUser: WebUser | null
   parentEmail: string
@@ -187,11 +183,11 @@ async function upsertEmailUser(intent: {
   now: string
 }): Promise<boolean> {
   return patchDocument(`${USERS}/${emailUserDocId(intent.parentEmail)}`, {
-    email: { stringValue: intent.parentEmail },
+    parent_email: { stringValue: intent.parentEmail },
+    plan: { stringValue: intent.plan },
+    period: { stringValue: intent.period },
     report_channel: { stringValue: 'email' },
     source: { stringValue: 'web_checkout' },
-    checkout_plan: { stringValue: intent.plan },
-    checkout_period: { stringValue: intent.period },
     plan_status: { stringValue: 'pending_payment' },
     student_name: intent.webUser?.name ? { stringValue: intent.webUser.name } : { nullValue: null },
     web_user_id: intent.webUser ? { stringValue: intent.webUser.id } : { nullValue: null },
@@ -223,8 +219,8 @@ export async function saveCheckoutIntent(intent: {
     if (intent.webUser) {
       await patchDocument(`${WEB_USERS}/${intent.webUser.id}`, {
         parent_email: { stringValue: intent.parentEmail },
-        checkout_plan: { stringValue: intent.plan },
-        checkout_period: { stringValue: intent.period },
+        plan: { stringValue: intent.plan },
+        period: { stringValue: intent.period },
         checkout_requested_at: { timestampValue: now },
       })
     }

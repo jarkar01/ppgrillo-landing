@@ -1,13 +1,7 @@
 import { sendWeeklyEmailReports } from '@/lib/email-reports'
-import { getGoogleAuth } from '@/lib/google-auth'
-import { buildParentReportTemplateParams, buildParentReportText } from '@/lib/parent-report'
-import { sendWhatsAppTemplate, sendWhatsAppText } from '@/lib/whatsapp-cloud'
-import { listReportRecipients, markReportSent, weekKey } from '@/lib/whatsapp-users'
 
 export const runtime = 'nodejs'
 export const maxDuration = 300
-
-const BATCH_SIZE = 10
 
 // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` when CRON_SECRET is set on the project.
 function isAuthorized(request: Request): boolean {
@@ -19,49 +13,31 @@ function isAuthorized(request: Request): boolean {
   return request.headers.get('authorization') === `Bearer ${secret}`
 }
 
+/** ISO week in Mexico City time, e.g. "2026-W45"; used to send at most one report per week. */
+function weekKey(date: Date): string {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'America/Mexico_City',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).formatToParts(date)
+  const get = (type: string) => Number(parts.find((p) => p.type === type)?.value)
+  const d = new Date(Date.UTC(get('year'), get('month') - 1, get('day')))
+  const day = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - day)
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7)
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`
+}
+
 export async function GET(request: Request) {
   if (!isAuthorized(request)) {
     return new Response('Unauthorized', { status: 401 })
   }
 
-  const auth = getGoogleAuth()
-  if (!auth) return Response.json({ error: 'google_auth_unavailable' }, { status: 500 })
-
   const now = new Date()
   const week = weekKey(now)
-  const recipients = await listReportRecipients(auth, week, now)
-
-  // Business-initiated messages outside the 24h window must use a Meta-approved template.
-  const templateName = process.env.WHATSAPP_REPORT_TEMPLATE
-  const templateLanguage = process.env.WHATSAPP_REPORT_TEMPLATE_LANG || 'es_MX'
-
-  let sent = 0
-  let failed = 0
-
-  for (let i = 0; i < recipients.length; i += BATCH_SIZE) {
-    const batch = recipients.slice(i, i + BATCH_SIZE)
-    await Promise.all(
-      batch.map(async (r) => {
-        const result = templateName
-          ? await sendWhatsAppTemplate(
-              r.recipient,
-              templateName,
-              templateLanguage,
-              buildParentReportTemplateParams(r),
-            )
-          : await sendWhatsAppText(r.recipient, buildParentReportText(r))
-
-        if (result.ok) {
-          sent++
-          await markReportSent(auth, r.docId, week, now)
-        } else {
-          failed++
-        }
-      }),
-    )
-  }
-
-  console.log(`[report] Week ${week}: ${sent} sent, ${failed} failed of ${recipients.length}`)
   const email = await sendWeeklyEmailReports(week, now)
-  return Response.json({ week, total: recipients.length, sent, failed, email })
+  console.log(`[report] Week ${week}: ${email.sent} sent, ${email.skipped} skipped of ${email.total}`)
+  return Response.json({ week, ...email })
 }

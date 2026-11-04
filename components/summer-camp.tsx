@@ -4,7 +4,7 @@ const features = [
   {
     icon: Timer,
     title: 'Retos diarios de 15 minutos',
-    body: 'Acertijos y lógica aplicada directo en WhatsApp para mantener la mente activa.',
+    body: 'Acertijos y lógica aplicada directo en PpGrillo para mantener la mente activa.',
   },
   {
     icon: ToggleRight,

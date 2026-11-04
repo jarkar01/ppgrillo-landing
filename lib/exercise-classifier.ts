@@ -11,7 +11,7 @@ export type MessageKind = 'new' | 'same' | 'other'
 const CLASSIFIER_TIMEOUT_MS = 6_000
 const MAX_CONTEXT_CHARS = 600
 
-const SYSTEM_PROMPT = `Eres el clasificador de tareas de PpGrillo, un tutor escolar socrático en WhatsApp.
+const SYSTEM_PROMPT = `Eres el clasificador de tareas de PpGrillo, un tutor escolar socrático web.
 Una "tarea" es UN ejercicio o problema completo. Todo el diálogo socrático para resolver ese mismo ejercicio (pasos, respuestas parciales, dudas, "no entiendo", "¿así?", resultados) pertenece a la misma tarea, aunque sean muchos mensajes.
 
 Clasifica el MENSAJE NUEVO del estudiante con UNA sola palabra:
@@ -51,9 +51,9 @@ export async function classifyMessage(
     if (label.startsWith('NUEVO')) return 'new'
     if (label.startsWith('MISMO')) return currentExercise ? 'same' : 'new'
     if (label.startsWith('OTRO')) return 'other'
-    console.warn(`[whatsapp] Unexpected classifier label "${label}"; using fallback`)
+    console.warn(`[classifier] Unexpected classifier label "${label}"; using fallback`)
   } catch (error) {
-    console.error('[whatsapp] Exercise classifier error:', error)
+    console.error('[classifier] Exercise classifier error:', error)
   }
   return fallbackKind(currentExercise, message)
 }

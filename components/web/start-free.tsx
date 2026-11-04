@@ -78,7 +78,7 @@ export function StartFreeForm({ onSuccess }: { onSuccess: () => void }) {
         {pending ? 'Desbloqueando…' : `Desbloquear mis ${FREE_LIFETIME_TASKS} tareas gratis`}
       </button>
       <p className="text-center text-xs text-pretty text-slate-500">
-        Sin tarjeta y sin teléfono. Solo te pediremos tu WhatsApp si contratas un plan.
+        Sin tarjeta y sin teléfono. Solo te pediremos un correo si contratas un plan.
       </p>
     </form>
   )

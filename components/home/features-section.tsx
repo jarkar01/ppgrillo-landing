@@ -56,10 +56,10 @@ export function FeaturesSection() {
             descargas pesadas ni configuraciones complicadas.
           </p>
           <p className="mt-6 flex items-start gap-3 rounded-2xl border border-slate-200 bg-card p-4 text-sm leading-relaxed text-slate-600">
-            <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-[#25D366]" aria-hidden="true" />
+            <MessageCircle className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden="true" />
             <span>
-              El acceso gratuito solo pide nombre y apellido. Tu número de WhatsApp se solicita
-              únicamente al contratar un plan de pago, para los avisos y reportes para padres.
+              El acceso gratuito solo pide nombre y apellido. El correo de mamá o papá se solicita
+              únicamente al contratar un plan de pago, para los avisos y reportes semanales.
             </span>
           </p>
         </div>

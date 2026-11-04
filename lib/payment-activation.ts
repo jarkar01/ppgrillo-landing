@@ -133,13 +133,16 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
     return ok ? { status: 'unmatched' } : { status: 'error', reason: 'firestore_write_failed' }
   }
 
-  const plan = str(user.fields, 'checkout_plan') ?? 'standard'
-  const period = str(user.fields, 'checkout_period') ?? 'monthly'
+  // `checkout_plan`/`checkout_period`/`email` cover parent records saved before the field rename.
+  const plan = str(user.fields, 'plan') ?? str(user.fields, 'checkout_plan') ?? 'standard'
+  const period = str(user.fields, 'period') ?? str(user.fields, 'checkout_period') ?? 'monthly'
   const approvedAt = payment.date_approved ? new Date(payment.date_approved) : new Date()
   const expiresAt = addMonths(approvedAt, period === 'quarterly' ? 3 : 1)
 
   const activated = await patchDocument(`${USERS}/${user.id}`, {
     plan_status: { stringValue: 'active' },
+    plan: { stringValue: plan },
+    period: { stringValue: period },
     paid_plan: { stringValue: plan },
     paid_period: { stringValue: period },
     plan_activated_at: { timestampValue: approvedAt.toISOString() },
@@ -150,7 +153,7 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
   })
   if (!activated) return { status: 'error', reason: 'firestore_write_failed' }
 
-  const email = str(user.fields, 'email')
+  const email = str(user.fields, 'parent_email') ?? str(user.fields, 'email')
   const emailAlreadySent = existing ? 'timestampValue' in (existing.fields.activation_email_sent_at ?? {}) : false
   const sent =
     email && !emailAlreadySent

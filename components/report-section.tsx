@@ -12,7 +12,7 @@ export function ReportSection() {
             El control de los padres, sin invadir la autonomía del alumno.
           </h2>
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-300">
-            Cada domingo recibes en WhatsApp cuántas tareas trabajó tu hijo, qué temas practicó y
+            Cada domingo recibes por correo cuántas tareas trabajó tu hijo, qué temas practicó y
             un tip para conversar en familia. Sin supervisar, sin invadir su espacio de aprendizaje.
           </p>
 
