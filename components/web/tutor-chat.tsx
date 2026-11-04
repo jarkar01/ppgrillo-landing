@@ -9,6 +9,13 @@ import { BrandIdentity } from '@/components/brand-identity'
 
 const GUIDE_PATH = '/app/como-funciona'
 import { ChatPaywall } from '@/components/web/chat-paywall'
+import {
+  ActivatedNotice,
+  ActivationCard,
+  PaymentFailedNotice,
+  PlanBadge,
+} from '@/components/web/subscription-status'
+import { useSubscription } from '@/lib/use-subscription'
 import { compressImage } from '@/components/app/compress-image'
 import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
 import { FREE_LIFETIME_TASKS } from '@/lib/plans'
@@ -76,7 +83,9 @@ export function TutorChat({
         return
       }
       const finishedLastFree =
-        meta.tasksUsed >= FREE_LIFETIME_TASKS && messageText(message).includes(TASK_COMPLETE_MARKER)
+        !meta.subscribed &&
+        meta.tasksUsed >= FREE_LIFETIME_TASKS &&
+        messageText(message).includes(TASK_COMPLETE_MARKER)
       updateLocalStudent({
         tasksUsed: meta.tasksUsed,
         currentTask: meta.currentTask,
@@ -96,7 +105,11 @@ export function TutorChat({
   const lastHasMarker = lastAssistant !== undefined && messageText(lastAssistant).includes(TASK_COMPLETE_MARKER)
   const finishedLastFree = tasksUsed >= FREE_LIFETIME_TASKS && lastHasMarker
   const exhaustedOnLoad = initialExhausted || (messages.length === 0 && initialTasksUsed >= FREE_LIFETIME_TASKS)
-  const locked = exhaustedOnLoad || limitReached || finishedLastFree
+  const subscription = useSubscription()
+  const subscribed = subscription.active || lastMeta?.subscribed === true
+  const plan = subscription.subscription?.plan
+  const locked = !subscribed && (exhaustedOnLoad || limitReached || finishedLastFree)
+  const showPaywall = locked && (!subscription.activating || subscription.delayed)
   // The server counts a task when it starts; the meter counts it once it is finished,
   // so it reaches 0 at the exact moment the chat locks.
   const taskInProgress = !locked && Boolean(lastMeta?.currentTask) && !lastHasMarker
@@ -145,7 +158,7 @@ export function TutorChat({
           <BrandIdentity />
         </Link>
         <div className="order-last w-full sm:order-none sm:w-auto">
-          <TaskMeter used={tasksCompleted} />
+          {subscribed ? <PlanBadge plan={plan} /> : <TaskMeter used={tasksCompleted} />}
         </div>
         <div className="flex items-center">
           <Link
@@ -161,7 +174,18 @@ export function TutorChat({
       </header>
 
       <div className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-5" aria-live="polite">
-        {messages.length === 0 && !locked ? (
+        {subscription.justActivated ? <ActivatedNotice firstName={firstName} plan={plan} /> : null}
+
+        {messages.length === 0 && subscribed && !subscription.justActivated ? (
+          <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
+            <p className="font-display text-lg font-bold text-balance text-slate-900">¡Hola, {firstName}! ¿Qué tarea vemos hoy?</p>
+            <p className="text-sm leading-relaxed text-pretty text-slate-700">
+              Escribe tu ejercicio o súbele una foto de la libreta y te guío paso a paso.
+            </p>
+          </div>
+        ) : null}
+
+        {messages.length === 0 && !locked && !subscribed ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">
               ¡Hola, {firstName}! Tienes {Math.max(0, FREE_LIFETIME_TASKS - tasksCompleted)} tareas de cortesía.
@@ -213,7 +237,11 @@ export function TutorChat({
           </p>
         ) : null}
 
-        {locked ? <ChatPaywall firstName={firstName} /> : null}
+        {subscription.activating ? (
+          <ActivationCard delayed={subscription.delayed} onCheck={subscription.checkNow} />
+        ) : null}
+        {locked && subscription.paymentFailed ? <PaymentFailedNotice /> : null}
+        {showPaywall ? <ChatPaywall firstName={firstName} /> : null}
       </div>
 
       <form
@@ -263,7 +291,13 @@ export function TutorChat({
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
             disabled={locked}
-            placeholder={locked ? 'Elige un plan para seguir con tus tareas' : 'Escribe tu ejercicio o tu respuesta…'}
+            placeholder={
+              locked
+                ? subscription.activating
+                  ? 'Activando tu cuenta…'
+                  : 'Elige un plan para seguir con tus tareas'
+                : 'Escribe tu ejercicio o tu respuesta…'
+            }
             className="max-h-32 min-h-12 flex-1 resize-none rounded-3xl border-2 border-slate-200 bg-white px-4 py-2.5 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:border-[#25D366] disabled:cursor-not-allowed disabled:bg-slate-100"
           />
           <button
