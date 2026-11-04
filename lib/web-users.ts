@@ -51,7 +51,7 @@ export function isValidWebUserId(id: string | undefined): id is string {
   return Boolean(id && UUID_PATTERN.test(id))
 }
 
-function readString(fields: FirestoreFields, key: string): string | undefined {
+export function readString(fields: FirestoreFields, key: string): string | undefined {
   const value = fields[key]
   return value && 'stringValue' in value && value.stringValue ? value.stringValue : undefined
 }
@@ -235,6 +235,32 @@ export async function findParentRecord(rawEmail: string): Promise<ParentRecord |
     console.error('[web-users] Parent record lookup failed:', error)
     return 'error'
   }
+}
+
+/** Parent record whose checkout was started from this device (`web_user_id` is written at checkout). */
+export async function findParentRecordByWebUser(webUserId: string): Promise<ParentRecord | null | 'error'> {
+  if (!isValidWebUserId(webUserId)) return null
+  try {
+    const ctx = await firestoreContext()
+    if (!ctx) return 'error'
+    const records = await queryUsersByField(ctx, 'web_user_id', webUserId)
+    return records.find((doc) => readString(doc.fields, 'plan_status') === 'active') ?? records[0] ?? null
+  } catch (error) {
+    console.error('[web-users] Web user parent lookup failed:', error)
+    return 'error'
+  }
+}
+
+export function parentEmailOf(record: ParentRecord): string | undefined {
+  return (readString(record.fields, 'parent_email') ?? readString(record.fields, 'email'))?.trim().toLowerCase()
+}
+
+/** Remembers the parent email on this device's student record so later lookups are direct. */
+export function linkWebUserToParent(webUserId: string, parentEmail: string): Promise<boolean> {
+  return patchDocument(`${WEB_USERS}/${webUserId}`, {
+    parent_email: { stringValue: parentEmail.trim().toLowerCase() },
+    parent_linked_at: { timestampValue: new Date().toISOString() },
+  })
 }
 
 /** Parent record in `users`; `plan_status` moves to 'active' once Mercado Pago confirms the payment. */

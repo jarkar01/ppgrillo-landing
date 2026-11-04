@@ -1,6 +1,14 @@
 import { cookies } from 'next/headers'
 import type { PaidPlanId } from '@/lib/plans'
-import { WEB_USER_COOKIE, findParentRecord, getWebUser, type FirestoreFields } from '@/lib/web-users'
+import {
+  WEB_USER_COOKIE,
+  findParentRecord,
+  findParentRecordByWebUser,
+  getWebUser,
+  linkWebUserToParent,
+  parentEmailOf,
+  type FirestoreFields,
+} from '@/lib/web-users'
 
 export type SubscriptionStatus = 'active' | 'pending_payment' | 'expired' | 'none'
 
@@ -45,12 +53,30 @@ export async function getSubscriptionByEmail(email: string): Promise<Subscriptio
   }
 }
 
-/** Subscription of the student on this device, resolved through the parent email linked at checkout. */
+/**
+ * Subscription of the student on this device. Uses the parent email linked to the device; if the
+ * link was never saved, falls back to the parent record created by a checkout from this device.
+ */
 export async function getCurrentSubscription(): Promise<{
+  webUserId?: string
   parentEmail?: string
   subscription: Subscription | 'error'
 }> {
   const webUser = await getWebUser((await cookies()).get(WEB_USER_COOKIE)?.value)
-  if (!webUser?.parentEmail) return { subscription: { status: 'none' } }
-  return { parentEmail: webUser.parentEmail, subscription: await getSubscriptionByEmail(webUser.parentEmail) }
+  if (!webUser) return { subscription: { status: 'none' } }
+  if (webUser.parentEmail) {
+    return {
+      webUserId: webUser.id,
+      parentEmail: webUser.parentEmail,
+      subscription: await getSubscriptionByEmail(webUser.parentEmail),
+    }
+  }
+
+  const record = await findParentRecordByWebUser(webUser.id)
+  if (record === 'error') return { webUserId: webUser.id, subscription: 'error' }
+  const parentEmail = record ? parentEmailOf(record) : undefined
+  if (!parentEmail) return { webUserId: webUser.id, subscription: { status: 'none' } }
+
+  await linkWebUserToParent(webUser.id, parentEmail)
+  return { webUserId: webUser.id, parentEmail, subscription: await getSubscriptionByEmail(parentEmail) }
 }
