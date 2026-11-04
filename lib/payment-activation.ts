@@ -1,7 +1,7 @@
 import { sendGmail, type OutgoingEmail } from '@/lib/gmail'
 import type { MercadoPagoPayment } from '@/lib/mercadopago'
 import {
-  emailUserDocId,
+  findParentRecord,
   firestoreContext,
   patchDocument,
   type FirestoreFields,
@@ -116,7 +116,7 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
 
   let user: Doc | null = null
   for (const email of candidateEmails(payment)) {
-    const found = await getDocument(`${USERS}/${emailUserDocId(email)}`)
+    const found = await findParentRecord(email)
     if (found === 'error') return { status: 'error', reason: 'firestore_unavailable' }
     if (found) {
       user = found

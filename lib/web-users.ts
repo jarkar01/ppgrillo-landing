@@ -176,6 +176,67 @@ export function emailUserDocId(email: string): string {
   return `email_${createHash('sha256').update(email.trim().toLowerCase()).digest('hex')}`
 }
 
+export type ParentRecord = { id: string; fields: FirestoreFields }
+
+async function getUserDoc(ctx: FirestoreContext, id: string): Promise<ParentRecord | null> {
+  const res = await fetch(`${ctx.base}/${USERS}/${encodeURIComponent(id)}`, {
+    headers: ctx.headers,
+    cache: 'no-store',
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  })
+  if (res.status === 404) return null
+  if (!res.ok) throw new Error(`users/${id} read failed: ${res.status} ${await res.text()}`)
+  const doc = (await res.json()) as { fields?: FirestoreFields }
+  return { id, fields: doc.fields ?? {} }
+}
+
+async function queryUsersByField(ctx: FirestoreContext, field: string, email: string): Promise<ParentRecord[]> {
+  const res = await fetch(`${ctx.base}:runQuery`, {
+    method: 'POST',
+    headers: ctx.headers,
+    cache: 'no-store',
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+    body: JSON.stringify({
+      structuredQuery: {
+        from: [{ collectionId: USERS }],
+        where: { fieldFilter: { field: { fieldPath: field }, op: 'EQUAL', value: { stringValue: email } } },
+        limit: 10,
+      },
+    }),
+  })
+  if (!res.ok) throw new Error(`users query on ${field} failed: ${res.status} ${await res.text()}`)
+  const rows = (await res.json()) as { document?: { name: string; fields?: FirestoreFields } }[]
+  return rows.flatMap((row) =>
+    row.document ? [{ id: row.document.name.split('/').pop() ?? '', fields: row.document.fields ?? {} }] : [],
+  )
+}
+
+/**
+ * Finds the parent record in `users` for an email. Families may be stored under the plain email as
+ * document id, under the hashed id written by the web checkout, or under any id with a matching
+ * `parent_email`/`email` field. An active record always wins over pending ones.
+ */
+export async function findParentRecord(rawEmail: string): Promise<ParentRecord | null | 'error'> {
+  const email = rawEmail.trim().toLowerCase()
+  try {
+    const ctx = await firestoreContext()
+    if (!ctx) return 'error'
+    const results = await Promise.all([
+      getUserDoc(ctx, email).then((doc) => (doc ? [doc] : [])),
+      getUserDoc(ctx, emailUserDocId(email)).then((doc) => (doc ? [doc] : [])),
+      queryUsersByField(ctx, 'parent_email', email),
+      queryUsersByField(ctx, 'email', email),
+    ])
+    const unique = new Map<string, ParentRecord>()
+    for (const doc of results.flat()) if (!unique.has(doc.id)) unique.set(doc.id, doc)
+    const records = [...unique.values()]
+    return records.find((doc) => readString(doc.fields, 'plan_status') === 'active') ?? records[0] ?? null
+  } catch (error) {
+    console.error('[web-users] Parent record lookup failed:', error)
+    return 'error'
+  }
+}
+
 /** Parent record in `users`; `plan_status` moves to 'active' once Mercado Pago confirms the payment. */
 async function upsertEmailUser(intent: {
   webUser: WebUser | null
