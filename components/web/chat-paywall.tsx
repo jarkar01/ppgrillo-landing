@@ -2,6 +2,7 @@
 
 import { Lock } from 'lucide-react'
 import { CheckoutButton } from '@/components/web/checkout-button'
+import { EmailLogin } from '@/components/web/email-login'
 import {
   FAMILY_MAX_USERS,
   FAMILY_PRICE_MXN,
@@ -66,6 +67,8 @@ export function ChatPaywall({ firstName }: { firstName: string }) {
           Elige un plan para seguir resolviendo tareas paso a paso con PpGrillo. El pago es seguro con Mercado Pago.
         </p>
       </div>
+
+      <EmailLogin variant="inline" />
 
       <ul className="flex flex-col gap-3">
         {OPTIONS.map((option) => (

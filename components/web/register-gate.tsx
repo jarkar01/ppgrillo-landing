@@ -2,6 +2,7 @@
 
 import { Loader2 } from 'lucide-react'
 import { BrandIdentity } from '@/components/brand-identity'
+import { EmailLogin } from '@/components/web/email-login'
 import { StartFreeForm } from '@/components/web/start-free'
 import { TutorChat } from '@/components/web/tutor-chat'
 import { useLocalStudent } from '@/lib/local-student'
@@ -21,6 +22,7 @@ export function RegisterGate() {
           </p>
         </div>
         <StartFreeForm onSuccess={() => {}} />
+        <EmailLogin />
       </div>
     </div>
   )
