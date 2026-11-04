@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import { MessageCircle } from 'lucide-react'
-import { WhatsappCta } from '@/components/whatsapp-cta'
+import { StartCta } from '@/components/start-cta'
 
 export function SiteHeader() {
   return (
@@ -41,15 +41,15 @@ export function SiteHeader() {
         </nav>
 
         <div className="flex items-center gap-2 sm:gap-3">
-          <WhatsappCta
+          <StartCta
             className={cn(
               buttonVariants(),
-              'gap-2 whitespace-nowrap rounded-full bg-[#25D366] px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-[#20bd5a] sm:min-w-[160px] sm:px-6',
+              'gap-2 whitespace-nowrap rounded-full bg-primary px-5 py-2.5 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 sm:min-w-[160px] sm:px-6',
             )}
           >
             <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
             3 tareas gratis
-          </WhatsappCta>
+          </StartCta>
         </div>
       </div>
     </header>

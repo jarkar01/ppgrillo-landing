@@ -1,13 +1,13 @@
 import { ArrowDown, MessageCircle } from 'lucide-react'
-import { WhatsappCta } from '@/components/whatsapp-cta'
+import { StartCta } from '@/components/start-cta'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 import {
-  WhatsappPhone,
+  ChatPhone,
   IncomingBubble,
   OutgoingBubble,
   NotebookMessage,
-} from '@/components/whatsapp-phone'
+} from '@/components/chat-phone'
 
 export function StudentHero() {
   return (
@@ -25,7 +25,7 @@ export function StudentHero() {
 
           <h1 className="mt-5 text-balance font-display text-4xl font-extrabold leading-[1.08] tracking-tight text-slate-900 sm:text-5xl">
             Tu tutor privado 24/7{' '}
-            <span className="text-[#4285F4]">en WhatsApp</span>
+            <span className="text-[#4285F4]">en tu navegador</span>
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
@@ -34,15 +34,15 @@ export function StudentHero() {
           </p>
 
           <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <WhatsappCta
+            <StartCta
               className={cn(
                 buttonVariants({ size: 'lg' }),
-                'h-auto w-full gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
+                'h-auto w-full gap-2 whitespace-normal rounded-full bg-primary px-7 py-4 text-center text-base font-bold text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90 sm:w-auto',
               )}
             >
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
               Empezar con 3 tareas gratis
-            </WhatsappCta>
+            </StartCta>
             <a
               href="#saber-mas"
               className="inline-flex items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline"
@@ -57,7 +57,7 @@ export function StudentHero() {
         </div>
 
         <div className="relative">
-          <WhatsappPhone tag="Hoy • 9:12 p.m.">
+          <ChatPhone tag="Hoy • 9:12 p.m.">
             <NotebookMessage />
             <IncomingBubble>
               ¡Va, lo sacamos juntos! Sin prisa. Piensa en una balanza en equilibrio: para dejar
@@ -68,7 +68,7 @@ export function StudentHero() {
               ¡Eso! Ya casi. Si 2 cajas iguales pesan 8 kilos, ¿cuánto pesa cada una? Tú dime.
             </IncomingBubble>
             <OutgoingBubble>¡4! x = 4, ya entendí</OutgoingBubble>
-          </WhatsappPhone>
+          </ChatPhone>
         </div>
       </div>
     </section>

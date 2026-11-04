@@ -95,9 +95,9 @@ export default function PrivacidadPage() {
               dato en este paso.
             </p>
             <p>
-              <strong className="text-slate-800">Contratación de un plan de pago:</strong> Número
-              de teléfono o WhatsApp, solicitado exclusivamente en el checkout para asociar la
-              suscripción y enviar los reportes de avance a solicitud. El pago se procesa en Mercado
+              <strong className="text-slate-800">Contratación de un plan de pago:</strong> Correo
+              electrónico de mamá, papá o tutor, solicitado exclusivamente en el checkout para
+              asociar la suscripción y enviar los reportes semanales de avance. El pago se procesa en Mercado
               Pago; no almacenamos datos de tarjetas.
             </p>
             <p>

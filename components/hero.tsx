@@ -8,13 +8,13 @@ import {
 } from 'lucide-react'
 import { buttonVariants } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { WhatsappCta } from '@/components/whatsapp-cta'
+import { StartCta } from '@/components/start-cta'
 import {
-  WhatsappPhone,
+  ChatPhone,
   IncomingBubble,
   OutgoingBubble,
   NotebookMessage,
-} from '@/components/whatsapp-phone'
+} from '@/components/chat-phone'
 
 const badgeItems = [
   { label: 'Paz en el hogar', color: '#34A853' },
@@ -58,20 +58,20 @@ export function Hero({
           </h1>
 
           <p className="mt-5 text-pretty text-lg leading-relaxed text-slate-600">
-            PpGrillo acompaña a tu hijo a razonar paso a paso por WhatsApp. Sin apps que descargar.
+            PpGrillo acompaña a tu hijo a razonar paso a paso desde el navegador. Sin apps que descargar.
             Un tutor socrático paciente que no le hace la tarea: le enseña a pensar.
           </p>
 
           <div className="mt-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center">
-            <WhatsappCta
+            <StartCta
               className={cn(
                 buttonVariants({ size: 'lg' }),
-                'h-auto w-full gap-2 whitespace-normal rounded-full bg-[#25D366] px-7 py-4 text-center text-base font-bold text-white shadow-md shadow-emerald-600/20 hover:bg-[#20bd5a] sm:w-auto',
+                'h-auto w-full gap-2 whitespace-normal rounded-full bg-primary px-7 py-4 text-center text-base font-bold text-primary-foreground shadow-md shadow-primary/20 hover:bg-primary/90 sm:w-auto',
               )}
             >
               <CtaIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
               Empezar con 3 tareas gratis
-            </WhatsappCta>
+            </StartCta>
             <a
               href={learnMoreHref}
               className="inline-flex items-center gap-1.5 text-base font-semibold text-primary underline-offset-4 hover:underline"
@@ -92,7 +92,7 @@ export function Hero({
         </div>
 
         <div className="relative">
-          <WhatsappPhone>
+          <ChatPhone>
             <NotebookMessage />
             <IncomingBubble>
               ¡Recibí tu foto! Tranquilo, no hay prisa: lo resolvemos juntos. Imagina una balanza en
@@ -104,7 +104,7 @@ export function Hero({
               ¡Eso es, lo razonaste tú solo! Último paso: si 2 cajas iguales pesan 8 kilos, ¿cuánto
               pesa cada una?
             </IncomingBubble>
-          </WhatsappPhone>
+          </ChatPhone>
         </div>
       </div>
     </section>

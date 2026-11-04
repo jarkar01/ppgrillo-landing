@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { ArrowRight } from 'lucide-react'
-import { WhatsappCta } from '@/components/whatsapp-cta'
+import { StartCta } from '@/components/start-cta'
 
 export function MobileStickyCta({
-  legend = 'Sin tarjeta bancaria · WhatsApp oficial',
+  legend = 'Sin tarjeta bancaria · Sin apps que descargar',
   revealAfterHero = false,
 }: {
   legend?: string
@@ -29,10 +29,10 @@ export function MobileStickyCta({
         }`}
         aria-hidden={!visible}
       >
-        <WhatsappCta className="flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3.5 text-base font-bold text-white shadow-md shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] active:scale-[0.99]">
+        <StartCta className="flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-base font-bold text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90 active:scale-[0.99]">
           Empezar con 3 tareas gratis
           <ArrowRight className="h-5 w-5" aria-hidden="true" />
-        </WhatsappCta>
+        </StartCta>
         <p className="mt-1.5 text-center text-xs font-medium text-slate-500">{legend}</p>
       </div>
 
@@ -43,10 +43,10 @@ export function MobileStickyCta({
           }`}
           aria-hidden={!visible}
         >
-          <WhatsappCta className="flex items-center gap-2 rounded-full bg-[#25D366] px-7 py-3.5 text-base font-bold text-white shadow-lg shadow-emerald-600/30 transition-colors hover:bg-[#20bd5a]">
+          <StartCta className="flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-colors hover:bg-primary/90">
             Empezar con 3 tareas gratis
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
-          </WhatsappCta>
+          </StartCta>
         </div>
       )}
     </>
