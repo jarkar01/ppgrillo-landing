@@ -69,14 +69,14 @@ export async function listEmailReportRecipients(week: string): Promise<EmailRepo
   const candidates = rows.flatMap((row) => {
     if (!row.document) return []
     const fields = row.document.fields ?? {}
-    const email = str(fields, 'email')
+    const email = str(fields, 'parent_email') ?? str(fields, 'email')
     if (!email || str(fields, 'last_report_week') === week) return []
     return [
       {
         docId: row.document.name.split('/').pop() ?? '',
         email,
         studentName: str(fields, 'student_name'),
-        plan: str(fields, 'checkout_plan') ?? 'standard',
+        plan: str(fields, 'plan') ?? str(fields, 'checkout_plan') ?? 'standard',
         webUserId: str(fields, 'web_user_id'),
       },
     ]
