@@ -1,8 +1,7 @@
 import { sendGmail, type EmailSendResult, type OutgoingEmail } from '@/lib/gmail'
-import { firestoreContext, patchDocument, type FirestoreFields } from '@/lib/web-users'
+import { firestoreContext, patchDocument, type FirestoreFields } from '@/lib/parent-users'
 
 const USERS = 'users'
-const WEB_USERS = 'web_users'
 const REQUEST_TIMEOUT_MS = 10_000
 
 export type EmailReportRecipient = {
@@ -10,7 +9,6 @@ export type EmailReportRecipient = {
   email: string
   studentName?: string
   plan: string
-  webUserId?: string
   totalTasks: number
   currentTask?: string
 }
@@ -77,35 +75,13 @@ export async function listEmailReportRecipients(week: string): Promise<EmailRepo
         email,
         studentName: str(fields, 'student_name'),
         plan: str(fields, 'plan') ?? str(fields, 'checkout_plan') ?? 'standard',
-        webUserId: str(fields, 'web_user_id'),
+        totalTasks: int(fields, 'task_count'),
+        currentTask: str(fields, 'current_task_text'),
       },
     ]
   })
 
-  return Promise.all(
-    candidates.map(async (c) => {
-      const progress = c.webUserId ? await readWebUserProgress(ctx, c.webUserId) : undefined
-      return { ...c, totalTasks: progress?.totalTasks ?? 0, currentTask: progress?.currentTask }
-    }),
-  )
-}
-
-async function readWebUserProgress(
-  ctx: { base: string; headers: Record<string, string> },
-  webUserId: string,
-): Promise<{ totalTasks: number; currentTask?: string } | undefined> {
-  try {
-    const res = await fetch(`${ctx.base}/${WEB_USERS}/${encodeURIComponent(webUserId)}`, {
-      headers: ctx.headers,
-      cache: 'no-store',
-      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
-    })
-    if (!res.ok) return undefined
-    const fields = ((await res.json()) as { fields?: FirestoreFields }).fields ?? {}
-    return { totalTasks: int(fields, 'task_count'), currentTask: str(fields, 'current_task_text') }
-  } catch {
-    return undefined
-  }
+  return candidates
 }
 
 function escapeHtml(value: string): string {

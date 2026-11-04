@@ -4,6 +4,7 @@ import { useId, useState, type FormEvent } from 'react'
 import { ArrowLeft, CalendarDays, CalendarRange, CreditCard, ExternalLink, Loader2, Lock } from 'lucide-react'
 import { Modal } from '@/components/web/modal'
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/web/start-free'
+import { readLocalStudent } from '@/lib/local-student'
 import type { BillingPeriod, PaidPlanId } from '@/lib/plans'
 import { markCheckoutStarted } from '@/lib/use-subscription'
 
@@ -35,7 +36,7 @@ function CheckoutForm({ plan, period }: { plan: PaidPlanId; period: BillingPerio
       const res = await fetch('/api/web/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan, period, parentEmail: email }),
+        body: JSON.stringify({ plan, period, parentEmail: email, studentName: readLocalStudent()?.name }),
       })
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string }
       if (!res.ok || !data.url) throw new Error(data.error ?? 'No pudimos continuar al pago.')

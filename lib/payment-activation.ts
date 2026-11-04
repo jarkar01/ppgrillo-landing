@@ -1,21 +1,23 @@
 import { sendGmail, type OutgoingEmail } from '@/lib/gmail'
 import type { MercadoPagoPayment } from '@/lib/mercadopago'
 import {
-  findParentRecord,
   firestoreContext,
+  getParentRecord,
   patchDocument,
+  toParentEmail,
+  updateParentRecord,
   type FirestoreFields,
-} from '@/lib/web-users'
+  type ParentRecord,
+} from '@/lib/parent-users'
 
-const USERS = 'users'
 const PAYMENTS = 'mp_payments'
 const REQUEST_TIMEOUT_MS = 10_000
-const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 type Doc = { id: string; fields: FirestoreFields }
 
 export type ActivationResult =
-  | { status: 'activated' | 'already_processed' | 'not_approved' | 'unmatched' }
+  | { status: 'activated' | 'already_processed'; email?: string }
+  | { status: 'not_approved' | 'unmatched' }
   | { status: 'error'; reason: string }
 
 function str(fields: FirestoreFields, key: string): string | undefined {
@@ -40,11 +42,11 @@ async function getDocument(path: string): Promise<Doc | null | 'error'> {
   return { id: path.split('/').pop() ?? '', fields: doc.fields ?? {} }
 }
 
-/** Payer email from Mercado Pago first; external_reference covers links that pass the parent email. */
+/** external_reference carries the parent email typed at checkout; the payer email is the fallback. */
 function candidateEmails(payment: MercadoPagoPayment): string[] {
-  const emails = [payment.payer?.email, payment.external_reference]
-    .map((e) => e?.trim().toLowerCase())
-    .filter((e): e is string => Boolean(e && EMAIL_PATTERN.test(e)))
+  const emails = [payment.external_reference, payment.payer?.email]
+    .map(toParentEmail)
+    .filter((e): e is string => Boolean(e))
   return [...new Set(emails)]
 }
 
@@ -93,7 +95,7 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
   const existing = await getDocument(paymentPath)
   if (existing === 'error') return { status: 'error', reason: 'firestore_unavailable' }
   if (existing && str(existing.fields, 'processing_status') === 'activated') {
-    return { status: 'already_processed' }
+    return { status: 'already_processed', email: str(existing.fields, 'parent_email') }
   }
 
   const paymentFields: FirestoreFields = {
@@ -114,18 +116,21 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
     return ok ? { status: 'not_approved' } : { status: 'error', reason: 'firestore_write_failed' }
   }
 
-  let user: Doc | null = null
-  for (const email of candidateEmails(payment)) {
-    const found = await findParentRecord(email)
+  // The family document is `users/{email}`; a payment without a prior checkout creates it.
+  const emails = candidateEmails(payment)
+  let user: ParentRecord | null = null
+  for (const email of emails) {
+    const found = await getParentRecord(email)
     if (found === 'error') return { status: 'error', reason: 'firestore_unavailable' }
     if (found) {
       user = found
       break
     }
   }
+  if (!user && emails[0]) user = { email: emails[0], fields: {} }
 
   if (!user) {
-    console.warn('[payments] Approved payment without a matching parent email:', payment.id)
+    console.warn('[payments] Approved payment without a usable parent email:', payment.id)
     const ok = await patchDocument(paymentPath, {
       ...paymentFields,
       processing_status: { stringValue: 'unmatched' },
@@ -139,7 +144,8 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
   const approvedAt = payment.date_approved ? new Date(payment.date_approved) : new Date()
   const expiresAt = addMonths(approvedAt, period === 'quarterly' ? 3 : 1)
 
-  const activated = await patchDocument(`${USERS}/${user.id}`, {
+  const activated = await updateParentRecord(user.email, {
+    report_channel: { stringValue: 'email' },
     plan_status: { stringValue: 'active' },
     plan: { stringValue: plan },
     period: { stringValue: period },
@@ -153,7 +159,7 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
   })
   if (!activated) return { status: 'error', reason: 'firestore_write_failed' }
 
-  const email = str(user.fields, 'parent_email') ?? str(user.fields, 'email')
+  const email = user.email
   const emailAlreadySent = existing ? 'timestampValue' in (existing.fields.activation_email_sent_at ?? {}) : false
   const sent =
     email && !emailAlreadySent
@@ -165,7 +171,7 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
 
   await patchDocument(paymentPath, {
     ...paymentFields,
-    user_doc_id: { stringValue: user.id },
+    parent_email: { stringValue: user.email },
     plan: { stringValue: plan },
     period: { stringValue: period },
     processing_status: { stringValue: 'activated' },
@@ -173,5 +179,5 @@ export async function activateFromPayment(payment: MercadoPagoPayment): Promise<
   })
 
   if (!sent.ok) console.error('[payments] Activation email not sent for payment', payment.id)
-  return { status: 'activated' }
+  return { status: 'activated', email: user.email }
 }
