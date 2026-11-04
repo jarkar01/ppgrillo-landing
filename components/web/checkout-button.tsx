@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays, CalendarRange, CreditCard, ExternalLink, Loade
 import { Modal } from '@/components/web/modal'
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/web/start-free'
 import type { BillingPeriod, PaidPlanId } from '@/lib/plans'
+import { markCheckoutStarted } from '@/lib/use-subscription'
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -39,6 +40,7 @@ function CheckoutForm({ plan, period }: { plan: PaidPlanId; period: BillingPerio
       const data = (await res.json().catch(() => ({}))) as { url?: string; error?: string }
       if (!res.ok || !data.url) throw new Error(data.error ?? 'No pudimos continuar al pago.')
       setCheckoutUrl(data.url)
+      markCheckoutStarted()
       if (window.self !== window.top) {
         window.open(data.url, '_blank', 'noopener,noreferrer')
       } else {
