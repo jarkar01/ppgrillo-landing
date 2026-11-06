@@ -99,10 +99,10 @@ export default function TerminosPage() {
               </li>
               <li>
                 Al agotarlas, el servicio continúa mediante suscripción mensual recurrente:{' '}
-                <strong className="text-slate-800">Plan Estándar de $39.00 MXN</strong> (hasta 20
-                tareas al mes) o{' '}
-                <strong className="text-slate-800">Plan Familiar de $149.00 MXN</strong> (tareas
-                ilimitadas y varios hermanos en la misma línea), gestionadas a través de la pasarela
+                <strong className="text-slate-800">Plan Estándar de $39.00 MXN</strong> (hasta 40
+                tareas e investigaciones al mes) o{' '}
+                <strong className="text-slate-800">Plan Familiar de $119.00 MXN</strong> (consultas
+                ilimitadas para hasta 3 usuarios en una misma cuenta familiar), gestionadas a través de la pasarela
                 de pagos de Mercado Pago.
               </li>
               <li>

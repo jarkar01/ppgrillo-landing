@@ -40,7 +40,7 @@ const PLANS: Plan[] = [
     period: 'MXN / mes',
     featured: true,
     features: [
-      `Tareas semanales del ciclo escolar (hasta ${STANDARD_MONTHLY_TASKS} al mes)`,
+      `${STANDARD_MONTHLY_TASKS} tareas e investigaciones al mes`,
       'Reportes semanales de avance para padres, enviados por correo electrónico',
       'Fotos y notas de voz de la libreta',
     ],
