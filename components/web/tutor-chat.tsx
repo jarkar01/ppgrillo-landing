@@ -5,9 +5,11 @@ import { DefaultChatTransport, type FileUIPart } from 'ai'
 import Link from 'next/link'
 import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { Camera, Info, Loader2, SendHorizontal, X } from 'lucide-react'
+import { ChatQuickActions } from '@/components/web/chat-quick-actions'
 import { BrandIdentity } from '@/components/brand-identity'
 
 const GUIDE_PATH = '/app/como-funciona'
+const METODO_PATH = '/metodo?from=app'
 import { ChatPaywall } from '@/components/web/chat-paywall'
 import { EmailLogin } from '@/components/web/email-login'
 import {
@@ -170,7 +172,7 @@ export function TutorChat({
         </div>
         <div className="flex items-center">
           <Link
-            href={GUIDE_PATH}
+            href={METODO_PATH}
             className="flex h-10 shrink-0 items-center gap-1.5 rounded-full border-2 border-slate-200 px-3 text-sm font-semibold text-slate-700 transition-colors hover:border-[#25D366] hover:text-[#128C7E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366]"
           >
             <Info className="h-4 w-4" aria-hidden="true" />
@@ -266,7 +268,7 @@ export function TutorChat({
 
       <form
         onSubmit={handleSubmit}
-        className="flex flex-col gap-2 border-t border-slate-200 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        className="flex flex-col gap-2 border-t border-slate-200 px-4 pt-3 pb-1"
       >
         {image ? (
           <div className="flex items-center gap-2 self-start rounded-xl bg-slate-100 p-1.5 pr-2">
@@ -332,6 +334,7 @@ export function TutorChat({
           </button>
         </div>
       </form>
+      <ChatQuickActions />
     </div>
   )
 }
