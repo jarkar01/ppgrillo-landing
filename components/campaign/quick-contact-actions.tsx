@@ -1,95 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import { Check, Download, Share2 } from "lucide-react";
-import { InstallGuideDialog, type InstallPlatform, type InstallPromptEvent } from "./install-guide-dialog";
-
-const SHARE_DATA = {
-  title: "PpGrillo",
-  text: "Conoce PpGrillo: tu tutor que te ayuda a resolver tus tareas paso a paso.",
-  url: "https://ppgrillo.io",
-};
-
-function isStandalone() {
-  return (
-    window.matchMedia("(display-mode: standalone)").matches ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true
-  );
-}
-
-function detectPlatform(): InstallPlatform {
-  const ua = navigator.userAgent;
-  const isIPadOS = /Macintosh/.test(ua) && navigator.maxTouchPoints > 1;
-  if (/iPhone|iPad|iPod/i.test(ua) || isIPadOS) return "ios";
-  if (/Android/i.test(ua)) return "android";
-  return "desktop";
-}
+import { InstallGuideDialog } from "./install-guide-dialog";
+import { useInstallAndShare } from "./use-install-share";
 
 export function QuickContactActions() {
-  const [copied, setCopied] = useState(false);
-  const [installEvent, setInstallEvent] = useState<InstallPromptEvent | null>(null);
-  const [installed, setInstalled] = useState(false);
-  const [platform, setPlatform] = useState<InstallPlatform>("desktop");
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  useEffect(() => {
-    setInstalled(isStandalone());
-
-    if ("serviceWorker" in navigator && window.self === window.top) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
-    }
-
-    function onBeforeInstall(event: Event) {
-      event.preventDefault();
-      setInstallEvent(event as InstallPromptEvent);
-    }
-    function onInstalled() {
-      setInstalled(true);
-      setInstallEvent(null);
-      dialogRef.current?.close();
-    }
-    window.addEventListener("beforeinstallprompt", onBeforeInstall);
-    window.addEventListener("appinstalled", onInstalled);
-    return () => {
-      window.removeEventListener("beforeinstallprompt", onBeforeInstall);
-      window.removeEventListener("appinstalled", onInstalled);
-    };
-  }, []);
-
-  async function handleShare() {
-    if (typeof navigator.share === "function") {
-      try {
-        await navigator.share(SHARE_DATA);
-        return;
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") return;
-      }
-    }
-
-    try {
-      await navigator.clipboard.writeText(SHARE_DATA.url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2500);
-    } catch {
-      window.prompt("Copia este enlace para compartir PpGrillo:", SHARE_DATA.url);
-    }
-  }
-
-  function openGuide() {
-    setPlatform(detectPlatform());
-    dialogRef.current?.showModal();
-  }
-
-  async function handleNativeInstall() {
-    if (!installEvent) return;
-    await installEvent.prompt();
-    const { outcome } = await installEvent.userChoice;
-    setInstallEvent(null);
-    if (outcome === "accepted") {
-      setInstalled(true);
-      dialogRef.current?.close();
-    }
-  }
+  const { copied, installed, platform, dialogRef, canPromptInstall, share, openGuide, nativeInstall } =
+    useInstallAndShare();
 
   return (
     <section
@@ -126,7 +43,7 @@ export function QuickContactActions() {
           </button>
           <button
             type="button"
-            onClick={handleShare}
+            onClick={share}
             className="flex min-h-12 flex-1 items-center justify-center gap-2.5 rounded-full border-2 border-slate-200 bg-white px-6 py-3 text-base font-semibold text-slate-800 transition-colors hover:border-slate-300 hover:bg-slate-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-400 active:scale-[0.99]"
           >
             {copied ? (
@@ -146,8 +63,8 @@ export function QuickContactActions() {
       <InstallGuideDialog
         ref={dialogRef}
         platform={platform}
-        canPromptInstall={installEvent !== null}
-        onNativeInstall={handleNativeInstall}
+        canPromptInstall={canPromptInstall}
+        onNativeInstall={nativeInstall}
       />
     </section>
   );

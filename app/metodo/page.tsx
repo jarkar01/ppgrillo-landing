@@ -98,19 +98,21 @@ const schoolBenefits: Benefit[] = [
   },
 ]
 
-function BackToTrialButton() {
+function BackToTrialButton({ toChat }: { toChat: boolean }) {
   return (
     <Link
-      href="/"
+      href={toChat ? '/app' : '/'}
       className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-base font-bold text-white shadow-lg shadow-emerald-600/25 transition-colors hover:bg-[#20bd5a] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E]"
     >
       <ArrowLeft className="h-5 w-5 shrink-0" aria-hidden="true" />
-      Volver al inicio
+      {toChat ? 'Volver al chat' : 'Volver al inicio'}
     </Link>
   )
 }
 
-export default function MetodoPage() {
+export default async function MetodoPage({ searchParams }: { searchParams: Promise<{ from?: string }> }) {
+  const toChat = (await searchParams).from === 'app'
+
   return (
     <BrandFonts>
       <div className="min-h-screen overflow-x-hidden bg-background">
@@ -119,7 +121,7 @@ export default function MetodoPage() {
             <Link href="/" aria-label="Ir al inicio de PpGrillo" className="rounded-lg focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#4285F4]">
               <BrandIdentity align="start" className="max-sm:items-center" />
             </Link>
-            <BackToTrialButton />
+            <BackToTrialButton toChat={toChat} />
           </div>
           <div className="border-t border-slate-200/70 bg-secondary/40 px-5 py-2.5">
             <CollaborationNote className="mx-auto max-w-3xl text-center" />

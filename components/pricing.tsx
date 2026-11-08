@@ -73,7 +73,7 @@ export function Pricing({
                 <span className="pb-1.5 text-lg font-semibold text-slate-500">MXN / mes</span>
               </div>
               <p className="mt-1.5 text-sm text-slate-500">
-                Plan Estándar · tareas semanales (hasta {STANDARD_MONTHLY_TASKS} al mes) + reporte
+                Plan Estándar · {STANDARD_MONTHLY_TASKS} tareas e investigaciones al mes + reporte
                 semanal para padres
               </p>
               <p className="mx-auto mt-3 max-w-xs text-pretty text-[13px] font-medium leading-snug text-primary">

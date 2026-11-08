@@ -1,8 +1,7 @@
 export const FREE_LIFETIME_TASKS = 3
 
-// ~5 tareas por semana del ciclo escolar. Mantiene el costo operativo (IA)
-// por debajo de $20 MXN por alumno al mes.
-export const STANDARD_MONTHLY_TASKS = 20
+// ~10 tareas o investigaciones por semana del ciclo escolar.
+export const STANDARD_MONTHLY_TASKS = 40
 
 // 1 tarea = 1 ejercicio completo, con todo su diálogo socrático. Si el ejercicio en curso
 // queda inactivo más de este tiempo, el siguiente mensaje académico cuenta como tarea nueva.
@@ -10,7 +9,7 @@ export const TASK_IDLE_RESET_HOURS = 24
 
 export const STANDARD_PRICE_MXN = 39
 export const STANDARD_QUARTERLY_PRICE_MXN = 100
-export const FAMILY_PRICE_MXN = 149
+export const FAMILY_PRICE_MXN = 119
 
 export const FAMILY_MAX_USERS = 3
 
@@ -40,7 +39,7 @@ export const LAST_FREE_TASK_NOTICE =
 function plansBreakdown() {
   return [
     `*Plan Estándar — $${STANDARD_PRICE_MXN} MXN/mes*`,
-    `Tareas semanales del ciclo escolar (hasta ${STANDARD_MONTHLY_TASKS} al mes) + reporte semanal de avance para papás por correo electrónico.`,
+    `Hasta ${STANDARD_MONTHLY_TASKS} tareas e investigaciones al mes + reporte semanal de avance para papás por correo electrónico.`,
     MERCADOPAGO_STANDARD_URL,
     '',
     `*Plan Familiar / Ilimitado — $${FAMILY_PRICE_MXN} MXN/mes*`,

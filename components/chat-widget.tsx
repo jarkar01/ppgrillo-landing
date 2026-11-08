@@ -27,7 +27,7 @@ const FAQS: Faq[] = [
     id: 'gratis',
     question: '¿Qué incluye la versión gratuita y los planes?',
     answer:
-      'La Versión Gratuita ($0 MXN) incluye 3 tareas de cortesía de por vida, sin tarjeta. El Plan Estándar ($39 MXN al mes) cubre las tareas semanales del ciclo escolar (hasta 20 al mes) e incluye un reporte semanal de avance para los papás por correo. El Plan Familiar ($149 MXN al mes) da consultas ilimitadas y multi-hijo en una sola cuenta. Pagos seguros con Mercado Pago.',
+      'La Versión Gratuita ($0 MXN) incluye 3 tareas de cortesía de por vida, sin tarjeta. El Plan Estándar ($39 MXN al mes) incluye 40 tareas e investigaciones al mes y un reporte semanal de avance para los papás por correo. El Plan Familiar ($119 MXN al mes) da consultas ilimitadas para hasta 3 usuarios en una misma cuenta familiar. Pagos seguros con Mercado Pago.',
   },
   {
     id: 'pago',
