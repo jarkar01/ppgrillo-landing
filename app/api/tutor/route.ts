@@ -7,6 +7,9 @@ import {
   type UIMessage,
 } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
+import { after } from 'next/server'
+import { recordTaskUsage } from '@/lib/admin-users'
+import { readParentSession } from '@/lib/parent-session'
 import { lightenHistory } from '@/components/app/compress-image'
 import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
 import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
@@ -164,6 +167,11 @@ export async function POST(req: Request) {
   if (kind === 'new') {
     tasksUsed += 1
     currentTask = classifierInput.slice(0, MAX_EXERCISE_CHARS)
+    const parentEmail = await readParentSession()
+    if (parentEmail) {
+      const trialTasks = tasksUsed
+      after(() => recordTaskUsage(parentEmail, trialTasks))
+    }
   }
 
   const metadata: TutorMetadata = {
