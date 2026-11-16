@@ -61,7 +61,15 @@ export function CampaignLanding({
           </p>
         </div>
 
-        <AnimatedChat messages={chat} fitViewport={compact} />
+        <div className="flex w-full flex-col items-center gap-2">
+          <p className="flex items-center justify-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-center text-sm leading-snug font-bold text-balance text-[#128C7E] ring-2 ring-[#25D366]/40 sm:text-base">
+            <span aria-hidden="true">👇</span>
+            <label htmlFor="landing-question" className="cursor-text">
+              ¡Pruébalo ahora mismo! Escribe tu duda o sube una foto de la tarea (sin registrarte)
+            </label>
+          </p>
+          <AnimatedChat messages={chat} fitViewport={compact} />
+        </div>
 
         <div className="flex w-full max-w-md flex-col items-center gap-2.5">
           <StartFreeButton>{ctaLabel}</StartFreeButton>

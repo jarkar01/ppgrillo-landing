@@ -172,7 +172,7 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
           </div>
         </div>
         <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-[#128C7E]" aria-hidden="true">
-          1 tarea gratis
+          3 tareas gratis
         </span>
       </div>
 
