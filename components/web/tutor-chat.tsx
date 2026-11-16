@@ -127,15 +127,17 @@ export function TutorChat({
   const tasksCompleted = locked ? FREE_LIFETIME_TASKS : Math.max(0, tasksUsed - (taskInProgress ? 1 : 0))
   // After the anonymous first task, a parent email unlocks the remaining courtesy tasks.
   const anonymous = !trialEmail && !subscribed && !paidDevice
+  // Only after the tutor has actually replied in this visit, so a fresh /app is always open for Task #1.
   const emailGate =
     anonymous &&
     !locked &&
-    tasksUsed >= ANONYMOUS_FREE_TASKS &&
-    (lastMeta?.needsEmail === true || lastHasMarker || (messages.length === 0 && initialTasksUsed >= ANONYMOUS_FREE_TASKS))
+    lastAssistant !== undefined &&
+    (lastMeta?.needsEmail === true || (lastHasMarker && tasksUsed >= ANONYMOUS_FREE_TASKS))
   const inputLocked = locked || emailGate
+  const meterUsed = anonymous && !emailGate && !locked ? 0 : tasksCompleted
 
   const sendPendingQuestion = useEffectEvent(() => {
-    if (locked || initialTasksUsed >= ANONYMOUS_FREE_TASKS) return
+    if (locked) return
     const question = takePendingQuestion()
     if (question) sendMessage({ text: question })
   })
@@ -191,7 +193,7 @@ export function TutorChat({
           {subscribed || paidDevice ? (
             <PlanBadge plan={plan ?? subscription.paidPlan} />
           ) : showFreeTrial ? (
-            <TaskMeter used={tasksCompleted} />
+            <TaskMeter used={meterUsed} />
           ) : null}
         </div>
         <div className="flex items-center">
