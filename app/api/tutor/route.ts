@@ -9,10 +9,11 @@ import {
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { after } from 'next/server'
 import { recordTaskUsage } from '@/lib/admin-users'
-import { readParentSession } from '@/lib/parent-session'
+import { readParentSession, readTrialSession } from '@/lib/parent-session'
 import { lightenHistory } from '@/components/app/compress-image'
 import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
-import { FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
+import { ANONYMOUS_FREE_TASKS, EMAIL_UNLOCK_TASKS, FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
+import { recordAnonymousTrial } from '@/lib/trial-users'
 import { getCurrentSubscription } from '@/lib/subscription'
 import { TASK_COMPLETE_MARKER, type TutorMetadata, type TutorStudentState } from '@/lib/tutor-types'
 
@@ -124,6 +125,10 @@ function limitReachedReply(name: string) {
   return `¡Qué gusto haber aprendido contigo, ${first}! Ya usaste tus ${FREE_LIFETIME_TASKS} tareas de cortesía. Para resolver este nuevo ejercicio y seguir aprendiendo, elige un plan aquí abajo.`
 }
 
+function emailGateReply() {
+  return `¡Excelente primer paso! Para seguir con un ejercicio nuevo, pide a mamá o papá que escriba su correo aquí abajo: así se guarda tu avance y se activan ${EMAIL_UNLOCK_TASKS} tareas más gratis.`
+}
+
 export async function POST(req: Request) {
   const { messages = [], grade, student: state }: TutorBody = await req.json().catch(() => ({}))
 
@@ -163,14 +168,24 @@ export async function POST(req: Request) {
     return streamStatic(limitReachedReply(name || 'amigo'), { tasksUsed, limitReached: true })
   }
 
+  const emailOnFile = (await readParentSession()) ?? (await readTrialSession())
+
+  // The first courtesy task is anonymous; the next ones need a parent email on file.
+  if (!subscribed && kind === 'new' && tasksUsed >= ANONYMOUS_FREE_TASKS && tasksUsed < FREE_LIFETIME_TASKS && !emailOnFile) {
+    return streamStatic(emailGateReply(), { tasksUsed, limitReached: false, needsEmail: true })
+  }
+
   let currentTask = currentExercise
   if (kind === 'new') {
+    if (tasksUsed === 0 && !emailOnFile) {
+      const userAgent = req.headers.get('user-agent')
+      after(() => recordAnonymousTrial({ hasImage, userAgent }))
+    }
     tasksUsed += 1
     currentTask = classifierInput.slice(0, MAX_EXERCISE_CHARS)
-    const parentEmail = await readParentSession()
-    if (parentEmail) {
+    if (emailOnFile) {
       const trialTasks = tasksUsed
-      after(() => recordTaskUsage(parentEmail, trialTasks))
+      after(() => recordTaskUsage(emailOnFile, trialTasks))
     }
   }
 

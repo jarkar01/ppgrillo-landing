@@ -155,7 +155,7 @@ export default async function MetodoPage({ searchParams }: { searchParams: Promi
           <div className="mx-auto flex w-full max-w-md flex-col items-center gap-2.5 px-5 py-12 text-center">
             <StartFreeButton />
             <p className="text-sm font-medium text-pretty text-slate-500">
-              Solo tu nombre • Sin tarjeta • 3 tareas gratis de por vida
+              Prueba 1 tarea gratis ahora • Sin registro ni tarjeta
             </p>
           </div>
         </main>

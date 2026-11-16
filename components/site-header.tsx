@@ -48,7 +48,7 @@ export function SiteHeader() {
             )}
           >
             <MessageCircle className="h-4 w-4 shrink-0" aria-hidden="true" />
-            3 tareas gratis
+            1 tarea gratis
           </StartCta>
         </div>
       </div>

@@ -70,7 +70,7 @@ export function Hero({
               )}
             >
               <CtaIcon className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Empezar con 3 tareas gratis
+              Prueba 1 tarea gratis ahora
             </StartCta>
             <a
               href={learnMoreHref}

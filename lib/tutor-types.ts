@@ -3,6 +3,8 @@ import type { UIMessage } from 'ai'
 export type TutorMetadata = {
   tasksUsed: number
   limitReached: boolean
+  /** The anonymous courtesy task is used; a parent email is required to start the next one. */
+  needsEmail?: boolean
   subscribed?: boolean
   currentTask?: string
   lastActivityAt?: number

@@ -30,7 +30,7 @@ export function MobileStickyCta({
         aria-hidden={!visible}
       >
         <StartCta className="flex min-h-13 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 py-3.5 text-base font-bold text-primary-foreground shadow-md shadow-primary/20 transition-colors hover:bg-primary/90 active:scale-[0.99]">
-          Empezar con 3 tareas gratis
+          Prueba 1 tarea gratis ahora
           <ArrowRight className="h-5 w-5" aria-hidden="true" />
         </StartCta>
         <p className="mt-1.5 text-center text-xs font-medium text-slate-500">{legend}</p>
@@ -44,7 +44,7 @@ export function MobileStickyCta({
           aria-hidden={!visible}
         >
           <StartCta className="flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-base font-bold text-primary-foreground shadow-lg shadow-primary/30 transition-colors hover:bg-primary/90">
-            Empezar con 3 tareas gratis
+            Prueba 1 tarea gratis ahora
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
           </StartCta>
         </div>

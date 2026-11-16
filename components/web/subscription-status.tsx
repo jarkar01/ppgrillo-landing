@@ -1,6 +1,7 @@
 'use client'
 
 import { BadgeCheck, CircleAlert, Loader2, RefreshCw } from 'lucide-react'
+import { ActivatedInstall } from '@/components/web/activated-install'
 import type { PaidPlanId } from '@/lib/plans'
 
 const PLAN_NAMES: Record<PaidPlanId, string> = {
@@ -45,12 +46,17 @@ export function ActivationCard({ delayed, onCheck }: { delayed: boolean; onCheck
 
 export function ActivatedNotice({ firstName, plan }: { firstName: string; plan?: PaidPlanId }) {
   return (
-    <div role="status" className="flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-left">
+    <div className="flex items-start gap-3 rounded-2xl bg-emerald-50 p-4 text-left">
       <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-[#128C7E]" aria-hidden="true" />
-      <p className="text-sm leading-relaxed text-pretty text-slate-700">
-        <span className="font-semibold text-slate-900">¡Listo, {firstName}! Tu {plan ? PLAN_NAMES[plan] : 'plan'} ya está activo.</span>{' '}
-        Ya puedes seguir con tus tareas.
-      </p>
+      <div className="flex flex-col gap-3">
+        <p role="status" className="text-sm leading-relaxed text-pretty text-slate-700">
+          <span className="font-semibold text-slate-900">
+            {firstName ? `¡Listo, ${firstName}!` : '¡Listo!'} Tu {plan ? PLAN_NAMES[plan] : 'plan'} ya está activo.
+          </span>{' '}
+          Ya puedes seguir con tus tareas.
+        </p>
+        <ActivatedInstall />
+      </div>
     </div>
   )
 }

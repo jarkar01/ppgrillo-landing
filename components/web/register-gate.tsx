@@ -3,33 +3,10 @@
 import { useEffect } from 'react'
 import useSWR from 'swr'
 import { Loader2 } from 'lucide-react'
-import { BrandIdentity } from '@/components/brand-identity'
-import { EmailLogin } from '@/components/web/email-login'
-import { StartFreeForm } from '@/components/web/start-free'
 import { TutorChat } from '@/components/web/tutor-chat'
 import { saveLocalStudent, useLocalStudent } from '@/lib/local-student'
 import { savePaidSession, usePaidSession } from '@/lib/paid-session'
-import { FREE_LIFETIME_TASKS, type PaidPlanId } from '@/lib/plans'
-
-export function RegisterGate() {
-  return (
-    <div className="mx-auto flex min-h-svh w-full max-w-md flex-col items-center justify-center gap-6 px-4 py-10">
-      <BrandIdentity />
-      <div className="flex w-full flex-col gap-5 rounded-3xl border-2 border-slate-200 bg-white p-6 sm:p-7">
-        <div className="flex flex-col gap-1.5">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-balance text-slate-900">
-            Empieza con {FREE_LIFETIME_TASKS} tareas gratis
-          </h1>
-          <p className="text-sm leading-relaxed text-pretty text-slate-600">
-            Solo necesitamos tu nombre para desbloquear tus tareas de cortesía de por vida.
-          </p>
-        </div>
-        <StartFreeForm onSuccess={() => {}} />
-        <EmailLogin />
-      </div>
-    </div>
-  )
-}
+import type { PaidPlanId } from '@/lib/plans'
 
 type ServerSession = { status?: string; email?: string; plan?: PaidPlanId; name?: string }
 
@@ -47,6 +24,7 @@ export function WebApp() {
     revalidateOnFocus: false,
   })
   const serverPaid = probe && server?.status === 'active' && Boolean(server.email)
+  const serverResolved = !probe || Boolean(server) || Boolean(error)
 
   useEffect(() => {
     if (student !== null) return
@@ -56,12 +34,13 @@ export function WebApp() {
       const name = server.name ?? 'Alumno PpGrillo'
       savePaidSession({ email: server.email, plan: server.plan, name })
       saveLocalStudent({ name, tasksUsed: 0, exhausted: false })
+    } else if (paid === null && serverResolved) {
+      // No sign-up: a new visitor starts the first courtesy task anonymously.
+      saveLocalStudent({ name: '', tasksUsed: 0 })
     }
-  }, [student, paid, serverPaid, server])
+  }, [student, paid, serverPaid, server, serverResolved])
 
-  const resolving = student === null && (paid === undefined || Boolean(paid) || serverPaid || (probe && !server && !error))
-
-  if (student === undefined || resolving) {
+  if (!student) {
     return (
       <div className="flex min-h-svh items-center justify-center" role="status">
         <Loader2 className="h-6 w-6 animate-spin text-[#128C7E]" aria-hidden="true" />
@@ -70,5 +49,12 @@ export function WebApp() {
     )
   }
 
-  return student ? <TutorChat name={student.name} initialTasksUsed={student.tasksUsed} initialExhausted={student.exhausted === true} /> : <RegisterGate />
+  return (
+    <TutorChat
+      name={student.name}
+      trialEmail={student.trialEmail}
+      initialTasksUsed={student.tasksUsed}
+      initialExhausted={student.exhausted === true}
+    />
+  )
 }

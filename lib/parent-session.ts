@@ -44,6 +44,41 @@ function decode(value: string | undefined): string | undefined {
   return EMAIL_PATTERN.test(email) ? email : undefined
 }
 
+/**
+ * Email left during the free trial to unlock the extra courtesy tasks. It is signed under its own
+ * prefix so it can never be replayed as `ppg_parent`: a trial email never grants paid access.
+ */
+export const TRIAL_COOKIE = 'ppg_trial'
+const TRIAL_PREFIX = 'trial:'
+
+export async function readTrialSession(): Promise<string | undefined> {
+  const value = (await cookies()).get(TRIAL_COOKIE)?.value
+  const secret = signingSecret()
+  if (!value || !secret) return undefined
+  const [payload, signature] = value.split('.')
+  if (!payload || !signature) return undefined
+  const expected = sign(`${TRIAL_PREFIX}${payload}`, secret)
+  const actual = Buffer.from(signature, 'base64url')
+  if (expected.length !== actual.length || !timingSafeEqual(expected, actual)) return undefined
+  const email = normalizeEmail(Buffer.from(payload, 'base64url').toString('utf8'))
+  return EMAIL_PATTERN.test(email) ? email : undefined
+}
+
+export async function saveTrialSession(rawEmail: string): Promise<boolean> {
+  const secret = signingSecret()
+  const email = normalizeEmail(rawEmail)
+  if (!secret || !EMAIL_PATTERN.test(email)) return false
+  const payload = Buffer.from(email, 'utf8').toString('base64url')
+  ;(await cookies()).set(TRIAL_COOKIE, `${payload}.${sign(`${TRIAL_PREFIX}${payload}`, secret).toString('base64url')}`, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'none',
+    path: '/',
+    maxAge: PARENT_COOKIE_MAX_AGE,
+  })
+  return true
+}
+
 export async function readParentSession(): Promise<string | undefined> {
   return decode((await cookies()).get(PARENT_COOKIE)?.value)
 }

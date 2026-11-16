@@ -3,7 +3,9 @@
 import { useChat } from '@ai-sdk/react'
 import { DefaultChatTransport, type FileUIPart } from 'ai'
 import Link from 'next/link'
-import { useCallback, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { useCallback, useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
+import { TrialEmailGate } from '@/components/web/trial-email-gate'
+import { takePendingQuestion } from '@/lib/pending-question'
 import { Camera, Info, Loader2, SendHorizontal, X } from 'lucide-react'
 import { ChatQuickActions } from '@/components/web/chat-quick-actions'
 import { BrandIdentity } from '@/components/brand-identity'
@@ -21,7 +23,7 @@ import {
 import { useSubscription } from '@/lib/use-subscription'
 import { compressImage } from '@/components/app/compress-image'
 import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
-import { FREE_LIFETIME_TASKS } from '@/lib/plans'
+import { ANONYMOUS_FREE_TASKS, FREE_LIFETIME_TASKS } from '@/lib/plans'
 import {
   TASK_COMPLETE_MARKER,
   stripTaskMarker,
@@ -54,10 +56,12 @@ function messageText(message: TutorMessage): string {
 
 export function TutorChat({
   name,
+  trialEmail,
   initialTasksUsed,
   initialExhausted = false,
 }: {
   name: string
+  trialEmail?: string
   initialTasksUsed: number
   initialExhausted?: boolean
 }) {
@@ -103,7 +107,8 @@ export function TutorChat({
   const tasksUsed = lastMeta?.tasksUsed ?? initialTasksUsed
   const limitReached = lastMeta?.limitReached ?? false
   const busy = status === 'submitted' || status === 'streaming'
-  const firstName = name.split(' ')[0]
+  const firstName = name.trim().split(' ')[0] ?? ''
+  const hello = firstName ? `¡Hola, ${firstName}!` : '¡Hola!'
 
   const lastHasMarker = lastAssistant !== undefined && messageText(lastAssistant).includes(TASK_COMPLETE_MARKER)
   const finishedLastFree = tasksUsed >= FREE_LIFETIME_TASKS && lastHasMarker
@@ -120,10 +125,29 @@ export function TutorChat({
   // so it reaches 0 at the exact moment the chat locks.
   const taskInProgress = !locked && Boolean(lastMeta?.currentTask) && !lastHasMarker
   const tasksCompleted = locked ? FREE_LIFETIME_TASKS : Math.max(0, tasksUsed - (taskInProgress ? 1 : 0))
+  // After the anonymous first task, a parent email unlocks the remaining courtesy tasks.
+  const anonymous = !trialEmail && !subscribed && !paidDevice
+  const emailGate =
+    anonymous &&
+    !locked &&
+    tasksUsed >= ANONYMOUS_FREE_TASKS &&
+    (lastMeta?.needsEmail === true || lastHasMarker || (messages.length === 0 && initialTasksUsed >= ANONYMOUS_FREE_TASKS))
+  const inputLocked = locked || emailGate
+
+  const sendPendingQuestion = useEffectEvent(() => {
+    if (locked || initialTasksUsed >= ANONYMOUS_FREE_TASKS) return
+    const question = takePendingQuestion()
+    if (question) sendMessage({ text: question })
+  })
+  // Deferred so React's dev double-mount cancels the first attempt instead of losing the message.
+  useEffect(() => {
+    const timer = setTimeout(sendPendingQuestion, 0)
+    return () => clearTimeout(timer)
+  }, [])
 
   function submit() {
     const text = input.trim()
-    if ((!text && !image) || busy || locked) return
+    if ((!text && !image) || busy || inputLocked) return
     sendMessage({ text: text || 'Te mando la foto de mi ejercicio.', files: image ? [image] : undefined })
     setInput('')
     setImage(null)
@@ -190,24 +214,26 @@ export function TutorChat({
           <EmailLogin
             startOpen
             defaultEmail={subscription.paidEmail}
-            title={`${firstName}, confirma tu correo para seguir`}
+            title={firstName ? `${firstName}, confirma tu correo para seguir` : 'Confirma tu correo para seguir'}
             intro="Este dispositivo ya está ligado a un plan pagado, pero perdimos la sesión segura (por ejemplo, al borrar datos del navegador). Te enviamos un código para confirmarlo; no tienes que pagar de nuevo."
           />
         ) : null}
 
         {messages.length === 0 && (subscribed || paidDevice) && !subscription.justActivated ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
-            <p className="font-display text-lg font-bold text-balance text-slate-900">¡Hola, {firstName}! ¿Qué tarea vemos hoy?</p>
+            <p className="font-display text-lg font-bold text-balance text-slate-900">{hello} ¿Qué tarea vemos hoy?</p>
             <p className="text-sm leading-relaxed text-pretty text-slate-700">
               Escribe tu ejercicio o súbele una foto de la libreta y te guío paso a paso.
             </p>
           </div>
         ) : null}
 
-        {messages.length === 0 && !locked && showFreeTrial ? (
+        {messages.length === 0 && !inputLocked && showFreeTrial ? (
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">
-              ¡Hola, {firstName}! Tienes {Math.max(0, FREE_LIFETIME_TASKS - tasksCompleted)} tareas de cortesía.
+              {anonymous && tasksUsed < ANONYMOUS_FREE_TASKS
+                ? '¡Hola! Prueba 1 tarea gratis ahora, sin registro.'
+                : `${hello} Tienes ${Math.max(0, FREE_LIFETIME_TASKS - tasksCompleted)} tareas de cortesía.`}
             </p>
             <p className="text-sm leading-relaxed text-pretty text-slate-700">
               Escribe tu ejercicio o súbele una foto de la libreta. Te guío con preguntas paso a paso para que
@@ -216,6 +242,7 @@ export function TutorChat({
             </p>
           </div>
         ) : null}
+        {messages.length === 0 && anonymous && !emailGate && showFreeTrial ? <EmailLogin /> : null}
 
         {messages.map((message) => (
           <div
@@ -263,6 +290,7 @@ export function TutorChat({
           />
         ) : null}
         {locked && subscription.paymentFailed ? <PaymentFailedNotice /> : null}
+        {emailGate && !busy ? <TrialEmailGate /> : null}
         {showPaywall ? <ChatPaywall firstName={firstName} /> : null}
       </div>
 
@@ -292,12 +320,12 @@ export function TutorChat({
             accept="image/*"
             className="sr-only"
             id="tutor-photo"
-            disabled={locked}
+            disabled={inputLocked}
             onChange={(event) => handleFile(event.target.files?.[0])}
           />
           <label
             htmlFor="tutor-photo"
-            aria-disabled={locked}
+            aria-disabled={inputLocked}
             className="flex h-12 w-12 shrink-0 cursor-pointer items-center justify-center rounded-full border-2 border-slate-200 text-slate-600 transition-colors hover:border-[#25D366] hover:text-[#128C7E] aria-disabled:pointer-events-none aria-disabled:opacity-50"
           >
             <Camera className="h-5 w-5" aria-hidden="true" />
@@ -312,9 +340,11 @@ export function TutorChat({
             value={input}
             onChange={(event) => setInput(event.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={locked}
+            disabled={inputLocked}
             placeholder={
-              locked
+              emailGate
+                ? 'Escribe el correo arriba para seguir'
+                : locked
                 ? subscription.activating || subscription.confirming
                   ? 'Activando tu cuenta…'
                   : paidDevice
@@ -326,7 +356,7 @@ export function TutorChat({
           />
           <button
             type="submit"
-            disabled={locked || busy || (!input.trim() && !image)}
+            disabled={inputLocked || busy || (!input.trim() && !image)}
             className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white transition-colors hover:bg-[#20bd5a] disabled:opacity-50"
           >
             <SendHorizontal className="h-5 w-5" aria-hidden="true" />
