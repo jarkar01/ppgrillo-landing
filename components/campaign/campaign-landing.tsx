@@ -6,9 +6,7 @@ import {
   type ChatMessage,
 } from "@/components/campaign/animated-chat";
 import { CampaignPlans } from "@/components/campaign/campaign-plans";
-import { QuickContactActions } from "@/components/campaign/quick-contact-actions";
 import { StartFreeButton } from "@/components/web/start-free";
-import { FREE_LIFETIME_TASKS } from "@/lib/plans";
 
 export type { ChatMessage };
 
@@ -30,7 +28,7 @@ export function CampaignLanding({
   footerHref,
   footerLabel,
   ctaLabel = "Empezar gratis",
-  ctaNote = `Solo nombre y apellido • Sin tarjeta ni teléfono • ${FREE_LIFETIME_TASKS} tareas gratis de por vida`,
+  ctaNote = "Prueba 1 tarea gratis ahora • Sin registro ni tarjeta",
   compact = false,
 }: CampaignLandingProps) {
   const isAnchor = footerHref.startsWith("#");
@@ -98,7 +96,6 @@ export function CampaignLanding({
           </Link>
         )}
       </section>
-      <QuickContactActions />
       <CampaignPlans />
     </>
   );

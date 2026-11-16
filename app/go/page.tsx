@@ -6,7 +6,7 @@ import { PARENT_SOCRATIC_DIALOGUE } from '@/lib/socratic-dialogue'
 export const metadata: Metadata = {
   title: 'PpGrillo · Empieza gratis',
   description:
-    'Tu hijo aprende a razonar paso a paso. 3 tareas gratis de por vida con solo tu nombre. Sin tarjeta bancaria.',
+    'Tu hijo aprende a razonar paso a paso. Prueba 1 tarea gratis ahora, sin registro ni tarjeta.',
 }
 
 export default function GoPage() {

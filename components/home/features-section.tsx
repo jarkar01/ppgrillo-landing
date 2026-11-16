@@ -29,8 +29,8 @@ const features = [
   {
     icon: Gauge,
     color: '#EA4335',
-    title: '3 tareas gratis para empezar',
-    body: 'Pruébalo sin tarjeta. Después, Plan Estándar ($39 MXN/mes) o Familiar ilimitado ($119 MXN/mes).',
+    title: 'Prueba 1 tarea gratis ahora',
+    body: 'Sin registro ni tarjeta; luego 2 tareas más con el correo de mamá o papá. Después, Plan Estándar ($39 MXN/mes) o Familiar ilimitado ($119 MXN/mes).',
   },
   {
     icon: BarChart3,

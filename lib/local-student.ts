@@ -3,7 +3,10 @@
 import { useSyncExternalStore } from 'react'
 
 export type LocalStudent = {
+  /** Empty while the student is still on the anonymous first task. */
   name: string
+  /** Parent email left to unlock the extra courtesy tasks. */
+  trialEmail?: string
   tasksUsed: number
   currentTask?: string
   lastActivityAt?: number
@@ -20,9 +23,10 @@ function parse(raw: string | null): LocalStudent | null {
   if (!raw) return null
   try {
     const data = JSON.parse(raw) as Partial<LocalStudent>
-    if (typeof data.name !== 'string' || !data.name.trim()) return null
+    if (!data || typeof data !== 'object') return null
     return {
-      name: data.name,
+      name: typeof data.name === 'string' ? data.name.trim() : '',
+      trialEmail: typeof data.trialEmail === 'string' ? data.trialEmail : undefined,
       tasksUsed: Number.isFinite(data.tasksUsed) ? Math.max(0, Number(data.tasksUsed)) : 0,
       currentTask: typeof data.currentTask === 'string' ? data.currentTask : undefined,
       lastActivityAt: typeof data.lastActivityAt === 'number' ? data.lastActivityAt : undefined,

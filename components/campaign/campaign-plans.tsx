@@ -28,7 +28,7 @@ const PLANS: Plan[] = [
     period: 'MXN',
     features: [
       `${FREE_LIFETIME_TASKS} tareas de cortesía de por vida`,
-      'Solo nombre y apellido, sin tarjeta',
+      '1 tarea sin registro; 2 más con el correo de mamá o papá',
       'Tutor socrático completo aquí en la web',
     ],
     cta: 'Empezar gratis',
@@ -124,7 +124,7 @@ export function CampaignPlans() {
           Planes
         </h2>
         <p className="text-pretty text-sm leading-relaxed text-slate-600">
-          Empieza con {FREE_LIFETIME_TASKS} tareas gratis y elige un plan solo si te convence.
+          Prueba 1 tarea gratis ahora, sin registro ni tarjeta, y elige un plan solo si te convence.
         </p>
       </div>
 
