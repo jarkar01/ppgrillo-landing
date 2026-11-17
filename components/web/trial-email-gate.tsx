@@ -5,6 +5,7 @@ import { useSWRConfig } from 'swr'
 import { Gift, Loader2 } from 'lucide-react'
 import { PRIMARY_BUTTON } from '@/components/web/start-free'
 import { readLocalStudent, updateLocalStudent } from '@/lib/local-student'
+import { trackMetaEvent } from '@/lib/meta-pixel'
 import { savePaidSession } from '@/lib/paid-session'
 import { EMAIL_UNLOCK_TASKS, type PaidPlanId } from '@/lib/plans'
 
@@ -42,6 +43,7 @@ export function TrialEmailGate() {
       setError(data.error ?? 'No pudimos guardar tu correo. Intenta de nuevo.')
       return
     }
+    trackMetaEvent('Lead', { content_name: 'trial_email_task_1' })
     const savedEmail = data.email ?? email.trim().toLowerCase()
     const name = studentName.trim().replace(/\s+/g, ' ') || data.name || readLocalStudent()?.name || ''
     if (data.active) {

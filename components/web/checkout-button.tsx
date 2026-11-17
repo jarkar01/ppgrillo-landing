@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarDays, CalendarRange, CreditCard, ExternalLink, Loade
 import { Modal } from '@/components/web/modal'
 import { PRIMARY_BUTTON, SECONDARY_BUTTON } from '@/components/web/start-free'
 import { readLocalStudent } from '@/lib/local-student'
+import { trackMetaEvent } from '@/lib/meta-pixel'
 import type { BillingPeriod, PaidPlanId } from '@/lib/plans'
 import { markCheckoutStarted } from '@/lib/use-subscription'
 
@@ -169,7 +170,11 @@ export function CheckoutButton({
       ) : (
         <button
           type="button"
-          onClick={() => (billingOptions ? setChoosingPeriod(true) : openCheckout(defaultPeriod))}
+          onClick={() => {
+            trackMetaEvent('InitiateCheckout', { content_name: planName, content_ids: [plan], currency: 'MXN' })
+            if (billingOptions) setChoosingPeriod(true)
+            else openCheckout(defaultPeriod)
+          }}
           aria-expanded={billingOptions ? false : undefined}
           aria-controls={billingOptions ? optionsId : undefined}
           className={featured ? PRIMARY_BUTTON : SECONDARY_BUTTON}
