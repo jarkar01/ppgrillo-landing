@@ -27,7 +27,17 @@ type TutorBody = {
   messages?: UIMessage[]
   grade?: string
   student?: Partial<TutorStudentState>
+  /** The student tapped "Ya terminé este ejercicio / Nuevo tema". */
+  finishTask?: boolean
 }
+
+const FINISH_TASK_INSTRUCTION = `
+
+EL ALUMNO DECIDIÓ DAR POR TERMINADO ESTE EJERCICIO:
+- Felicítalo con calidez por su esfuerzo.
+- Haz un cierre breve: resume en 2 a 4 frases los pasos que trabajaron y cuál es la respuesta final del problema.
+- Invítalo a traer su siguiente ejercicio cuando quiera.
+- Termina tu mensaje con el marcador exacto ${TASK_COMPLETE_MARKER} en una línea aparte.`
 
 function buildSystemPrompt(student: string, level: string) {
   return `Eres PpGrillo, un tutor socrático de habla hispana para estudiantes de ${level}. Estás acompañando a ${student}.
@@ -48,8 +58,16 @@ ESTILO:
 
 Si el alumno insiste en que le des la respuesta, con amabilidad le explicas que tu trabajo es ayudarlo a llegar solo, y le ofreces la siguiente pista.
 
+DURACIÓN DEL EJERCICIO:
+- No hay límite de mensajes: un ejercicio puede tomar 4, 6, 10 o más intercambios. Sigue guiando hasta que el alumno llegue a la respuesta final correcta.
+- Nunca abandones ni cierres un ejercicio a la mitad.
+- Si el alumno trae un ejercicio distinto sin haber terminado el actual, pregúntale con amabilidad si quiere terminar primero el actual o tocar el botón "Ya terminé este ejercicio / Nuevo tema".
+
 CIERRE DEL EJERCICIO:
-- Cuando el alumno llegue por sí mismo a la respuesta final correcta y el ejercicio quede totalmente resuelto, felicítalo en una frase y termina tu mensaje con el marcador exacto ${TASK_COMPLETE_MARKER} en una línea aparte.
+- Solo cuando el alumno haya llegado por sí mismo a la respuesta final correcta y el ejercicio quede totalmente resuelto:
+  1. Felicítalo con calidez por haber llegado a la conclusión.
+  2. Dale un cierre claro: resume en 2 a 4 frases los pasos clave y la respuesta final del problema (este mensaje puede ser más largo que los demás).
+  3. Termina tu mensaje con el marcador exacto ${TASK_COMPLETE_MARKER} en una línea aparte.
 - Nunca escribas ese marcador en ningún otro caso ni lo menciones.`
 }
 
@@ -131,7 +149,7 @@ function emailGateReply() {
 }
 
 export async function POST(req: Request) {
-  const { messages = [], grade, student: state }: TutorBody = await req.json().catch(() => ({}))
+  const { messages = [], grade, student: state, finishTask = false }: TutorBody = await req.json().catch(() => ({}))
 
   const name = typeof state?.name === 'string' ? state.name.trim().slice(0, 60) : ''
   let tasksUsed = Number.isFinite(state?.tasksUsed) ? Math.max(0, Math.floor(Number(state?.tasksUsed))) : 0
@@ -142,14 +160,23 @@ export async function POST(req: Request) {
   const userText = latestUserText(messages)
   const hasImage = latestUserHasImage(messages)
   const idle = lastActivityAt !== undefined && now - lastActivityAt > TASK_IDLE_RESET_HOURS * 3_600_000
-  const currentExercise = idle ? undefined : storedTask
+  const taskDone = state?.taskDone === true
+  const currentExercise = idle || taskDone ? undefined : storedTask
   const classifierInput = userText || (hasImage ? '[Foto de un ejercicio de la libreta]' : '')
+  // An open exercise is never cut by message count or by a guess: it stays the same task
+  // until the tutor closes it (marker) or the student taps "Ya terminé".
   let kind: MessageKind = 'new'
-  try {
-    kind = hasImage && !currentExercise ? 'new' : await classifyMessage(currentExercise, classifierInput)
-  } catch {
-    kind = currentExercise ? 'same' : 'new'
+  if (currentExercise) {
+    kind = 'same'
+  } else if (!hasImage) {
+    try {
+      kind = await classifyMessage(undefined, classifierInput)
+    } catch {
+      kind = 'new'
+    }
   }
+  if (kind === 'same' && !currentExercise) kind = 'new'
+  const closingTask = finishTask && Boolean(currentExercise)
 
   // Paid access is validated server-side against the parent record in Firestore (by parent_email).
   let subscribed = false
@@ -199,13 +226,19 @@ export async function POST(req: Request) {
   }
   const student = name || 'el alumno'
   const level = grade?.trim() || 'K-12 (pregúntale su grado si no lo sabes)'
-  const system = buildSystemPrompt(student, level)
+  const system = buildSystemPrompt(student, level) + (closingTask ? FINISH_TASK_INSTRUCTION : '')
 
   const apiKey = process.env.GEMINI_API_KEY
 
   // Demo mode: no API key configured yet. Return a simulated Socratic response
   // so the interface remains fully testable in Preview.
   if (!apiKey) {
+    if (closingTask) {
+      return streamStatic(
+        `¡Muy buen trabajo con este ejercicio! Cuando quieras, tráeme el siguiente.\n${TASK_COMPLETE_MARKER}`,
+        metadata,
+      )
+    }
     return streamDemo(student, userText, metadata)
   }
 

@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { useCallback, useEffect, useEffectEvent, useRef, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { TrialEmailGate } from '@/components/web/trial-email-gate'
 import { takePendingQuestion } from '@/lib/pending-question'
-import { Camera, Info, Loader2, SendHorizontal, X } from 'lucide-react'
+import { Camera, Check, Info, Loader2, SendHorizontal, X } from 'lucide-react'
 import { ChatQuickActions } from '@/components/web/chat-quick-actions'
 import { BrandIdentity } from '@/components/brand-identity'
 
@@ -89,15 +89,14 @@ export function TutorChat({
         updateLocalStudent({ exhausted: true })
         return
       }
-      const finishedLastFree =
-        !meta.subscribed &&
-        meta.tasksUsed >= FREE_LIFETIME_TASKS &&
-        messageText(message).includes(TASK_COMPLETE_MARKER)
+      const closed = messageText(message).includes(TASK_COMPLETE_MARKER)
+      const finishedLastFree = !meta.subscribed && meta.tasksUsed >= FREE_LIFETIME_TASKS && closed
       updateLocalStudent({
         tasksUsed: meta.tasksUsed,
         currentTask: meta.currentTask,
         lastActivityAt: meta.lastActivityAt,
         exhausted: finishedLastFree || undefined,
+        taskDone: closed,
       })
     },
   })
@@ -153,6 +152,11 @@ export function TutorChat({
     sendMessage({ text: text || 'Te mando la foto de mi ejercicio.', files: image ? [image] : undefined })
     setInput('')
     setImage(null)
+  }
+
+  function finishExercise() {
+    if (busy || inputLocked || !taskInProgress) return
+    sendMessage({ text: 'Ya terminé este ejercicio.' }, { body: { finishTask: true } })
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -315,6 +319,17 @@ export function TutorChat({
           </div>
         ) : null}
         {imageError ? <p role="alert" className="text-sm text-red-600">{imageError}</p> : null}
+        {taskInProgress && !inputLocked && messages.length > 0 ? (
+          <button
+            type="button"
+            onClick={finishExercise}
+            disabled={busy}
+            className="flex items-center gap-1.5 self-start rounded-full border border-slate-200 px-3 py-1.5 text-xs font-semibold text-slate-600 transition-colors hover:border-[#25D366] hover:text-[#128C7E] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] disabled:opacity-50"
+          >
+            <Check className="h-3.5 w-3.5" aria-hidden="true" />
+            Ya terminé este ejercicio / Nuevo tema
+          </button>
+        ) : null}
         <div className="flex items-end gap-2">
           <input
             ref={fileRef}
