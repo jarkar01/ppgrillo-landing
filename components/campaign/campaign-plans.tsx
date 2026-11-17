@@ -124,7 +124,7 @@ export function CampaignPlans() {
           Planes
         </h2>
         <p className="text-pretty text-sm leading-relaxed text-slate-600">
-          Prueba 1 tarea gratis ahora, sin registro ni tarjeta, y elige un plan solo si te convence.
+          Prueba 3 tareas gratis, sin tarjeta ni registro inicial, y elige un plan solo si te convence.
         </p>
       </div>
 

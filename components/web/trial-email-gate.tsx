@@ -63,11 +63,11 @@ export function TrialEmailGate() {
         </span>
         <div className="flex flex-col gap-1">
           <h2 id={`${id}-title`} className="font-display text-lg font-bold text-balance text-slate-900">
-            ¡Excelente primer paso! Desbloquea {EMAIL_UNLOCK_TASKS} tareas más gratis
+            ¡Excelente primer paso! Activa tus otras {EMAIL_UNLOCK_TASKS} tareas gratis
           </h2>
           <p className="text-sm leading-relaxed text-pretty text-slate-700">
-            Ingresa el correo electrónico de mamá o papá para guardar este avance, recibir un resumen de lo que
-            practicó tu hijo y activar {EMAIL_UNLOCK_TASKS} tareas adicionales sin costo.
+            Ingresa el correo electrónico de mamá o papá para activar {EMAIL_UNLOCK_TASKS} tareas adicionales sin
+            costo y enviarte el reporte de avance de tu hijo.
           </p>
         </div>
       </div>

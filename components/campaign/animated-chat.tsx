@@ -1,10 +1,8 @@
 'use client'
 
 import Image from 'next/image'
-import { ArrowUp, Lock, Paperclip, RotateCcw } from 'lucide-react'
-import { useRouter } from 'next/navigation'
+import { Lock, RotateCcw } from 'lucide-react'
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react'
-import { savePendingQuestion } from '@/lib/pending-question'
 
 export type ChatMessage = {
   from: 'student' | 'tutor'
@@ -132,14 +130,6 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
     setRevealed(0)
   }
 
-  const router = useRouter()
-  const [question, setQuestion] = useState('')
-
-  function startTrial(text: string) {
-    if (text.trim()) savePendingQuestion(text.trim())
-    router.push('/app')
-  }
-
   return (
     <div className="flex w-full max-w-md flex-col items-center gap-1">
     <figure
@@ -219,41 +209,6 @@ export function AnimatedChat({ messages, fitViewport = false }: { messages: Chat
           </li>
         ) : null}
       </ol>
-
-      <form
-        onSubmit={(event) => {
-          event.preventDefault()
-          startTrial(question)
-        }}
-        className="flex items-center gap-2 border-t border-slate-200 bg-card px-3 py-2.5"
-      >
-        <button
-          type="button"
-          onClick={() => startTrial('')}
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-[#128C7E]"
-          aria-label="Subir foto de la tarea"
-        >
-          <Paperclip className="h-4 w-4" aria-hidden="true" />
-        </button>
-        <label htmlFor="landing-question" className="sr-only">
-          Escribe tu duda
-        </label>
-        <input
-          id="landing-question"
-          value={question}
-          onChange={(event) => setQuestion(event.target.value)}
-          placeholder="Escribe tu duda o sube una foto..."
-          autoComplete="off"
-          className="min-w-0 flex-1 rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-left text-[16px] text-slate-900 placeholder:text-slate-500 focus:border-[#128C7E] focus:outline-none sm:text-[13px]"
-        />
-        <button
-          type="submit"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#128C7E] text-white hover:bg-[#0f7a6e] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#128C7E]"
-          aria-label="Enviar duda y empezar gratis"
-        >
-          <ArrowUp className="h-4 w-4" aria-hidden="true" />
-        </button>
-      </form>
     </figure>
     {reducedMotion ? null : (
       <button

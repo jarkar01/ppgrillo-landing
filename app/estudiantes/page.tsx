@@ -13,7 +13,7 @@ export default function EstudiantesPage() {
       <main className="min-h-svh bg-background">
         <CampaignLanding
           headline="Tu tutor 24/7, sin descargar nada."
-          subhead="Sube foto de tu tarea al chat web y sal de la duda. Prueba 1 tarea gratis ahora, sin registro ni tarjeta."
+          subhead="Sube foto de tu tarea al chat web y sal de la duda. Prueba 3 tareas gratis, sin tarjeta ni registro inicial."
           chat={[
             { from: 'student', text: 'Me trabé en este, ¿me ayudas?', withPhoto: true },
             { from: 'tutor', text: '¡Claro! Antes de despejar la x, ¿qué número está estorbando de su lado?' },

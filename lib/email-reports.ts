@@ -88,6 +88,21 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`)
 }
 
+export function buildTrialCompleteEmail(r: { studentName?: string; totalTasks: number; currentTask?: string }): ReportEmail {
+  const name = r.studentName || 'tu hijo(a)'
+  const paragraphs = [
+    `Hola, este es el reporte de avance de ${name} en PpGrillo.`,
+    `Completó sus ${r.totalTasks} tareas gratis razonando paso a paso con el método socrático: PpGrillo no le dio las respuestas, lo guió con preguntas hasta que llegó por su cuenta.`,
+    ...(r.currentTask ? [`Último ejercicio trabajado: "${r.currentTask}".`] : []),
+    'Para seguir sin interrupciones, elige un plan en https://ppgrillo.io/app: Plan Estándar $39 MXN/mes (40 tareas e investigaciones) o Plan Familiar $119 MXN/mes (ilimitado, hasta 3 usuarios).',
+  ]
+  return {
+    subject: `Reporte de avance PpGrillo · ${name}`,
+    text: paragraphs.join('\n\n'),
+    html: paragraphs.map((p) => `<p>${escapeHtml(p)}</p>`).join(''),
+  }
+}
+
 export function buildParentReportEmail(r: EmailReportRecipient): ReportEmail {
   const name = r.studentName ?? 'tu hijo(a)'
   const paragraphs = [
