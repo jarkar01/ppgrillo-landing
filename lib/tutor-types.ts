@@ -16,6 +16,8 @@ export type TutorStudentState = {
   currentTask?: string
   lastActivityAt?: number
   exhausted?: boolean
+  /** The current exercise was closed (tutor marker or "Ya terminé"); the next message may start a new task. */
+  taskDone?: boolean
 }
 
 /** The tutor appends this marker when the student finishes an exercise; the UI hides it. */
