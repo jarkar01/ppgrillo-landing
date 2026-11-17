@@ -1,5 +1,6 @@
 import { buttonVariants } from '@/components/ui/button'
 import { StartCta } from '@/components/start-cta'
+import { TrackedCheckoutLink } from '@/components/tracked-checkout-link'
 import { cn } from '@/lib/utils'
 import { Check, MessageCircle } from 'lucide-react'
 
@@ -105,7 +106,10 @@ export function Pricing({
               <p className="text-center text-[13px] text-slate-500">
                 ¿Ya decidido? Suscríbete directo con Mercado Pago
               </p>
-              <a
+              <TrackedCheckoutLink
+                plan="standard"
+                planName="Plan Estándar"
+                value={STANDARD_PRICE_MXN}
                 href={MERCADOPAGO_STANDARD_URL}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -113,8 +117,11 @@ export function Pricing({
               >
                 Plan Estándar · ${STANDARD_PRICE_MXN} MXN al mes
                 <span className="sr-only"> (abre Mercado Pago en una pestaña nueva)</span>
-              </a>
-              <a
+              </TrackedCheckoutLink>
+              <TrackedCheckoutLink
+                plan="family"
+                planName="Plan Familiar"
+                value={FAMILY_PRICE_MXN}
                 href={MERCADOPAGO_FAMILY_URL}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -122,7 +129,7 @@ export function Pricing({
               >
                 Plan Familiar · ${FAMILY_PRICE_MXN} MXN al mes · hasta {FAMILY_MAX_USERS} usuarios
                 <span className="sr-only"> (abre Mercado Pago en una pestaña nueva)</span>
-              </a>
+              </TrackedCheckoutLink>
               <p className="text-center text-xs text-slate-500">
                 Cobro recurrente mensual • Cancela cuando quieras sin contratos
               </p>
