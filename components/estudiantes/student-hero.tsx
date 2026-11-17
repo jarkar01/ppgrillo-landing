@@ -41,7 +41,7 @@ export function StudentHero() {
               )}
             >
               <MessageCircle className="h-5 w-5 shrink-0" aria-hidden="true" />
-              Prueba 1 tarea gratis ahora
+              Prueba 3 tareas gratis
             </StartCta>
             <a
               href="#saber-mas"

@@ -14,6 +14,7 @@ import { lightenHistory } from '@/components/app/compress-image'
 import { classifyMessage, type MessageKind } from '@/lib/exercise-classifier'
 import { ANONYMOUS_FREE_TASKS, EMAIL_UNLOCK_TASKS, FREE_LIFETIME_TASKS, TASK_IDLE_RESET_HOURS } from '@/lib/plans'
 import { recordAnonymousTrial } from '@/lib/trial-users'
+import { buildTrialCompleteEmail, sendReportEmail } from '@/lib/email-reports'
 import { getCurrentSubscription } from '@/lib/subscription'
 import { TASK_COMPLETE_MARKER, type TutorMetadata, type TutorStudentState } from '@/lib/tutor-types'
 
@@ -212,11 +213,36 @@ export async function POST(req: Request) {
   // without going through the Vercel AI Gateway.
   const google = createGoogleGenerativeAI({ apiKey })
 
+  let resolveReply: (text: string) => void = () => {}
+  const reply = new Promise<string>((resolve) => {
+    resolveReply = resolve
+  })
+
   const result = streamText({
     model: google('gemini-2.5-flash'),
     system,
     messages: await convertToModelMessages(lightenHistory(messages)),
+    onFinish: ({ text }) => resolveReply(text),
+    onError: () => resolveReply(''),
   })
+
+  // Finishing the last courtesy task sends the parent the progress report.
+  if (!subscribed && emailOnFile && tasksUsed >= FREE_LIFETIME_TASKS) {
+    const reportTo = emailOnFile
+    const reportTask = currentTask
+    after(async () => {
+      const text = await Promise.race([reply, new Promise<string>((r) => setTimeout(() => r(''), 120_000))])
+      if (!text.includes(TASK_COMPLETE_MARKER)) return
+      const sent = await sendReportEmail(
+        reportTo,
+        buildTrialCompleteEmail({ studentName: name || undefined, totalTasks: FREE_LIFETIME_TASKS, currentTask: reportTask }),
+      ).catch((error: unknown) => {
+        console.error('[tutor] Trial report email failed:', error)
+        return null
+      })
+      if (sent && !sent.ok) console.error('[tutor] Trial report email not sent')
+    })
+  }
 
   return result.toUIMessageStreamResponse({
     messageMetadata: ({ part }) => (part.type === 'start' ? metadata : undefined),

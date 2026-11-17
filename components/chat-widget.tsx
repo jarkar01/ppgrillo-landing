@@ -158,7 +158,7 @@ export function ChatWidget({ liftOnMobile = false }: { liftOnMobile?: boolean })
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-lg shadow-primary/30 transition hover:brightness-95"
           >
             <ArrowRight className="h-5 w-5" aria-hidden="true" />
-            Prueba 1 tarea gratis ahora
+            Prueba 3 tareas gratis
           </Link>
         </div>
       </div>
