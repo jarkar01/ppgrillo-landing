@@ -1,10 +1,10 @@
 export const FREE_LIFETIME_TASKS = 3
 
-// The first courtesy task needs no sign-up; leaving a parent email unlocks the rest.
-export const ANONYMOUS_FREE_TASKS = 1
+// The first two courtesy tasks need no sign-up; a parent email unlocks the third one.
+export const ANONYMOUS_FREE_TASKS = 2
 export const EMAIL_UNLOCK_TASKS = FREE_LIFETIME_TASKS - ANONYMOUS_FREE_TASKS
 
-export const FREE_TRIAL_TAGLINE = 'Prueba 1 tarea gratis ahora • Sin registro ni tarjeta'
+export const FREE_TRIAL_TAGLINE = 'Prueba 2 tareas gratis ahora • Sin registro ni tarjeta'
 
 // ~10 tareas o investigaciones por semana del ciclo escolar.
 export const STANDARD_MONTHLY_TASKS = 40
