@@ -28,7 +28,7 @@ const PLANS: Plan[] = [
     period: 'MXN',
     features: [
       `${FREE_LIFETIME_TASKS} tareas de cortesía de por vida`,
-      '1 tarea sin registro; 2 más con el correo de mamá o papá',
+      '2 tareas sin registro; la tercera con el correo de mamá o papá',
       'Tutor socrático completo aquí en la web',
     ],
     cta: 'Empezar gratis',
@@ -132,9 +132,9 @@ export function CampaignPlans() {
 
       <div className="flex flex-col items-center gap-1.5">
         <p className="text-pretty text-sm leading-relaxed text-slate-600">
-          Para tu primera tarea gratuita no necesitas registrarte; para desbloquear las 2 tareas
-          adicionales de cortesía y recibir los reportes de avance, solo pedimos el correo
-          electrónico de mamá, papá o tutor.
+          Para tus primeras 2 tareas gratuitas no necesitas registrarte; para desbloquear la tercera
+          tarea de cortesía y recibir los reportes de avance, solo pedimos el correo electrónico de
+          mamá, papá o tutor.
         </p>
         <p className="text-xs text-slate-500">
           Pago seguro con Mercado Pago • Cobro mensual • Cancela cuando quieras

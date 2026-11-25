@@ -145,7 +145,7 @@ function limitReachedReply(name: string) {
 }
 
 function emailGateReply() {
-  return `¡Excelente primer paso! Para seguir con un ejercicio nuevo, pide a mamá o papá que escriba su correo aquí abajo: así se guarda tu avance y se activan ${EMAIL_UNLOCK_TASKS} tareas más gratis.`
+  return `¡Vas muy bien! Ya terminaste ${ANONYMOUS_FREE_TASKS} tareas. Para empezar tu tercera tarea gratis, pide a mamá o papá que escriba su correo aquí abajo: así se guarda tu avance y se ${EMAIL_UNLOCK_TASKS === 1 ? 'activa tu última tarea de cortesía' : `activan ${EMAIL_UNLOCK_TASKS} tareas más gratis`}.`
 }
 
 export async function POST(req: Request) {

@@ -124,7 +124,7 @@ export function TutorChat({
   // so it reaches 0 at the exact moment the chat locks.
   const taskInProgress = !locked && Boolean(lastMeta?.currentTask) && !lastHasMarker
   const tasksCompleted = locked ? FREE_LIFETIME_TASKS : Math.max(0, tasksUsed - (taskInProgress ? 1 : 0))
-  // After the anonymous first task, a parent email unlocks the remaining courtesy tasks.
+  // After the anonymous courtesy tasks, a parent email unlocks the remaining one.
   const anonymous = !trialEmail && !subscribed && !paidDevice
   // Only after the tutor has actually replied in this visit, so a fresh /app is always open for Task #1.
   const emailGate =
@@ -238,7 +238,9 @@ export function TutorChat({
           <div className="flex flex-col gap-2 rounded-2xl bg-emerald-50 p-4 text-left">
             <p className="font-display text-lg font-bold text-balance text-slate-900">
               {anonymous && tasksUsed < ANONYMOUS_FREE_TASKS
-                ? '¡Hola! Prueba 1 tarea gratis ahora, sin registro.'
+                ? ANONYMOUS_FREE_TASKS - tasksUsed === 1
+                  ? '¡Hola! Te queda 1 tarea gratis sin registro.'
+                  : `¡Hola! Prueba ${ANONYMOUS_FREE_TASKS - tasksUsed} tareas gratis ahora, sin registro.`
                 : `${hello} Tienes ${Math.max(0, FREE_LIFETIME_TASKS - tasksCompleted)} tareas de cortesía.`}
             </p>
             <p className="text-sm leading-relaxed text-pretty text-slate-700">

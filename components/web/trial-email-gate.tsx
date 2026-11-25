@@ -65,11 +65,11 @@ export function TrialEmailGate() {
         </span>
         <div className="flex flex-col gap-1">
           <h2 id={`${id}-title`} className="font-display text-lg font-bold text-balance text-slate-900">
-            ¡Excelente primer paso! Activa tus otras {EMAIL_UNLOCK_TASKS} tareas gratis
+            ¡Vas muy bien! Activa tu tercera tarea gratis
           </h2>
           <p className="text-sm leading-relaxed text-pretty text-slate-700">
-            Ingresa el correo electrónico de mamá o papá para activar {EMAIL_UNLOCK_TASKS} tareas adicionales sin
-            costo y enviarte el reporte de avance de tu hijo.
+            Ingresa el correo electrónico de mamá o papá para activar tu última tarea de cortesía sin costo y
+            enviarte el reporte de avance de tu hijo. Tu progreso se conserva.
           </p>
         </div>
       </div>
@@ -116,7 +116,7 @@ export function TrialEmailGate() {
         ) : null}
         <button type="submit" disabled={busy} className={PRIMARY_BUTTON}>
           {busy ? <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden="true" /> : null}
-          {busy ? 'Activando…' : `Activar ${EMAIL_UNLOCK_TASKS} tareas gratis`}
+          {busy ? 'Activando…' : EMAIL_UNLOCK_TASKS === 1 ? 'Activar mi tercera tarea gratis' : `Activar ${EMAIL_UNLOCK_TASKS} tareas gratis`}
         </button>
         <p className="text-center text-xs text-pretty text-slate-500">Sin tarjeta. Solo usamos tu correo para enviarte el avance.</p>
       </form>
